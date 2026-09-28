@@ -94,3 +94,7 @@ def test_month_precision_dates_must_be_first_of_month(make_incident, rubric):
 def test_date_precision_values(make_incident, rubric):
     assert any("date_precision" in e for e in _errors(make_incident(date_precision="year"), rubric))
     assert _errors(make_incident(date_precision="day"), rubric) == []
+
+
+def test_before_precision_allows_any_day(make_incident, rubric):
+    assert _errors(make_incident(date_precision="before"), rubric) == []
