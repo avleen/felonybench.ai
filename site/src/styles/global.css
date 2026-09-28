@@ -22,7 +22,7 @@
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); overflow-x: hidden; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); overflow-x: hidden; } /* safety net; remove if position: sticky is ever used */
 a { color: var(--link); }
 a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible {
   outline: 2px solid var(--focus); outline-offset: 2px;
@@ -38,6 +38,8 @@ h1, h2, h3 { line-height: 1.2; }
 .site-header nav a[aria-current="page"] { text-decoration: underline; text-decoration-color: var(--stamp); text-decoration-thickness: 2px; }
 footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 14px; padding: 24px 16px; max-width: 1080px; margin: 0 auto; }
 .table-wrap { overflow-x: auto; max-width: 100%; }
+/* Tables with several prose columns scroll on phones instead of collapsing into one-word columns. */
+table.wide { min-width: 40rem; }
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }

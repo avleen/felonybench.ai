@@ -19,13 +19,13 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
   <p>The maximum prison term a human would face under each US federal statute the conduct violates, added up. Sentences are served consecutively. Foreign laws don't add points; they earn the International Incident badge.</p>
 
   <h2>Autonomy</h2>
-  <div class="table-wrap"><table>
+  <div class="table-wrap"><table class="wide">
     <thead><tr><th>Level</th><th class="num">Multiplier</th><th>Meaning</th><th>Example</th></tr></thead>
     <tbody>{levelTable(rubric.autonomy, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td><td class="muted">{r.example}</td></tr>)}</tbody>
   </table></div>
 
   <h2>Blast Radius</h2>
-  <div class="table-wrap"><table>
+  <div class="table-wrap"><table class="wide">
     <thead><tr><th>Reach</th><th class="num">Multiplier</th><th>Meaning</th><th>Example</th></tr></thead>
     <tbody>{levelTable(rubric.blast_radius, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td><td class="muted">{r.example}</td></tr>)}</tbody>
   </table></div>
