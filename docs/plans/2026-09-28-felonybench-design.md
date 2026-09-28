@@ -218,8 +218,41 @@ build consumes. Pages builds on merge to `main` and gives preview deploys on PRs
 | `/trends` | Cumulative step chart per org; each step is an incident, hover for detail, click through |
 | `/model/<name>` | Rap sheet: mugshot card, badges (Repeat Offender, Cooperating Witness, International Incident), incident list |
 | `/incident/<id>` | Summary, score breakdown with rationale, statutes, Post-Incident Review + Coverage links |
-| `/methodology` | Rubric, source rules, how incidents are found, changelog, corrections process |
+| `/rubric` | The scoring rubric in full (see below) |
+| `/how-it-works` | The pipeline from news story to leaderboard (see below) |
 | `/about` | Satire disclaimer, credit to felonybench.com / .org |
+
+### `/rubric`
+
+Rendered at build time from `rubric/v1.yaml`, so the page can never drift from
+the scores it explains.
+
+- The formula, then one section per dimension: what it measures, its value
+  table, and a one-line example of each level.
+- Live worked example: a real incident's breakdown pulled from `scores.json`,
+  step by step.
+- Leagues (Open vs Sandbox) and tiers (Verified vs Alleged), with the source
+  rules that decide the tier.
+- Aggregation: shares, model → org rollup, recidivism.
+- Rubric version and changelog. Each version bump notes what changed and that
+  all history was recomputed.
+
+### `/how-it-works`
+
+For the curious: the machinery, told plainly (the joke is the leaderboard, not
+this page).
+
+- Pipeline diagram: RSS feeds → keyword filter → Claude Code (triage / weekly
+  sweep) → pull request with draft score → human review → merge → Cloudflare
+  Pages rebuild.
+- What the agents search, where, and how often; the source preference order.
+- Guardrails: agents only read public pages, web content is treated as data,
+  restricted tools, nothing publishes without a human merge.
+- What's in scope and what isn't.
+- Corrections and takedowns: how to report an error, and how fixes land (same
+  PR flow, noted in the incident's history).
+- Excerpts of `agent/RUNBOOK.md` rendered on the page (the repo is private, so
+  the site carries what the curious need rather than linking to GitHub).
 
 Build-time OG image per model for sharing.
 
