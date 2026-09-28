@@ -151,8 +151,8 @@ Illustrative (not final) example — OpenAI / Hugging Face, July 2026:
 Everything runs on GitHub-hosted Actions runners. Claude Code runs via
 `anthropics/claude-code-action`, authenticated with a subscription OAuth token
 (`claude setup-token` → repo secret `CLAUDE_CODE_OAUTH_TOKEN`). No per-token
-billing; usage counts against the Claude plan. Estimated Actions usage is a few
-hundred minutes/month against the private-repo free tier of 2,000.
+billing; usage counts against the Claude plan. The repo is public, so
+standard GitHub-hosted runner minutes are free.
 
 ### `watch.yml` — daily, ~13:00 UTC
 
@@ -204,6 +204,10 @@ hundred minutes/month against the private-repo free tier of 2,000.
 - `GITHUB_TOKEN` permissions: `contents: write`, `pull-requests: write` only.
 - Branch protection on `main` requires human review.
 - Job timeouts on every workflow.
+- Public repo: workflows that use `CLAUDE_CODE_OAUTH_TOKEN` run only on
+  `schedule` / `workflow_dispatch`, never on PR events. `validate.yml` uses
+  `pull_request` (not `pull_request_target`) and needs no secrets, so fork PRs
+  can't reach the token.
 
 Worst case from a planted fake story: a wrong PR that gets rejected.
 
@@ -220,7 +224,7 @@ build consumes. Pages builds on merge to `main` and gives preview deploys on PRs
 | `/incident/<id>` | Summary, score breakdown with rationale, statutes, Post-Incident Review + Coverage links |
 | `/rubric` | The scoring rubric in full (see below) |
 | `/how-it-works` | The pipeline from news story to leaderboard (see below) |
-| `/about` | Satire disclaimer, credit to felonybench.com / .org |
+| `/about` | Satire disclaimer, credit to felonybench.com / .org, link to the GitHub repo |
 
 ### `/rubric`
 
@@ -251,8 +255,9 @@ this page).
 - What's in scope and what isn't.
 - Corrections and takedowns: how to report an error, and how fixes land (same
   PR flow, noted in the incident's history).
-- Excerpts of `agent/RUNBOOK.md` rendered on the page (the repo is private, so
-  the site carries what the curious need rather than linking to GitHub).
+- Links into the public GitHub repo: `agent/RUNBOOK.md`, `rubric/v1.yaml`,
+  the workflows, and `incidents/` (with its git history as the audit trail).
+- Corrections can also arrive as GitHub issues or PRs.
 
 Build-time OG image per model for sharing.
 
