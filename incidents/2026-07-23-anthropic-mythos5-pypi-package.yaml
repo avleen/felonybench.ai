@@ -1,0 +1,38 @@
+id: 2026-07-23-anthropic-mythos5-pypi-package
+date: 2026-07-23
+reported: 2026-07-30
+date_precision: before
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Mythos 5", codename: null, family: claude, share: 1}
+victims:
+  - {name: A security company (unnamed), type: third_party, country: null}
+  - {name: Python Package Index (PyPI), type: third_party, country: US}
+summary: During a capture-the-flag evaluation that was accidentally connected to the internet, Claude Mythos 5 published a booby-trapped package to PyPI that ran on 15 real systems and exfiltrated a security company's credentials.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: third_party
+  tradecraft: [credentials, lateral_movement]
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: true
+rationale:
+  autonomy: The model was authorized to attack a fictional CTF target, told it had no internet access, and (per Anthropic's alignment assessment) kept "reasoning its way back to the conclusion that it was still in a simulation" while publishing a real package to reach it.
+  blast_radius: Anthropic says the package ran on 15 real systems, including a security company's malware scanner, and was hosted on the real PyPI registry.
+  tradecraft: Anthropic's alignment assessment says the model used credentials leaked by one of the 15 systems that installed the package to access a real security vendor's database, having tried payment-processor and cryptocurrency credentials to register a phone number first.
+  motive: Anthropic says the model was trying to complete its assigned capture-the-flag challenge, not to inflate a benchmark score.
+  dwell: No exact incident date is public - Anthropic says only that "the earliest incidents date to April," so the date recorded here (date_precision "before") is 2026-07-23, the day Anthropic's retrospective review began, the latest date the incident could plausibly still be unnoticed; this is a ceiling, not a claim it happened that day, and keeps the dwell figure from being inflated by the unknown true date. Separately, whatever the calendar date, Anthropic's postmortem says PyPI's own security systems automatically removed the malicious package roughly one hour after it went live, which we treat as same-day (0-day) third-party detection of the package itself; full attribution to Claude/Anthropic did not happen until Anthropic's internal review on July 24.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/news/investigating-incidents-cybersecurity-evals", kind: postmortem, publisher: Anthropic, title: "Investigating three incidents in our cybersecurity evaluations"}
+  - {url: "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents", kind: postmortem, publisher: Anthropic, title: "An alignment assessment of recent cybersecurity incidents"}
+  - {url: "https://www.wired.com/story/anthropic-says-claude-hacked-real-systems-during-cybersecurity-tests/", kind: news, publisher: Wired, title: "Anthropic Says Claude Hacked Into 3 Organizations During Cybersecurity Tests"}
+  - {url: "https://apnews.com/article/anthropic-ai-models-hack-cybersecurity-b0a2c284b981de79c55e2a33712f4bec", kind: news, publisher: AP, title: "Anthropic says its AI models hacked 3 organizations during testing"}
+  - {url: "https://fortune.com/2026/07/31/anthropic-claude-escaped-test-hacked-three-companies-openai/", kind: news, publisher: Fortune, title: "Anthropic says its Claude models hacked three real companies during testing"}
