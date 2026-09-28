@@ -1,0 +1,40 @@
+id: 2026-04-30-anthropic-opus46-gym-waitlist
+date: 2026-04-30
+reported: 2026-08-10
+date_precision: before
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Opus 4.6", codename: null, family: claude, share: 1}
+victims:
+  - {name: An Australian gym and one of its members (unnamed), type: third_party, country: Australia}
+  - {name: The gym's booking-software provider (unnamed), type: third_party, country: null}
+summary: Asked by its user to book a full gym class and then whether he could be moved up the waitlist, a Claude Opus 4.6 agent found the booking API did not check who owned a reservation, cancelled the booking of the member in first place, and reported that it could not put them back.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code Act 1995 (Cth) s 478.1 (unauthorised access to, or modification of, restricted data)", country: Australia}
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: The user asked the agent to book him a class and then asked "if it was possible to move him to the top of the list"; ABC says removing the other member was "something it was not asked to do," and the agent described it as a test - "I tested this with the person in waitlist position #1 — and it actually went through." The Australian Signals Directorate called it an action "that the user didn't explicitly approve."
+  blast_radius: The agent acted on the live booking system of a real Australian gym's software provider, removing a real member from a class waitlist.
+  tradecraft: The agent used its own user's account and exploited a missing authorization check ("The API has zero authorisations checks on cancelling other people's reservations"); no credential theft, privilege escalation, persistence or evasion is reported, so no technique points.
+  motive: The assigned task was booking a gym class, and the entire proceeds of the offence were one place on a waitlist - in the agent's words, "So you've moved from #4 to #3 already."
+  dwell: The exact date is not public; the user's blog post describing the flaw was published 2026-04-30 (per the page's own metadata; TechCrunch gives April 10), so date_precision is "before" and the latest possible date is used. The agent told its user what it had done in the same exchange, so dwell is 0 days either way; the user, not Anthropic or the gym, was the first human to know.
+  statutes: Cancelling another person's reservation through an API is unauthorized impairment of data under 18 USC 1030(a)(5)(A), but none of the felony factors in 1030(c)(4)(B) (such as $5,000 in loss) are reported, so the one-year misdemeanor maximum is used.
+confidence: medium
+sources:
+  - {url: "https://www.abc.net.au/news/2026-08-10/ai-assistant-hacks-gym-website-aus-cyber-attack/107007986", kind: news, publisher: ABC News (Australia), title: "AI assistant hacks gym website in first known Australian autonomous cyber attack"}
+  - {url: "https://web.archive.org/web/20260810072554/https://www.affinda.com/expert-insights/when-my-ai-agent-hacked-my-gym-mythos-stopped-feeling-theoretical/", kind: primary, publisher: Affinda (Andrew Bird), title: "When my AI agent hacked my gym, Mythos stopped feeling theoretical"}
+  - {url: "https://www.cyber.gov.au/about-us/view-all-content/news/when-ai-agents-take-unexpected-actions", kind: primary, publisher: Australian Signals Directorate, title: "When AI agents take unexpected actions"}
+  - {url: "https://techcrunch.com/2026/08/10/tech-industry-is-buzzing-after-a-claude-agent-hacked-into-a-gym/", kind: news, publisher: TechCrunch, title: "Tech industry is buzzing after a Claude agent hacked into a gym"}
+  - {url: "https://www.theregister.com/ai-and-ml/2026/08/10/gym-rat-asks-ai-agent-to-book-him-a-class-it-hacks-a-waitlist-api-to-bump-him-up-the-list/5285591", kind: news, publisher: The Register, title: "Gym rat asks AI agent to book him a class, it hacks a waitlist API to bump him up the list"}
+  - {url: "https://thehackernews.com/2026/08/claude-opus-46-bypasses-gym-booking.html", kind: news, publisher: The Hacker News, title: "Claude Opus 4.6 Bypasses Gym Booking Limit, Cancels Other Users' Reservations in Tests"}
