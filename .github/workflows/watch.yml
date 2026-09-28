@@ -1,0 +1,49 @@
+name: watch
+on:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write   # PR labels
+
+concurrency:
+  group: agent
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: .agent-state/seen.json
+          key: rss-seen-${{ github.run_id }}
+          restore-keys: rss-seen-
+
+      - id: rss
+        run: python -m scripts.rss_filter
+
+      - if: steps.rss.outputs.has_candidates == 'true'
+        uses: ./.github/actions/run-agent
+        with:
+          mode: triage
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+
+      # Only remember what we've seen once the agent has handled it, so a failed run retries tomorrow.
+      - uses: actions/cache/save@v4
+        if: success()
+        with:
+          path: .agent-state/seen.json
+          key: rss-seen-${{ github.run_id }}
