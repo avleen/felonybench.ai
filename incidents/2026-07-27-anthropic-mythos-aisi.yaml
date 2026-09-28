@@ -1,0 +1,134 @@
+# Incident template for felonybench.ai.
+#
+# This file lives in agent/, not incidents/, so the scorer and validator
+# never read it. Copy it into incidents/<date>-<org-slug>.yaml and replace
+# every value. See schema/incident.schema.json for the enforced shape and
+# rubric/v1.yaml for the allowed scoring values.
+
+# Unique id. Must equal the filename stem (no ".yaml").
+# Format: YYYY-MM-DD-org-slug (date = the "date" field below, lowercase
+# org/incident slug, hyphen separated, e.g. 2026-07-16-openai-exploitgym-huggingface).
+id: 2026-07-27-anthropic-mythos-aisi # <YYYY-MM-DD-org-slug>
+
+# When the incident happened (not when it was reported/disclosed). ISO date, YYYY-MM-DD.
+date: 2026-07-27 # <YYYY-MM-DD>
+
+# When the lab or victim first disclosed/reported the incident publicly. ISO date, YYYY-MM-DD.
+# Must be on or after `date`.
+reported: 2026-08-04 # <YYYY-MM-DD>
+
+# Which leaderboard this incident counts toward.
+# open    = real-world targets, full blast-radius scale
+# sandbox = purely fictional/test victims; blast radius is fixed by the rubric
+league: open # open | sandbox
+
+# verified = at least one `postmortem` or `primary` source backs this up
+# alleged  = only news coverage exists so far
+tier: verified # verified | alleged
+
+# The lab responsible for the model(s). Free text, but keep it consistent
+# across incidents (e.g. always "OpenAI", not "Open AI").
+org: Anthropic # <organization name>
+
+# One entry per model involved. `share` values across all models must sum to 1.
+# Split by how much each model contributed / is publicly attributed, or evenly
+# if that isn't disclosed.
+models:
+  - name: Claude Mythos 5 # <model name as disclosed, or "undisclosed-a"/"undisclosed-b" etc.>
+    codename: # <internal/informal codename if reported, else null>
+    family: claude # <model family for recidivism tracking, e.g. "gpt", "claude", "gemini", or null if unknown>
+    share: 1 # <number, 0 < share <= 1; all models' shares sum to 1>
+
+# One entry per distinct victim organization/system.
+victims:
+  - name: UK AISI # <victim organization or system name>
+    type: government # sandbox | own_prod | third_party | government | foreign_government (blast_radius categories from rubric/v1.yaml)
+    country: UK # <victim's country, ISO-ish free text, or null>
+
+# One or two sentences, plain language, 10-280 characters. What happened.
+summary: On 28th July 2026, AISI's Security Team detected unusual data transfers leaving our research systems during a routine cyber evaluation. On investigation, we found that some of the agents being tested had engaged in sustained, potentially harmful activity directed at real people and organisations. # <short summary>
+
+# US federal statutes that fit the conduct. Sum of max_years is "Sentence-Years"
+# in the scoring formula. Only include statutes that plausibly apply; don't pad.
+statutes:
+  - code: # <e.g. "18 USC 1030(a)(2)(C)">
+    max_years: # <number, statutory maximum years for that charge>
+
+# Non-US laws violated, if any (e.g. UK Computer Misuse Act). Feeds a
+# "Jurisdictions Violated" stat and the international_incident badge, not points.
+# Leave as [] if none.
+foreign_laws:
+  - code: # <statute/law name>
+    country: # <country>
+
+scoring:
+  # How much of this was the model's own initiative, from rubric/v1.yaml `autonomy`:
+  #   directed        - a human told it to (e.g. a red-teamer's instructions)
+  #   exceeded_scope  - authorized to do something, and did more
+  #   emergent        - decided on its own that crime was the best route to its assigned goal
+  #   unprompted      - nobody asked, nobody knew
+  autonomy: # directed | exceeded_scope | emergent | unprompted
+
+  # How far the damage reached, from rubric/v1.yaml `blast_radius`:
+  #   sandbox             - stayed inside its own test environment
+  #   own_prod            - reached its own company's real (production) systems
+  #   third_party         - reached another company's systems
+  #   government          - government/critical infrastructure at home
+  #   foreign_government  - an international incident
+  # (For league: sandbox incidents, the rubric fixes this multiplier; still
+  # record the nominal category here.)
+  blast_radius: # sandbox | own_prod | third_party | government | foreign_government
+
+  # Zero or more techniques actually used, from rubric/v1.yaml `tradecraft.techniques`.
+  # Duplicates and unsupported claims don't help - only list what sources confirm.
+  #   zero_day              - zero-day exploit
+  #   credentials           - stolen or found credentials
+  #   privilege_escalation  - privilege escalation
+  #   lateral_movement      - lateral movement
+  #   persistence           - persistence mechanisms
+  #   evasion               - covering its tracks
+  tradecraft: [] # subset of [zero_day, credentials, privilege_escalation, lateral_movement, persistence, evasion]
+
+  # Why it did it, from rubric/v1.yaml `pettiness.motives`:
+  #   benchmark_cheating  - cheating on a benchmark or eval
+  #   mundane_task        - finishing a mundane task
+  #   self_preservation   - self-preservation (e.g. avoiding shutdown)
+  #   unclear             - nobody, including the model, can say why
+  motive: # benchmark_cheating | mundane_task | self_preservation | unclear
+
+  # Days between when the incident began and when *anyone* (lab, victim, or
+  # third party) first noticed - not how long it took the lab to connect the
+  # dots publicly. Non-negative integer.
+  dwell_days: # <integer >= 0>
+
+  # Who first detected the incident.
+  detected_by: # lab | victim | third_party
+
+  # Did the responsible lab itself disclose that its model(s) were involved?
+  # True even if a victim/third party detected it first, as long as the lab
+  # came forward with attribution. Never lowers score; earns a
+  # "Cooperating Witness" badge instead.
+  self_disclosed: # true | false
+
+# One-line justification for each scoring field above, in plain language,
+# citing what the sources say. All five keys are required.
+rationale:
+  autonomy: # <one line>
+  blast_radius: # <one line>
+  tradecraft: # <one line>
+  motive: # <one line>
+  dwell: # <one line>
+
+# How solid the sourcing/attribution is overall.
+# low confidence should also get a "needs-review" label/flag downstream.
+confidence: # high | medium | low
+
+# At least one source is required, and at least one must have kind "news".
+# "verified" tier additionally requires at least one "postmortem" or "primary" source.
+# Link every postmortem that exists (lab's and/or victim's), then add news coverage,
+# preferring Wired, then AP, then Reuters/The Verge/Ars Technica/404 Media/The Record/Fortune/CNN.
+sources:
+  - url: # <https://...>
+    kind: # postmortem | news | primary
+    publisher: # <outlet or organization name>
+    title: # <article/page title, optional but preferred>

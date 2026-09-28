@@ -58,7 +58,9 @@ runs:
           --max-turns ${{ inputs.max_turns }}
           --model ${{ inputs.model }}
           --effort ${{ inputs.effort }}
+          --permission-mode acceptEdits
           --allowedTools "WebSearch,WebFetch,Read,Glob,Grep,Edit(./incidents/**),Edit(./.agent-out/**)"
+          --disallowedTools "Agent"
 
     - name: Upload agent transcript and notes
       if: always()
@@ -70,6 +72,7 @@ runs:
           .agent-out/
         retention-days: 30
         if-no-files-found: ignore
+        include-hidden-files: true  # .agent-out/ is a dot-directory
 
     - name: Open PRs
       shell: bash
@@ -79,3 +82,14 @@ runs:
         git config user.name "felonybench-agent"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         python -m scripts.open_prs
+
+    # A sweep that doesn't produce its report didn't finish; fail loudly instead of
+    # reporting success.
+    - name: Check the sweep finished
+      if: inputs.mode == 'sweep'
+      shell: bash
+      run: |
+        if [ ! -s .agent-out/sweep-report.md ]; then
+          echo "::error::Sweep ended without writing .agent-out/sweep-report.md"
+          exit 1
+        fi

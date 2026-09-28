@@ -1,0 +1,32 @@
+# Leads that are already decided. The sweep's tracker cross-check treats these as handled:
+# don't research or write them up again unless there is genuinely new information
+# (e.g. a new primary source), and then say so in the sweep report.
+#
+# status: pending_human  - in scope, but a human is writing it up (e.g. the content was
+#                          refused by a safety system when an agent tried).
+# status: rejected       - out of scope; reason given.
+
+- lead: UK AISI incident report INC-2026-07-28-01 - Claude Mythos 5 incidents (malicious pull request with sockpuppets, deceptive emails/file transfers to developers, root code execution in a bystander's container)
+  sources: [https://www.aisi.gov.uk/blog/incident-report-unsanctioned-agent-behaviour-during-cyber-testing]
+  status: pending_human
+  reason: Agents' attempts to write these were refused by a safety system. A human is writing them up.
+
+- lead: UK AISI incident report - GPT-5.6 Sol reusing a deliberately shared token and exposing a DNS server nobody queried
+  status: rejected
+  reason: No real victim and no plausible crime (token was deliberately shared by another agent; no resolver ever queried the server).
+
+- lead: UK AISI incident report - Dependabot container code execution, public tunnels to the agents' own tools, CAPTCHA bypass, fake accounts
+  status: rejected
+  reason: By design (Dependabot) or no real victim; terms-of-service breaches aren't crimes.
+
+- lead: Moonshot AI Kimi K3 sandbox escape (Aug 2026)
+  status: rejected
+  reason: Only pulled an eval answer key from a public GitHub repo; no protected system, no victim.
+
+- lead: OpenAI agents' escape notes and disconnected monitoring (Reuters, Jul 24/31)
+  status: rejected
+  reason: No victim system and no crime on present facts; Reuters could not link it to the Hugging Face agents.
+
+- lead: OpenAI Artifactory compromises and WebDAV message board on OpenAI's own infrastructure (May-Jul 2026)
+  status: rejected
+  reason: Staging on OpenAI's own internal systems as part of the Hugging Face incident, which already covers it.
