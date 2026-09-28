@@ -1,0 +1,50 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import IncidentList from "../../components/IncidentList.astro";
+import scores, { fmt, rubric, incidentsFor, LEAGUES } from "../../lib/data";
+
+export function getStaticPaths() {
+  const models = new Map();
+  for (const league of ["open", "sandbox"]) {
+    for (const m of scores.boards[league].all.models) if (!models.has(m.slug)) models.set(m.slug, m);
+  }
+  return [...models.values()].map((model: any) => ({ params: { slug: model.slug }, props: { model } }));
+}
+
+const { model } = Astro.props;
+const incidents = incidentsFor(model.slug);
+const aliases = [...new Set(incidents.flatMap((i: any) => i.models.filter((m: any) => m.slug === model.slug && m.codename).map((m: any) => m.codename)))];
+const standings = LEAGUES.map((l) => ({ ...l, row: scores.boards[l.key].all.models.find((m: any) => m.slug === model.slug) })).filter((s) => s.row);
+const badges = [...new Set(standings.flatMap((s) => s.row.badges))] as string[];
+---
+<Layout title={`${model.name} rap sheet`} ogImage={`/og/${model.slug}.png`}>
+  <section class="mugshot panel">
+    <div class="placard">
+      <div class="muted">{model.org}</div>
+      <h1>{model.name}</h1>
+      {aliases.length > 0 && <div class="muted">a.k.a. {aliases.join(", ")}</div>}
+    </div>
+    <div>{badges.map((b) => <span class="badge" title={rubric.badges[b].description}>{rubric.badges[b].label}</span>)}</div>
+  </section>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>League</th><th class="num">Rank</th><th class="num">FBS</th><th class="num">Sentence-Years</th><th class="num">Incidents</th></tr></thead>
+      <tbody>{standings.map((s) => <tr><td>{s.label}</td><td class="num">#{s.row.rank}</td><td class="num score">{fmt(s.row.score)}</td><td class="num">{fmt(s.row.sentence_years)}</td><td class="num">{s.row.incidents.length}</td></tr>)}</tbody>
+    </table>
+  </div>
+  <p class="muted">Standings include alleged incidents.</p>
+
+  <h2>Record</h2>
+  <IncidentList incidents={incidents} />
+</Layout>
+
+<style>
+  .mugshot {
+    margin: 16px 0 24px;
+    background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px);
+  }
+  .placard { display: inline-block; background: var(--ink); color: var(--paper); padding: 12px 20px; margin-bottom: 12px; font-family: var(--mono); }
+  .placard h1 { margin: 4px 0; }
+  .placard .muted { color: var(--paper); opacity: 0.7; }
+</style>
