@@ -1,4 +1,8 @@
-from scripts.open_prs import disallowed, labels_for, parse_porcelain, pr_body, pr_title
+import subprocess
+
+import pytest
+
+from scripts.open_prs import _run, disallowed, labels_for, main, parse_porcelain, pr_body, pr_title
 
 
 def test_parse_porcelain():
@@ -39,3 +43,25 @@ def test_body_includes_score(make_incident, rubric):
     body = pr_body(make_incident(), "", breakdown(make_incident(), rubric), "", [])
     assert "| **Total** | **87** |" in body
     assert "✅" in body
+
+
+def test_body_is_capped_at_65000_chars(make_incident):
+    body = pr_body(make_incident(), "x" * 200_000, None, "", [])
+    assert len(body) <= 65000
+    assert body.endswith("_…truncated._")
+
+
+def test_run_prints_command_and_stderr_on_failure(capsys, monkeypatch, tmp_path):
+    monkeypatch.setattr("scripts.open_prs.ROOT", tmp_path)
+
+    def fake_run(cmd, check, text, capture_output, cwd):
+        raise subprocess.CalledProcessError(
+            1, cmd, output="stdout stuff", stderr="boom: something went wrong"
+        )
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    with pytest.raises(subprocess.CalledProcessError):
+        _run("git", "status")
+    err = capsys.readouterr().err
+    assert "git status" in err
+    assert "boom: something went wrong" in err

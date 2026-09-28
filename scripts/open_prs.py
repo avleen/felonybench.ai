@@ -18,6 +18,7 @@ from scripts.scoring import build_scores
 from scripts.validate import load_validator, validate_dir
 
 ALLOWED_PREFIXES = ("incidents/", ".agent-out/", ".agent-state/")
+PR_BODY_LIMIT = 65000
 
 
 def parse_porcelain(output: str) -> list[tuple[str, str]]:
@@ -68,11 +69,21 @@ def pr_body(incident: dict, notes: str, breakdown: dict | None, diff_md: str, er
     parts.append(f"## Validation\n\n{status}")
     parts.append(f"Confidence: **{incident.get('confidence', 'unknown')}**")
     parts.append("_Opened by the FelonyBench agent. Check every source before merging._")
-    return "\n\n".join(parts)
+    body = "\n\n".join(parts)
+    if len(body) > PR_BODY_LIMIT:
+        suffix = "\n\n_…truncated._"
+        body = body[: PR_BODY_LIMIT - len(suffix)] + suffix
+    return body
 
 
 def _run(*cmd: str) -> str:
-    return subprocess.run(cmd, check=True, text=True, capture_output=True, cwd=ROOT).stdout
+    try:
+        return subprocess.run(cmd, check=True, text=True, capture_output=True, cwd=ROOT).stdout
+    except subprocess.CalledProcessError as e:
+        print(f"Command failed: {' '.join(cmd)}", file=sys.stderr)
+        if e.stderr:
+            print(e.stderr, file=sys.stderr)
+        raise
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -102,35 +113,40 @@ def main(argv: list[str] | None = None) -> int:
     open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--json", "number,headRefName"))
     open_heads = {pr["headRefName"]: pr["number"] for pr in open_prs}
 
+    failed = False
     for path, text in contents.items():
         stem = Path(path).stem
         branch = f"agent/{stem}"
-        incident = yaml.safe_load(text) or {}
-        _run("git", "switch", "-C", branch, args.base)
-        (ROOT / path).write_text(text)
+        try:
+            incident = yaml.safe_load(text) or {}
+            _run("git", "switch", "-C", branch, args.base)
+            (ROOT / path).write_text(text)
 
-        errors = validate_dir(ROOT / "incidents", rubric, validator).get(Path(path).name, [])
-        breakdown, diff_md = None, "## Leaderboard impact\n\nNot scored: validation failed."
-        if not errors:
-            after = build_scores(load_incidents(ROOT / "incidents"), rubric, "head")
-            breakdown = next(i["breakdown"] for i in after["incidents"] if i["id"] == incident["id"])
-            diff_md = render(before, after)
+            errors = validate_dir(ROOT / "incidents", rubric, validator).get(Path(path).name, [])
+            breakdown, diff_md = None, "## Leaderboard impact\n\nNot scored: validation failed."
+            if not errors:
+                after = build_scores(load_incidents(ROOT / "incidents"), rubric, "head")
+                breakdown = next(i["breakdown"] for i in after["incidents"] if i["id"] == incident["id"])
+                diff_md = render(before, after)
 
-        title = pr_title(incident, is_new=path in new_files)
-        notes_path = args.notes / f"{stem}.md"
-        notes = notes_path.read_text() if notes_path.exists() else ""
-        body = pr_body(incident, notes, breakdown, diff_md, errors)
+            title = pr_title(incident, is_new=path in new_files)
+            notes_path = args.notes / f"{stem}.md"
+            notes = notes_path.read_text() if notes_path.exists() else ""
+            body = pr_body(incident, notes, breakdown, diff_md, errors)
 
-        _run("git", "add", path)
-        _run("git", "commit", "-m", title)
-        _run("git", "push", "--force", "origin", f"HEAD:refs/heads/{branch}")
-        if branch in open_heads:
-            _run("gh", "pr", "comment", str(open_heads[branch]), "--body", "Agent updated this incident.\n\n" + body)
-        else:
-            label_args = [x for label in labels_for(incident, errors) for x in ("--label", label)]
-            _run("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title, "--body", body, *label_args)
-        print(f"{title} -> {branch}")
-    return 0
+            _run("git", "add", path)
+            _run("git", "commit", "-m", title)
+            _run("git", "push", "--force", "origin", f"HEAD:refs/heads/{branch}")
+            if branch in open_heads:
+                _run("gh", "pr", "comment", str(open_heads[branch]), "--body", "Agent updated this incident.\n\n" + body)
+            else:
+                label_args = [x for label in labels_for(incident, errors) for x in ("--label", label)]
+                _run("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title, "--body", body, *label_args)
+            print(f"{title} -> {branch}")
+        except subprocess.CalledProcessError as e:
+            failed = True
+            print(f"Failed to process {path} (branch {branch}): {e}", file=sys.stderr)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
