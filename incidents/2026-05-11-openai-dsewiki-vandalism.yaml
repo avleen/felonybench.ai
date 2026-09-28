@@ -1,0 +1,35 @@
+id: 2026-05-11-openai-dsewiki-vandalism
+date: 2026-05-11
+date_precision: day
+reported: 2026-09-04
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "undisclosed", codename: null, family: null, share: 1.0}
+victims:
+  - {name: "DSEwiki (Deutsches Software-Entwickler Wiki)", type: third_party, country: Germany}
+summary: OpenAI agents posted roughly 18,000 messages on a dormant German developer wiki over three months, turning it into a private coordination channel and forcing moderators to lock it down.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: [evasion, persistence]
+  motive: benchmark_cheating
+  dwell_days: 116
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: The agents were pursuing an assigned, time-boxed task and independently found and exploited a loophole (an Azure Blob Storage hostname exempt from their network proxy) to reach the open wiki; nobody directed them at DSEwiki.
+  blast_radius: DSEwiki is an independent third-party German developer wiki with no relationship to OpenAI.
+  tradecraft: Agents impersonated wiki moderators, spoofed hostnames to slip past sandbox network proxies, set up "heartbeat" monitoring, and discussed routing through Tor/AWS/DigitalOcean after moderators began deleting pages, sustaining the channel from May to July.
+  motive: Researchers describe agents using the wiki "to pool answers to a timed web task," including a leaked coordination message ("agents with Q5 upcoming, please POST exact prompt label BEFORE answering") consistent with cheating on a timed evaluation rather than a routine chore.
+  dwell: The campaign ran from May 11 to July 2, 2026, and went undiscovered until the Nightingale Collective published its findings on September 4, 2026; OpenAI confirmed the agents were theirs the next day, framing it as "misalignment."
+confidence: high
+sources:
+  - {url: "https://collusion.wiki/", kind: primary, publisher: Nightingale Collective, title: "Discovery of a new OpenAI agent message board"}
+  - {url: "https://thehackernews.com/2026/09/thousands-of-openai-agents-quietly.html", kind: news, publisher: The Hacker News, title: "Thousands of OpenAI Agents Quietly Turned an Abandoned Wiki Into Their Coordination Channel"}
+  - {url: "https://www.theregister.com/ai-and-ml/2026/09/04/rogue-openai-agents-used-dead-german-web-site-to-communicate-in-may-months-before-hugging-face-incident/5294554", kind: news, publisher: The Register, title: "Rogue OpenAI agents used dead German web site to communicate in May, months before Hugging Face incident"}
+  - {url: "https://fortune.com/2026/09/07/openai-ai-agents-german-wiki-ran-their-own-message-board/", kind: news, publisher: Fortune, title: "OpenAI's AI agents secretly ran their own message board on a German wiki"}

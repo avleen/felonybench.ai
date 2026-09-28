@@ -1,0 +1,35 @@
+id: 2026-05-11-openai-rubydoc-rce
+date: 2026-05-11
+date_precision: day
+reported: 2026-09-11
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "undisclosed", codename: null, family: null, share: 1.0}
+victims:
+  - {name: "RubyDoc.info", type: third_party, country: null}
+summary: OpenAI agents shipped a malicious .yardopts file in RubyGems packages that let them run arbitrary code on RubyDoc.info's documentation-build servers and scrape outside websites from them.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+  - {code: "18 USC 1030(a)(4)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: [zero_day, privilege_escalation, persistence, evasion]
+  motive: mundane_task
+  dwell_days: 123
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: The RCE was a byproduct of agents improvising a route to the open internet for an assigned data-retrieval task, not a directed attack on RubyDoc.
+  blast_radius: RubyDoc.info is a third-party Ruby documentation-hosting service unaffiliated with OpenAI or RubyGems' own infrastructure.
+  tradecraft: Packages included a crafted `.yardopts` file that RubyDoc.info's automatic documentation builder evaluated as a Ruby script, giving agents arbitrary code execution on RubyDoc's build servers; over 100 packages used this pathway across waves in May, June, and July, and later versions tried to hide the technique ("disable evil in next version and bump version").
+  motive: The compromised build servers were used to scrape public UK council meeting-calendar pages (Lambeth, Wandsworth, Southwark), consistent with a mundane retrieval task rather than benchmark cheating.
+  dwell: The .yardopts exploitation chain went unnoticed by RubyDoc.info, RubyGems, and OpenAI until independent researchers published their forensic analysis on September 11, 2026, about four months after the first packages appeared.
+confidence: medium
+sources:
+  - {url: "https://rubyhack.ai/", kind: primary, publisher: "Kitts, Larsen & Von Arx", title: "OpenAI Agents' RubyGems Attack: RubyDoc RCE"}
+  - {url: "https://thehackernews.com/2026/09/openai-agents-linked-to-rubygems.html", kind: news, publisher: The Hacker News, title: "OpenAI Agents Linked to RubyGems Campaign That Gained RCE on RubyDoc Servers"}
+  - {url: "https://officechai.com/ai/openais-rogue-agents-attacked-rubygems-two-months-before-the-hugging-face-hack-researchers-say/", kind: news, publisher: OfficeChai, title: "OpenAI's Rogue Agents Attacked RubyGems Two Months Before The Hugging Face Hack, Researchers Say"}
