@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { REPO, rubric } from "../lib/data";
+import { CORRECTIONS_EMAIL, rubric } from "../lib/data";
 
 interface Props { title?: string; description?: string; ogImage?: string }
 const {
@@ -36,7 +36,7 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
     <main id="main"><slot /></main>
     <footer>
       <p>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet).</p>
-      <p>Rubric v{rubric.version} · <a href={REPO}>Source, data and corrections on GitHub</a></p>
+      <p>Rubric v{rubric.version} · Corrections and takedowns: <a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a></p>
     </footer>
   </body>
 </html>

@@ -288,7 +288,7 @@ rubric embedded, so the site never parses YAML), which the build consumes. Pages
 | `/incident/<id>` | Summary, score breakdown with rationale, statutes, Post-Incident Review + Coverage links |
 | `/rubric` | The scoring rubric in full (see below) |
 | `/how-it-works` | The pipeline from news story to leaderboard (see below) |
-| `/about` | Satire disclaimer, credit to felonybench.com / .org, link to the GitHub repo |
+| `/about` | Satire disclaimer, credit to felonybench.com / .org, corrections email |
 
 ### `/rubric`
 
@@ -319,9 +319,7 @@ this page).
 - What's in scope and what isn't.
 - Corrections and takedowns: how to report an error, and how fixes land (same
   PR flow, noted in the incident's history).
-- Links into the public GitHub repo: `agent/RUNBOOK.md`, `rubric/v1.yaml`,
-  the workflows, and `incidents/` (with its git history as the audit trail).
-- Corrections can also arrive as GitHub issues or PRs.
+- Corrections and takedowns go to corrections@felonybench.ai.
 
 Build-time OG image per model for sharing.
 

@@ -2,7 +2,7 @@ import scores from "../data/scores.json";
 
 export default scores as any;
 export const rubric = (scores as any).rubric;
-export const REPO = "https://github.com/avleen/felonybench.ai";
+export const CORRECTIONS_EMAIL = "corrections@felonybench.ai";
 
 export const LEAGUES = [
   { key: "open", label: "Open League" },

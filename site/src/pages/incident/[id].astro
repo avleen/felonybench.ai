@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import scores, { fmt, rubric, REPO, occurred } from "../../lib/data";
+import scores, { fmt, rubric, CORRECTIONS_EMAIL, occurred } from "../../lib/data";
 
 export function getStaticPaths() {
   return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
@@ -53,7 +53,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
     </>
   ))}
 
-  <p class="muted">Confidence: {i.confidence}. <a href={`${REPO}/commits/main/incidents/${i.id}.yaml`}>Record history</a> · <a href={`${REPO}/issues/new?title=${encodeURIComponent(`Correction: ${i.id}`)}`}>Report an error</a></p>
+  <p class="muted">Confidence: {i.confidence}. <a href={`mailto:${CORRECTIONS_EMAIL}?subject=${encodeURIComponent(`Correction: ${i.id}`)}`}>Report an error</a></p>
 </Layout>
 
 <style>

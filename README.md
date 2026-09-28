@@ -16,7 +16,7 @@ The leading benchmark for crimes committed by frontier AI models. Higher is bett
     python -m scripts.score          # writes scores.json
     cd site && npm ci && npm run dev
 
-Corrections: open an issue or a PR against the incident file.
+Corrections and takedowns: corrections@felonybench.ai
 
 ## License
 
