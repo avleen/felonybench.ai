@@ -1,7 +1,7 @@
 name: watch
 on:
   schedule:
-    - cron: "0 13 * * *"
+    - cron: "0 9 * * *"
   workflow_dispatch:
 
 permissions:
@@ -38,6 +38,7 @@ jobs:
         uses: ./.github/actions/run-agent
         with:
           mode: triage
+          model: sonnet
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
 

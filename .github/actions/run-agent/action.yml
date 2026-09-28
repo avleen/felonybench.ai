@@ -7,6 +7,9 @@ inputs:
   max_turns:
     description: Claude Code turn limit
     default: "60"
+  model:
+    description: Claude model alias to run (e.g. sonnet, opus)
+    default: "sonnet"
   claude_code_oauth_token:
     description: Claude subscription OAuth token (from claude setup-token)
     required: true
@@ -37,7 +40,19 @@ runs:
           Read agent/RUNBOOK.md and follow it exactly. Your mode is ${{ inputs.mode }}.
         claude_args: >-
           --max-turns ${{ inputs.max_turns }}
+          --model ${{ inputs.model }}
           --allowedTools "WebSearch,WebFetch,Read,Glob,Grep,Edit(./incidents/**),Edit(./.agent-out/**)"
+
+    - name: Upload agent transcript and notes
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: agent-run-${{ inputs.mode }}-${{ github.run_id }}
+        path: |
+          ${{ runner.temp }}/claude-execution-output.json
+          .agent-out/
+        retention-days: 30
+        if-no-files-found: ignore
 
     - name: Open PRs
       shell: bash

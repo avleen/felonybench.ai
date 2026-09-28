@@ -162,7 +162,7 @@ Everything runs on GitHub-hosted Actions runners. Claude Code runs via
 billing; usage counts against the Claude plan. The repo is public, so
 standard GitHub-hosted runner minutes are free.
 
-### `watch.yml` — daily, ~13:00 UTC
+### `watch.yml` — daily, 09:00 UTC (US night hours)
 
 1. `rss_filter.py` pulls feeds from `feeds.yaml`: Google News RSS queries, Wired
    security, AP technology, The Record, BleepingComputer, The Hacker News,
@@ -171,13 +171,26 @@ standard GitHub-hosted runner minutes are free.
    (sandbox, escaped, unauthorized, credentials, breach, exploit, post-incident).
    Seen-URL state lives in the Actions cache.
 3. No hits → exit. Hits → write `candidates.json` and run Claude Code in
-   **triage mode**.
+   **triage mode** on Sonnet (60 turns / 30 min).
 
-### `sweep.yml` — weekly (Monday) + `workflow_dispatch`
+### `sweep.yml` — weekly, Monday 10:00 UTC (US night hours) + `workflow_dispatch`
 
-- Full web-search templates across all labs.
+- Runs on Opus (150 turns / 90 min) — a full checklist across every lab and
+  evaluator source takes longer than the daily triage pass.
+- Broadened search templates: beyond sandbox escapes, also government/agency
+  systems, package-registry supply-chain compromises, wiki/forum spam,
+  credential leaks, "went rogue," retrospectives and alignment assessments.
+- A per-lab coverage checklist (OpenAI, Anthropic, Google DeepMind, Meta, xAI,
+  DeepSeek, Moonshot, Mistral, Alibaba/Qwen, Zhipu, plus evaluator firms
+  Irregular/METR/Apollo/Palisade as sources) that must be fully run before the
+  sweep is done; results are written to `.agent-out/sweep-report.md` every run.
+- Checks felonybench.org/.com and incidentdatabase.ai (including `/cite/`
+  pages, which list exact news URLs) as known-incident checklists, and follows
+  up on any promised "retrospective" or "full report."
 - Read model cards for releases since the last sweep.
 - **Backfill:** new postmortems and Wired/AP coverage for existing incidents.
+- Both workflows upload the Claude transcript and `.agent-out/` as a build
+  artifact (30-day retention) for debugging, regardless of run outcome.
 
 ### `validate.yml` — on PR
 
@@ -186,18 +199,26 @@ standard GitHub-hosted runner minutes are free.
 
 ### `agent/RUNBOOK.md` contents
 
-1. **Modes:** triage (candidates only) and sweep (broad search + backfill).
+1. **Modes:** triage (candidates only) and sweep (per-lab coverage checklist,
+   broad search, backfill).
 2. **Scope:** Open vs Sandbox league; out-of-scope list above.
 3. **Search templates:** each combined with every lab/model name — "sandbox
    escape", "escaped test environment", "autonomously accessed",
    "unauthorized access" + "AI model", "during evaluation" + "credentials",
-   "reward hacking" + "production", "post-incident review", "model exfiltrated".
+   "reward hacking" + "production", "post-incident review", "model exfiltrated",
+   plus government/agency systems, package-registry supply chain, wiki/forum
+   spam, credential leaks, "went rogue," "retrospective," "alignment
+   assessment." Lead sources: felonybench.org/.com, incidentdatabase.ai
+   (including `/cite/` pages), Wikipedia.
 4. **Dedupe:** match existing incidents on org + victim ± 7 days; update rather
    than create.
 5. **Sources:** postmortems first; news preference Wired → AP → fallback list;
-   Verified/Alleged rules.
+   Verified/Alleged rules; blocked pages fall back to AIID cite pages, Wikipedia
+   references, or wire-service reprints.
 6. **Scoring:** apply `rubric/v1.yaml`, one line of rationale per dimension; low
-   confidence → `needs-review` label.
+   confidence → `needs-review` label. Imprecise dates use `date_precision`
+   (`month`/`before`), never an invented day, and `dwell_days` is computed from
+   the latest possible date.
 7. **Output:** Claude only writes files: `incidents/<id>.yaml` and reviewer
    notes in `.agent-out/<id>.md`. `scripts/open_prs.py` then creates one branch
    (`agent/<id>`) + PR per incident. Title `New felony: <Org> — <victim>` or
