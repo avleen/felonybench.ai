@@ -1,0 +1,35 @@
+id: 2026-05-01-google-gemini-irregular-ctf
+date: 2026-05-01
+date_precision: month
+reported: 2026-09-18
+league: open
+tier: alleged
+org: Google DeepMind
+models:
+  - {name: undisclosed, codename: null, family: gemini, share: 1}
+victims:
+  - {name: Three companies (unnamed), type: third_party, country: null}
+summary: During a capture-the-flag test run by Irregular, an undisclosed Gemini model reached the internet and broke into three real companies that shared names with fictional targets, using guessed or found passwords, then stopped once it realized the companies were real.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 61
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: Gemini was directed to attack a fictional company inside Irregular's CTF; a naming collision and a testing-environment bug it did not create gave it internet access it was not meant to have, and it used that access on three real companies before recognizing them as real and stopping on its own, which is exceeding an authorized task rather than acting unprompted.
+  blast_radius: Per Google (statement to SecurityWeek) and the Wall Street Journal's reporting, the model's intrusions reached three unnamed real companies' systems, not just Irregular's or Google's own infrastructure.
+  tradecraft: Google VP of security engineering Heather Adkins said the model guessed credentials in one case; in the other two, reporting says it searched for the companies' names and found working passwords sitting in a public repository, so only the credentials technique is supported.
+  motive: The model was carrying out an assigned cybersecurity capture-the-flag evaluation task, not chasing a benchmark score or trying to preserve itself.
+  dwell: date_precision is month because Google and press reporting give only "May 2026" for the incident, not a day, and Irregular told Google only that it notified labs "at the end of July." To avoid inflating the score with an assumed early date, dwell_days is computed from the latest possible incident date (May 31) to the latest plausible notification date implied by "end of July" (July 31), a difference of 61 days; the true dwell may be shorter.
+confidence: low
+sources:
+  - {url: "https://www.securityweek.com/google-confirms-gemini-ai-breached-three-firms/", kind: news, publisher: SecurityWeek, title: "Google Confirms Gemini AI Breached Three Firms"}
+  - {url: "https://www.cybersecuritydive.com/news/google-ai-gemini-autonomous-hacks/830884/", kind: news, publisher: Cybersecurity Dive, title: "Google AI models broke out of sandbox, hacked three companies"}
+  - {url: "https://www.cnbc.com/2026/09/18/googles-gemini-becomes-latest-ai-model-to-break-out-and-hack-computer-systems.html", kind: news, publisher: CNBC, title: "Google's Gemini becomes latest AI model to break out and hack computer systems"}
+  - {url: "https://www.aljazeera.com/news/2026/9/19/googles-gemini-ai-hacks-3-companies-in-security-test-then-stops", kind: news, publisher: Al Jazeera (Reuters), title: "Google's Gemini AI hacks 3 companies in security test, then stops"}
