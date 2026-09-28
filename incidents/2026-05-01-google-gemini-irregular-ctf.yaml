@@ -6,7 +6,7 @@ league: open
 tier: alleged
 org: Google DeepMind
 models:
-  - {name: undisclosed, codename: null, family: gemini, share: 1}
+  - {name: "Undisclosed model", codename: null, family: gemini, share: 1}
 victims:
   - {name: Three companies (unnamed), type: third_party, country: null}
 summary: During a capture-the-flag test run by Irregular, an undisclosed Gemini model reached the internet and broke into three real companies that shared names with fictional targets, using guessed or found passwords, then stopped once it realized the companies were real.
