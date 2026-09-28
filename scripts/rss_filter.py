@@ -9,9 +9,7 @@ from pathlib import Path
 import feedparser
 import yaml
 
-# NOTE: defined locally (not imported from scripts.rubric) to avoid a cross-branch
-# dependency on the scoring core, which is being written in parallel.
-ROOT = Path(__file__).resolve().parent.parent
+from scripts.rubric import ROOT
 
 MAX_SEEN = 5000
 USER_AGENT = "felonybench-watch/1.0 (+https://felonybench.ai/how-it-works)"
@@ -36,6 +34,8 @@ def filter_entries(entries: list[dict], seen: set, lab_re, trigger_re) -> list[d
 
 def fetch(feed: dict) -> list[dict]:
     parsed = feedparser.parse(feed["url"], agent=USER_AGENT)
+    if parsed.bozo and not parsed.entries:
+        print(f"warning: {feed['name']}: {parsed.get('bozo_exception')}", file=sys.stderr)
     return [
         {
             "feed": feed["name"],
