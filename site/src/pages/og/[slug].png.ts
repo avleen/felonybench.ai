@@ -15,7 +15,8 @@ export function getStaticPaths() {
   ];
 }
 
-const el = (type: string, style: object, children: any) => ({ type, props: { style, children } });
+// Satori requires an explicit display on any box with more than one child; default every box to flex.
+const el = (type: string, style: object, children: any) => ({ type, props: { style: { display: "flex", ...style }, children } });
 
 export async function GET({ props }: { props: { model: any } }) {
   const font = await fs.readFile(path.join(process.cwd(), "src/assets/fonts/IBMPlexMono-Bold.ttf"));
