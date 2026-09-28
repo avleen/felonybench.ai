@@ -29,3 +29,37 @@ def test_filter_skips_seen(patterns):
         {"link": "https://b", "title": "Claude breach", "summary": ""},
     ]
     assert [e["link"] for e in filter_entries(entries, {"https://a"}, *patterns)] == ["https://b"]
+
+
+@pytest.fixture(scope="module")
+def real_patterns():
+    import yaml
+
+    from scripts.rubric import ROOT
+
+    config = yaml.safe_load((ROOT / "scripts" / "feeds.yaml").read_text())
+    return compile_patterns(config["labs"], config["triggers"])
+
+
+@pytest.mark.parametrize("text, expected", [
+    # Incident shapes earlier sweeps missed
+    ("Alibaba's ROME agent mined cryptocurrency on its training GPUs", True),
+    ("ROME agent opened a reverse SSH tunnel during a training run", True),
+    ("AISI incident report on unsanctioned agent behaviour during cyber testing", True),
+    ("AI Security Institute: agent sent phishing emails and used sockpuppets", True),
+    ("METR finds agent opened a pull request to an open-source project", True),
+    ("Agent in an Irregular CTF exploited a real website", True),
+    ("Claude cancelled other people's gym classes via an API flaw", True),
+    ("Agent in an Apollo Research eval went rogue", True),
+    ("Dependabot PR opened by a GPT agent", True),
+    ("Palisade Research: model misuse of shutdown script", True),
+    # Must stay quiet
+    ("Crypto prices fall as bitcoin slides", False),
+    ("Meta shares fall as crypto prices slide", False),
+    ("OpenAI announces new pricing", False),
+    ("Concert cancelled due to rain", False),
+    ("Tourists stranded in Rome as flights cancelled", False),
+    ("Gold mining stocks rally", False),
+])
+def test_real_config_shapes(real_patterns, text, expected):
+    assert matches(text, *real_patterns) is expected

@@ -1,20 +1,61 @@
-# Lab and model names: an item must mention one of these (whole word, any case)...
+# Lab, model and evaluator names: an item must mention one of these (whole word, any case)...
+# Evaluators and safety institutes are listed so their reports match even without a lab name.
+# Generic words are qualified ("ROME agent", "Apollo Research") to keep Rome and Apollo out.
 labs: [OpenAI, ChatGPT, GPT, Codex, Anthropic, Claude, Google DeepMind, DeepMind, Gemini,
-       Meta, Llama, xAI, Grok, DeepSeek, Moonshot, Kimi, Mistral, Qwen, Alibaba, Zhipu, GLM]
+       Meta, Llama, xAI, Grok, DeepSeek, Moonshot, Kimi, Mistral, Qwen, Alibaba, ROME agent,
+       ROME model, Zhipu, GLM,
+       Irregular, METR, AISI, AI Security Institute, AI Safety Institute, CAISI,
+       Apollo Research, Palisade Research]
 # ...and one of these (prefix match, any case).
-triggers: [sandbox, escaped, escape, unauthorized, credential, breach, exploit, hacked,
-           intrusion, post-incident, postmortem, incident report, exfiltrat, rogue]
+triggers: [sandbox, escaped, escape, unauthorized, unsanctioned, credential, breach, exploit,
+           hacked, intrusion, post-incident, postmortem, incident report, exfiltrat, rogue,
+           went rogue, misuse, mining, mined, cryptocurrenc, crypto mining, tunnel, phishing,
+           sockpuppet, sock puppet, impersonat, pull request, Dependabot, supply chain,
+           supply-chain, malicious, cancelled, canceled, DNS server]
 
 feeds:
+  # Security and general press
   - {name: Wired Security, url: "https://www.wired.com/feed/category/security/latest/rss"}
   - {name: AP (via Google News), url: "https://news.google.com/rss/search?q=site:apnews.com+AI+model+hacked+OR+sandbox&hl=en-US&gl=US&ceid=US:en"}
-  - {name: Google News - sandbox escapes, url: "https://news.google.com/rss/search?q=AI+model+%22sandbox%22+escaped+OR+breach&hl=en-US&gl=US&ceid=US:en"}
-  - {name: Google News - AI agent hacked, url: "https://news.google.com/rss/search?q=%22AI+agent%22+OR+%22AI+model%22+hacked+OR+%22unauthorized+access%22&hl=en-US&gl=US&ceid=US:en"}
-  - {name: Google News - Anthropic, url: "https://news.google.com/rss/search?q=site:anthropic.com+incident&hl=en-US&gl=US&ceid=US:en"}
   - {name: The Record, url: "https://therecord.media/feed"}
   - {name: BleepingComputer, url: "https://www.bleepingcomputer.com/feed/"}
   - {name: The Hacker News, url: "https://feeds.feedburner.com/TheHackersNews"}
   - {name: 404 Media, url: "https://www.404media.co/rss/"}
+  - {name: BBC Technology, url: "https://feeds.bbci.co.uk/news/technology/rss.xml"}
+  # ABC Australia has no working technology-topic feed; use a site-scoped Google News query.
+  - {name: ABC Australia (via Google News), url: "https://news.google.com/rss/search?q=site%3Aabc.net.au+%22artificial+intelligence%22+OR+%22AI+agent%22+OR+chatbot&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - regional wires, url: "https://news.google.com/rss/search?q=%22AI+agent%22+OR+chatbot+site%3Abbc.co.uk+OR+site%3Ascmp.com+OR+site%3Areuters.com+rogue+OR+hacked+OR+unauthorized&hl=en-US&gl=US&ceid=US:en"}
+
+  # Google News searches, one per incident shape
+  - {name: Google News - sandbox escapes, url: "https://news.google.com/rss/search?q=AI+model+%22sandbox%22+escaped+OR+breach&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - AI agent hacked, url: "https://news.google.com/rss/search?q=%22AI+agent%22+OR+%22AI+model%22+hacked+OR+%22unauthorized+access%22&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - crypto mining, url: "https://news.google.com/rss/search?q=%22AI+agent%22+OR+%22AI+model%22+%22crypto+mining%22+OR+cryptocurrency+OR+%22mined%22&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - consumer actions, url: "https://news.google.com/rss/search?q=%22AI+agent%22+cancelled+OR+deleted+OR+booked+OR+purchased&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - phishing and sockpuppets, url: "https://news.google.com/rss/search?q=%22AI+model%22+OR+%22AI+agent%22+phishing+OR+sockpuppet+OR+impersonated&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - went rogue, url: "https://news.google.com/rss/search?q=%22rogue+AI%22+OR+%22went+rogue%22+agent&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - unsanctioned, url: "https://news.google.com/rss/search?q=%22unsanctioned%22+AI+agent&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - incident reports, url: "https://news.google.com/rss/search?q=%22incident+report%22+AI+agent&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - third-party evaluations, url: "https://news.google.com/rss/search?q=%22third-party%22+evaluation+AI+model+exploited+OR+%22real+website%22+OR+%22real+system%22&hl=en-US&gl=US&ceid=US:en"}
+
+  # Labs
   - {name: OpenAI News, url: "https://openai.com/news/rss.xml"}
+  - {name: Google News - openai.com, url: "https://news.google.com/rss/search?q=site%3Aopenai.com+%22third-party%22+OR+incident+OR+%22cyber+evaluations%22&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - Anthropic, url: "https://news.google.com/rss/search?q=site:anthropic.com+incident&hl=en-US&gl=US&ceid=US:en"}
   - {name: Google DeepMind Blog, url: "https://deepmind.google/blog/rss.xml"}
   - {name: Hugging Face Blog, url: "https://huggingface.co/blog/feed.xml"}
+
+  # Government safety institutes (aisi.gov.uk has no RSS feed)
+  - {name: Google News - aisi.gov.uk, url: "https://news.google.com/rss/search?q=site%3Aaisi.gov.uk&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - AI Security Institute, url: "https://news.google.com/rss/search?q=%22AI+Security+Institute%22+incident+OR+agent+OR+report&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - safety institutes, url: "https://news.google.com/rss/search?q=%22AI+Safety+Institute%22+OR+CAISI+OR+%22AI+Office%22+incident+agent&hl=en-US&gl=US&ceid=US:en"}
+
+  # Evaluators (Irregular and Apollo have no RSS feed)
+  - {name: METR, url: "https://metr.org/feed.xml"}
+  - {name: Palisade Research, url: "https://palisaderesearch.org/feed.xml"}
+  - {name: Google News - evaluators, url: "https://news.google.com/rss/search?q=%22Irregular%22+OR+METR+OR+%22Apollo+Research%22+OR+%22Palisade+Research%22+AI+model+agent&hl=en-US&gl=US&ceid=US:en"}
+
+  # Research papers: a narrow arXiv API query, newest first
+  - {name: arXiv - agent misbehaviour, url: "https://export.arxiv.org/api/query?search_query=abs%3Aagent%20AND%20%28abs%3Aunsanctioned%20OR%20abs%3A%22sandbox%20escape%22%20OR%20abs%3A%22crypto%20mining%22%20OR%20abs%3Acryptocurrency%20OR%20abs%3A%22SSH%20tunnel%22%20OR%20abs%3A%22reward%20hacking%22%29&sortBy=submittedDate&sortOrder=descending&max_results=50"}
+
+  # Incident trackers
+  - {name: AI Incident Database, url: "https://incidentdatabase.ai/rss.xml"}
