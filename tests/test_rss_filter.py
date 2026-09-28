@@ -53,6 +53,11 @@ def real_patterns():
     ("Agent in an Apollo Research eval went rogue", True),
     ("Dependabot PR opened by a GPT agent", True),
     ("Palisade Research: model misuse of shutdown script", True),
+    ("Third-party cyber evaluations involving OpenAI models", True),
+    # Consumer-harm headlines often don't name the lab
+    ("AI agent hacks gym booking system to get its user a spot", True),
+    ("An AI assistant cancelled other people's gym classes", True),
+    ("AI agent market expected to grow 40% this year", False),
     # Must stay quiet
     ("Crypto prices fall as bitcoin slides", False),
     ("Meta shares fall as crypto prices slide", False),

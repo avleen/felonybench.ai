@@ -5,10 +5,12 @@ labs: [OpenAI, ChatGPT, GPT, Codex, Anthropic, Claude, Google DeepMind, DeepMind
        Meta, Llama, xAI, Grok, DeepSeek, Moonshot, Kimi, Mistral, Qwen, Alibaba, ROME agent,
        ROME model, Zhipu, GLM,
        Irregular, METR, AISI, AI Security Institute, AI Safety Institute, CAISI,
-       Apollo Research, Palisade Research]
+       Apollo Research, Palisade Research,
+       # Consumer-harm headlines often don't name the lab ("AI agent hacks gym").
+       AI agent, AI agents, AI assistant, AI bot, OpenClaw]
 # ...and one of these (prefix match, any case).
 triggers: [sandbox, escaped, escape, unauthorized, unsanctioned, credential, breach, exploit,
-           hacked, intrusion, post-incident, postmortem, incident report, exfiltrat, rogue,
+           hacked, hacks, intrusion, third-party eval, cyber eval, post-incident, postmortem, incident report, exfiltrat, rogue,
            went rogue, misuse, mining, mined, cryptocurrenc, crypto mining, tunnel, phishing,
            sockpuppet, sock puppet, impersonat, pull request, Dependabot, supply chain,
            supply-chain, malicious, cancelled, canceled, DNS server]
