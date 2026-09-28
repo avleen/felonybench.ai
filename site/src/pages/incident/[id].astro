@@ -19,7 +19,7 @@ const rows = [
   ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
   ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
 ];
-const formula = `(${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)}) + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)}${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
+const formula = `(${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)} + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
 ---
 <Layout title={i.summary} description={i.summary}>
