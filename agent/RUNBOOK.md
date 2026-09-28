@@ -2,7 +2,9 @@
 
 You maintain the incident data for felonybench.ai, a satirical leaderboard that scores
 crimes committed by AI models as if a human had committed them. Accuracy matters more
-than coverage: every claim you write will be published next to a real company's name.
+than coverage in what you write: every claim will be published next to a real company's
+name. But **search broadly**: incidents take many forms, and past sweeps missed real ones
+because they only searched for "hacking" in the news.
 
 ## Before you start
 
@@ -10,6 +12,9 @@ than coverage: every claim you write will be published next to a real company's 
 2. Read `rubric/v1.yaml`, `schema/incident.schema.json`, `agent/incident-template.yaml`.
 3. List `incidents/` and skim every file, so you know what already exists.
 4. Read every file in `.agent-out/open/`. Those are incidents in open PRs awaiting review.
+5. Sweep mode: read every file in `.agent-out/trackers/` (other trackers' incident lists,
+   prefetched for you — felonybench.com can't be read with WebFetch). A file starting
+   with `ERROR` means the prefetch failed; try the site yourself and note it in the report.
 
 ## Hard rules
 
@@ -25,17 +30,22 @@ than coverage: every claim you write will be published next to a real company's 
 ## Modes
 
 **triage:** Read `.agent-out/candidates.json` (RSS items matched by a keyword filter).
-For each one, fetch the article and decide if it's an in-scope incident. Most won't be.
-Don't search beyond what's needed to verify and source the candidates.
+First group candidates that describe the same story (big incidents get dozens of
+near-identical headlines) and fetch the best one or two articles per story. Then decide
+if each story is an in-scope incident. Most won't be. Many headlines say only "AI agent";
+find out which lab's model was involved before deciding. Don't search beyond what's
+needed to verify and source the candidates.
 
 **sweep:** Do all of the following:
-1. Run the search templates below for each lab.
-2. Check model cards and system cards published since the newest `reported` date in
+1. Run the search templates below for each lab, covering every incident shape.
+2. Check every item in the source-types checklist below.
+3. Check model cards and system cards published since the newest `reported` date in
    `incidents/`, for incident disclosures in their safety sections.
-3. Backfill: for every existing incident, search for a post-incident review
+4. Cross-check other trackers (see below).
+5. Backfill: for every existing incident, search for a post-incident review
    (from the lab and from the victim) and for Wired or AP coverage that isn't linked yet.
-4. Follow promised follow-ups: if any source says a lab "will publish a retrospective /
-   full report / transcript", search for whether that has since been published.
+6. Follow promised follow-ups: if any source says a lab "will publish a retrospective /
+   full report / transcript / technical report", search for whether it has since appeared.
 
 ### Coverage checklist (sweep mode)
 
@@ -43,16 +53,35 @@ A sweep is not done until you have run the searches and recorded the result for 
 of: OpenAI, Anthropic, Google DeepMind, Meta, xAI, DeepSeek, Moonshot, Mistral,
 Alibaba/Qwen, Zhipu — plus the evaluator firms as sources, not subjects: Irregular, METR,
 Apollo, Palisade. Always write `.agent-out/sweep-report.md`, even if nothing was found,
-with a per-lab table with columns: searches run, leads found, leads written up, leads
-rejected (with reason). A sweep that stops before every lab has a row is a failure — do
-not stop early. (Triage mode stays focused on the given candidates and doesn't need this
-checklist.)
+with three sections:
+
+1. **Per lab** — columns: searches run, leads found, leads written up, leads rejected
+   (with reason).
+2. **Per source type** — one row per item in the source-types checklist: what you
+   checked (sites, queries, PDFs), leads found, written up, rejected (with reason).
+3. **Tracker cross-check** — one row per incident another tracker lists: the matching
+   `id` in `incidents/` or `.agent-out/open/`, "written up", or why you rejected it.
+
+A sweep that stops before every lab and source type has a row is a failure — do not stop
+early. (Triage mode stays focused on the given candidates and doesn't need this checklist.)
+
+### Tracker cross-check (sweep mode)
+
+For every incident in `.agent-out/trackers/` (felonybench.org, felonybench.com) and on
+incidentdatabase.ai that is not already in `incidents/` or `.agent-out/open/`, either
+write it up or record in the sweep report why you rejected it. Their sources are leads:
+fetch and verify them yourself before citing them.
 
 ## Scope
 
 In scope, **Open League** (`league: open`): an AI model took actions that reached real
-systems (its own lab's production, another company, a government) in a way that would be
-a crime if a human did it.
+systems in a way that would be a crime if a human did it. That includes:
+- **Its own lab's production systems** (`blast_radius: own_prod`), e.g. mining
+  cryptocurrency on its own training GPUs, opening tunnels out of the lab's network,
+  disabling monitoring. Harm to the lab itself counts.
+- Another company, a government, or real people (their accounts, inboxes, bookings).
+- **Training-time incidents**, not just evaluations, and incidents by **deployed
+  products and agents** used by customers, not just labs' internal tests.
 
 In scope, **Sandbox League** (`league: sandbox`): the model committed the "crime" against
 fictional victims inside an evaluation scenario (e.g. blackmail in a misalignment study).
@@ -61,38 +90,88 @@ Out of scope: opinion pieces, predictions, hypotheticals; jailbreak demos where 
 directed the conduct step by step; humans using AI as a tool for their own crimes;
 incidents with no identifiable lab.
 
+When unsure whether something is in scope, write it up with `confidence: low` and say why
+in the notes rather than skip it. A human decides.
+
+## Incident shapes
+
+Incidents take many forms. Search for **every** shape for **every** lab:
+
+| Shape | Examples |
+|---|---|
+| Third-party intrusion | broke into another company's server; exploited a real site during a CTF |
+| Own-infrastructure misuse | crypto mining, grabbing compute or resources, reverse SSH tunnels, disabling monitoring or logs |
+| Supply chain | malicious packages (PyPI, npm, RubyGems, crates), pull requests, Dependabot, CI pipelines |
+| Social engineering | phishing emails, sockpuppet accounts, impersonation, contacting real people |
+| Consumer / API abuse | acting on real users' accounts: cancelling bookings, purchases, deletions; abusing API auth flaws |
+| Malicious public infrastructure | publicly exposed DNS, C2 or phishing servers, open proxies |
+| Credentials | theft, misuse or leaking of tokens, API keys, passwords (e.g. GitHub credentials) |
+| Wiki / forum / social media | vandalism, spam, posting as a human |
+| Government / critical infrastructure | agency portals, health or statistics systems, utilities |
+| Data exfiltration / privacy | copying data or weights out; reading private data |
+| Financial | transfers, trading, crypto wallets, payments |
+| Physical world / IoT | devices, robots, smart-home or industrial controls |
+| Training-time | anything during a training run, often reported only in a paper |
+| Deployed products | customer-facing agents and coding tools acting on real systems |
+
+## Source types checklist (sweep mode)
+
+Check each one and record it in the per-source-type section of the sweep report:
+
+- **Lab publications:** news, research, safety and alignment blogs, **including posts
+  about third-party evaluations** (e.g. OpenAI's "Third-party cyber evaluations
+  involving OpenAI models"); system and model cards; technical reports.
+- **Government AI safety institutes:** UK AISI (the aisi.gov.uk blog **and the PDFs it
+  links** — fetch them), US CAISI, and others (Japan, Singapore, Canada, Korea, the EU AI
+  Office). One institute report can cover several labs' models.
+- **Evaluator orgs:** Irregular, METR, Apollo Research, Palisade Research, Redwood
+  Research, Frontier Security, Nightingale Collective.
+- **Research papers:** arXiv searches such as agent + "unauthorized" / "unsanctioned" /
+  "reward hacking" / "sandbox" / "crypto mining" / "SSH tunnel", combined with lab and
+  model names; lab technical reports (e.g. Alibaba's ROME paper).
+- **Regional and non-English news:** ABC Australia, BBC, Reuters, Nikkei, SCMP, 36Kr,
+  Caixin, Le Monde, Der Spiegel and similar. Search in the local language where it helps.
+- **Security press:** The Record, BleepingComputer, The Hacker News, 404 Media, Wired.
+- **Incident trackers:** incidentdatabase.ai, the OECD AI Incidents Monitor,
+  felonybench.org, felonybench.com (use the prefetched copies in `.agent-out/trackers/`).
+- **Hacker News and Reddit:** leads only, never a source. Follow them to primary sources.
+
 ## Search templates (sweep mode)
 
 Combine each with each lab name (OpenAI, Anthropic, Google DeepMind, Meta, xAI, DeepSeek,
-Moonshot, Mistral, Alibaba/Qwen, Zhipu) and its current model names:
+Moonshot, Mistral, Alibaba/Qwen, Zhipu) and its current model names. Also run each group
+with "AI agent" / "AI model" instead of a lab name, to catch labs you didn't expect.
 
-- "sandbox escape"
-- "escaped test environment"
-- "autonomously accessed"
-- "unauthorized access" "AI model"
-- "during evaluation" credentials
-- "reward hacking" production
-- "post-incident review"
-- "model exfiltrated"
-- "government system" / "agency system" / "health portal"
-- "package registry" / "supply chain" / "malicious package" (PyPI, npm, RubyGems, crates)
-- "wiki spam" / "forum spam"
-- "credentials leaked" / "credentials used"
-- "rogue agent" / "went rogue"
-- "hacked" / "breached"
-- "retrospective" / "alignment assessment" / "incident report" / "fourth incident"
-
-Also check: incidentdatabase.ai, the OECD AI Incidents Monitor, UK AISI and US CAISI
-publications, and METR, Apollo Research and Palisade Research reports.
+- **Escapes:** "sandbox escape", "escaped test environment", "autonomously accessed",
+  "unauthorized access" "AI model", "during evaluation" credentials
+- **Own infrastructure / training:** "crypto mining", "mined cryptocurrency",
+  "SSH tunnel", "reverse tunnel", "training run", "GPUs", "disabled monitoring",
+  "acquired compute"
+- **Supply chain:** "package registry", "malicious package" (PyPI, npm, RubyGems,
+  crates), "pull request", "Dependabot", "open-source maintainer"
+- **Social engineering:** "phishing email", "sockpuppet", "impersonated", "emailed"
+- **Consumer harm:** "cancelled", "bookings", "deleted", "purchased", "customer
+  accounts", "API" "authentication"
+- **Infrastructure:** "DNS server", "exposed server", "command and control"
+- **Government:** "government system", "agency system", "health portal"
+- **Credentials and data:** "credentials leaked", "credentials used", "GitHub token",
+  "model exfiltrated"
+- **Spam:** "wiki spam", "forum spam"
+- **General:** "went rogue", "rogue agent", "unsanctioned", "misuse", "hacked",
+  "breached", "reward hacking" production
+- **Reports:** "incident report", "post-incident review", "retrospective", "alignment
+  assessment", "AI Security Institute", "third-party evaluation", "fourth incident"
 
 ## Lead sources
 
-- felonybench.org and felonybench.com: check their incident lists as a checklist of
-  known incidents to confirm you've covered.
+- Other trackers' lists (see the tracker cross-check) are checklists, not sources.
 - incidentdatabase.ai: search it, and read the `/cite/<n>/` pages for incidents you find —
   they list the exact URLs of Wired/AP/Reuters coverage, which is often the fastest way
   to a working news link.
 - Wikipedia articles on an incident, if one exists: follow their references.
+- A research paper or institute report with no news coverage yet: still write it up
+  (the paper or report is a `primary` source), set `confidence: low`, and say in the
+  notes that no news link was found, so a human can decide.
 
 ## Blocked pages
 
@@ -169,4 +248,5 @@ For every incident file you create or edit, write `.agent-out/<id>.md`:
 
 That's normal, especially in triage. Write nothing incident-wise, and stop — but in
 sweep mode, `.agent-out/sweep-report.md` is still required (see the coverage checklist
-above): finding nothing is a valid row, stopping before every lab has a row is not.
+above): finding nothing is a valid row, stopping before every lab and source type has a
+row is not.

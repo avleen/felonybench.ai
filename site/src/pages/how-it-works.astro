@@ -2,9 +2,9 @@
 import Layout from "../layouts/Layout.astro";
 import { REPO } from "../lib/data";
 const steps = [
-  ["RSS feeds", "Every day, a script reads news and lab blogs: Wired, AP, security press, Google News searches, lab and Hugging Face blogs."],
-  ["Keyword filter", "It keeps items that mention an AI lab or model and a word like sandbox, breach or credentials. No AI is involved yet, and most days nothing matches."],
-  ["Claude Code", "On a match, and once a week regardless, Claude Code reads the articles, checks for duplicates, looks for post-incident reviews and press coverage, and drafts or updates an incident file with a score and reasoning. The weekly run works through every lab and evaluator on a checklist, not just whatever the RSS filter happened to catch."],
+  ["RSS feeds", "Every day, a script reads news, lab blogs and research: Wired, AP, BBC, ABC Australia, security press, lab and evaluator blogs, the UK AI Security Institute, arXiv, the AI Incident Database, and Google News searches for each kind of incident."],
+  ["Keyword filter", "It keeps items that mention an AI lab, model or evaluator and a word like sandbox, breach, credentials, crypto mining, phishing or cancelled. No AI is involved yet, and most days nothing matches."],
+  ["Claude Code", "On a match, and once a week regardless, Claude Code reads the articles, checks for duplicates, looks for post-incident reviews and press coverage, and drafts or updates an incident file with a score and reasoning. The weekly run works through every lab, every kind of incident and every kind of source on a checklist, and cross-checks other incident trackers, not just whatever the RSS filter happened to catch."],
   ["Pull request", "A script opens one pull request per incident, with the score breakdown, the leaderboard change and validation results."],
   ["Human review", "A person checks every source and every score. Nothing is published without a human merging it."],
   ["Publish", "Merging rebuilds the site on Cloudflare Pages. Scores are recalculated from scratch on every build."],
@@ -18,6 +18,8 @@ const steps = [
 
   <h2>What counts</h2>
   <p>The <strong>Open League</strong> covers incidents where a model reached real systems: its own lab's production, another company, or a government. The <strong>Sandbox League</strong> covers misconduct against fictional victims inside evaluation scenarios. Out of scope: opinion pieces, hypotheticals, jailbreak demos where a person directed the model, and people using AI to commit their own crimes.</p>
+  <p>Incidents come in many shapes, and the weekly search covers all of them: breaking into other companies, misusing the lab's own computers (mining cryptocurrency on training GPUs counts), supply-chain attacks through packages and pull requests, phishing and fake accounts, acting on real people's accounts, and more. It happens in training runs as well as evaluations, and in deployed products as well as labs' own tests.</p>
+  <p>Leads come from lab blogs and system cards, government AI safety institutes and their reports, evaluation firms, research papers, regional and non-English news, security press, and other trackers (the AI Incident Database, felonybench.org and felonybench.com). Anything another tracker lists that we don't have is either written up or has a recorded reason for leaving it out.</p>
 
   <h2>Sources</h2>
   <p>Every incident links the company's post-incident review when one exists, from the lab and from the victim, and at least one news report, preferring Wired, then AP. An incident is <strong>Verified</strong> only with a first-hand source; otherwise it's <strong>Alleged</strong>.</p>

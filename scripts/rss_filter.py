@@ -4,6 +4,8 @@ import json
 import os
 import re
 import sys
+import time
+from calendar import timegm
 from pathlib import Path
 
 import feedparser
@@ -12,6 +14,7 @@ import yaml
 from scripts.rubric import ROOT
 
 MAX_SEEN = 5000
+MAX_AGE_DAYS = 7  # skip older items: already-seen news, or a newly added feed's backlog
 USER_AGENT = "felonybench-watch/1.0 (+https://felonybench.ai/how-it-works)"
 
 
@@ -25,11 +28,18 @@ def matches(text: str, lab_re, trigger_re) -> bool:
     return bool(lab_re.search(text) and trigger_re.search(text))
 
 
-def filter_entries(entries: list[dict], seen: set, lab_re, trigger_re) -> list[dict]:
+def filter_entries(entries: list[dict], seen: set, lab_re, trigger_re, min_ts: float | None = None) -> list[dict]:
     return [
         e for e in entries
-        if e["link"] not in seen and matches(f"{e['title']} {e['summary']}", lab_re, trigger_re)
+        if e["link"] not in seen
+        and (min_ts is None or e.get("published_ts") is None or e["published_ts"] >= min_ts)
+        and matches(f"{e['title']} {e['summary']}", lab_re, trigger_re)
     ]
+
+
+def _timestamp(entry) -> float | None:
+    parsed = entry.get("published_parsed") or entry.get("updated_parsed")
+    return timegm(parsed) if parsed else None
 
 
 def fetch(feed: dict) -> list[dict]:
@@ -43,6 +53,7 @@ def fetch(feed: dict) -> list[dict]:
             "link": e["link"],
             "summary": re.sub(r"<[^>]+>", " ", e.get("summary", "")),
             "published": e.get("published", ""),
+            "published_ts": _timestamp(e),
         }
         for e in parsed.entries
         if e.get("link")
@@ -54,6 +65,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--feeds", type=Path, default=ROOT / "scripts" / "feeds.yaml")
     parser.add_argument("--seen", type=Path, default=ROOT / ".agent-state" / "seen.json")
     parser.add_argument("--out", type=Path, default=ROOT / ".agent-out" / "candidates.json")
+    parser.add_argument("--max-age-days", type=float, default=MAX_AGE_DAYS)
     args = parser.parse_args(argv)
 
     config = yaml.safe_load(args.feeds.read_text())
@@ -71,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{feed['name']}: {len(got)} entries")
         entries += got
 
-    candidates = list({c["link"]: c for c in filter_entries(entries, seen, lab_re, trigger_re)}.values())
+    candidates = list({c["link"]: c for c in filter_entries(entries, seen, lab_re, trigger_re, time.time() - args.max_age_days * 86400)}.values())
     for entry in entries:
         if entry["link"] not in seen:
             seen.add(entry["link"])

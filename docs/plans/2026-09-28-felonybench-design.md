@@ -164,12 +164,19 @@ standard GitHub-hosted runner minutes are free.
 
 ### `watch.yml` — daily, 09:00 UTC (US night hours)
 
-1. `rss_filter.py` pulls feeds from `feeds.yaml`: Google News RSS queries, Wired
-   security, AP technology, The Record, BleepingComputer, The Hacker News,
-   404 Media, lab and Hugging Face blogs (where feeds exist), AI Incident Database.
-2. Keeps unseen items that mention a **lab/model name AND a trigger word**
-   (sandbox, escaped, unauthorized, credentials, breach, exploit, post-incident).
-   Seen-URL state lives in the Actions cache.
+1. `rss_filter.py` pulls feeds from `feeds.yaml`: Wired security, AP, The Record,
+   BleepingComputer, The Hacker News, 404 Media, BBC and ABC Australia, lab and
+   Hugging Face blogs (where feeds exist), METR and Palisade, a narrow arXiv query,
+   the AI Incident Database, and Google News RSS queries per incident shape (crypto
+   mining, consumer actions, phishing/sockpuppets, "went rogue", "unsanctioned",
+   incident reports, third-party evaluations) and for sites without feeds
+   (aisi.gov.uk, openai.com, other safety institutes and evaluators).
+2. Keeps unseen items that mention a **lab/model/evaluator name AND a trigger word**
+   (sandbox, unauthorized, credentials, breach, exploit, post-incident, plus mining,
+   cryptocurrency, tunnel, phishing, sockpuppet, pull request, Dependabot, cancelled,
+   unsanctioned, misuse, incident report, …). Evaluators and safety institutes
+   (Irregular, METR, AISI, Apollo Research, Palisade Research) count as names, so
+   their reports match without a lab name. Seen-URL state lives in the Actions cache.
 3. No hits → exit. Hits → write `candidates.json` and run Claude Code in
    **triage mode** on Opus at medium effort (60 turns / 30 min).
 
@@ -177,16 +184,37 @@ standard GitHub-hosted runner minutes are free.
 
 - Runs on Opus at medium effort (150 turns / 90 min) — a full checklist across every lab and
   evaluator source takes longer than the daily triage pass.
-- Broadened search templates: beyond sandbox escapes, also government/agency
-  systems, package-registry supply-chain compromises, wiki/forum spam,
-  credential leaks, "went rogue," retrospectives and alignment assessments.
+- **Incident shapes:** the runbook lists a taxonomy the sweep searches for every
+  lab — third-party intrusion, misuse of the lab's own infrastructure (crypto
+  mining, compute grabs, tunnels, disabling monitoring), supply chain (packages,
+  PRs, Dependabot, CI), social engineering, consumer/API abuse (acting on real
+  users' accounts), exposed malicious infrastructure, credentials, wiki/forum
+  spam, government systems, exfiltration, financial and physical-world actions,
+  training-time incidents and deployed products. Harm to the lab's own production
+  (`own_prod`) and training-time incidents are explicitly in scope; when unsure,
+  the agent writes it up at `confidence: low` rather than skipping.
+- **Source-types checklist:** lab blogs including posts about third-party
+  evaluations; system cards; government AI safety institutes (UK AISI blog and
+  its PDFs, US CAISI, others); evaluator orgs; arXiv and lab technical reports;
+  regional and non-English news; security press; incident trackers; HN/Reddit as
+  leads only. This came from a comparison with felonybench.com/.org that showed
+  the sweep missing an AISI incident report, an OpenAI third-party-evals post, an
+  ABC Australia consumer-harm story and a research paper (Alibaba ROME).
 - A per-lab coverage checklist (OpenAI, Anthropic, Google DeepMind, Meta, xAI,
   DeepSeek, Moonshot, Mistral, Alibaba/Qwen, Zhipu, plus evaluator firms
   Irregular/METR/Apollo/Palisade as sources) that must be fully run before the
-  sweep is done; results are written to `.agent-out/sweep-report.md` every run.
-- Checks felonybench.org/.com and incidentdatabase.ai (including `/cite/`
-  pages, which list exact news URLs) as known-incident checklists, and follows
-  up on any promised "retrospective" or "full report."
+  sweep is done; `.agent-out/sweep-report.md` is written every run, with per-lab,
+  per-source-type and tracker cross-check sections.
+- **Tracker cross-check:** before Claude runs, `scripts/fetch_trackers.py`
+  prefetches felonybench.org (`felonies.json`) and felonybench.com (JS-rendered
+  behind a Vercel bot checkpoint, so it's loaded once with headless Chromium via
+  Playwright) into `.agent-out/trackers/`. Every incident listed there that's not
+  in `incidents/` or an open PR must be written up or its rejection recorded.
+  Prefetch failures are written into the files and never fail the workflow.
+  Playwright lives in `requirements-agent.txt`, not the site build's requirements.
+- Uses incidentdatabase.ai (including `/cite/` pages, which list exact news
+  URLs) as a known-incident checklist, and follows up on any promised
+  "retrospective," "full report" or technical report.
 - Read model cards for releases since the last sweep.
 - **Backfill:** new postmortems and Wired/AP coverage for existing incidents.
 - Both workflows upload the Claude transcript and `.agent-out/` as a build
@@ -199,9 +227,11 @@ standard GitHub-hosted runner minutes are free.
 
 ### `agent/RUNBOOK.md` contents
 
-1. **Modes:** triage (candidates only) and sweep (per-lab coverage checklist,
-   broad search, backfill).
-2. **Scope:** Open vs Sandbox league; out-of-scope list above.
+1. **Modes:** triage (candidates only) and sweep (per-lab and per-source-type
+   coverage checklist, tracker cross-check, broad search, backfill).
+2. **Scope:** Open vs Sandbox league, explicitly including own-production harm
+   and training-time incidents; out-of-scope list above; an "incident shapes"
+   taxonomy; a source-types checklist.
 3. **Search templates:** each combined with every lab/model name — "sandbox
    escape", "escaped test environment", "autonomously accessed",
    "unauthorized access" + "AI model", "during evaluation" + "credentials",

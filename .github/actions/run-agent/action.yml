@@ -34,6 +34,19 @@ runs:
         GH_TOKEN: ${{ inputs.github_token }}
       run: bash scripts/pending_prs.sh
 
+    # felonybench.com sits behind a bot checkpoint that only a real browser passes, so the
+    # sweep gets prefetched copies of other trackers. Never fails the run: errors are
+    # written into the output files for the agent to see.
+    - name: Prefetch other trackers
+      if: inputs.mode == 'sweep'
+      shell: bash
+      run: |
+        set +e
+        pip install -q -r requirements-agent.txt && python -m playwright install --with-deps chromium \
+          || echo "::warning::Playwright install failed; felonybench.com prefetch will record an error"
+        python -m scripts.fetch_trackers || echo "::warning::Tracker prefetch failed"
+        exit 0
+
     - name: Claude Code
       uses: anthropics/claude-code-action@v1
       with:
