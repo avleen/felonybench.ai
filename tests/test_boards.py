@@ -68,3 +68,12 @@ def test_scored_incidents_carry_model_slugs_and_rubric(make_incident, rubric):
 def test_empty_input(rubric):
     scores = build_scores([], rubric, "now")
     assert scores["boards"]["open"]["verified"] == {"models": [], "orgs": []}
+
+
+def test_sandbox_board_is_separate_with_fixed_blast_radius(make_incident, rubric):
+    sandbox = make_incident(id="2026-08-01-openai-sandbox", league="sandbox", scoring={"blast_radius": "government"})
+    scores = build_scores([sandbox, make_incident()], rubric, "now")
+    orgs = scores["boards"]["sandbox"]["verified"]["orgs"]
+    assert [(o["name"], o["score"]) for o in orgs] == [("OpenAI", 87)]  # blast fixed at ×1, not ×2
+    assert orgs[0]["peak_blast_radius"] == "government"
+    assert scores["boards"]["open"]["verified"]["orgs"][0]["incidents"] == ["2026-07-16-openai-exploitgym-huggingface"]

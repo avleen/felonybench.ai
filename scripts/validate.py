@@ -76,9 +76,10 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
             continue
         errors = validate_incident(incident, path.stem, rubric, validator)
         incident_id = incident.get("id")
-        if incident_id in seen:
-            errors.append(f"duplicate id, also in {seen[incident_id]}")
-        seen[incident_id] = path.name
+        if incident_id is not None:
+            if incident_id in seen:
+                errors.append(f"duplicate id, also in {seen[incident_id]}")
+            seen.setdefault(incident_id, path.name)
         if errors:
             results[path.name] = errors
     return results

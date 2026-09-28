@@ -67,3 +67,18 @@ def test_validate_dir_flags_duplicate_ids(tmp_path, make_incident, rubric):
     (tmp_path / "2026-07-16-zzz-copy.yaml").write_text(yaml.safe_dump(make_incident()))
     results = validate_dir(tmp_path, rubric, load_validator())
     assert any("duplicate" in e for e in results["2026-07-16-zzz-copy.yaml"])
+
+
+def test_missing_ids_are_not_duplicates(tmp_path, make_incident, rubric):
+    for name in ("2026-01-01-a", "2026-01-02-b"):
+        incident = make_incident()
+        del incident["id"]
+        (tmp_path / f"{name}.yaml").write_text(yaml.safe_dump(incident))
+    results = validate_dir(tmp_path, rubric, load_validator())
+    assert not any("duplicate" in e for errors in results.values() for e in errors)
+
+
+def test_victim_type_comes_from_rubric(make_incident, rubric):
+    incident = make_incident()
+    incident["victims"][0]["type"] = "moon_base"
+    assert any("victims" in e for e in _errors(incident, rubric))
