@@ -68,3 +68,13 @@ def real_patterns():
 ])
 def test_real_config_shapes(real_patterns, text, expected):
     assert matches(text, *real_patterns) is expected
+
+
+def test_filter_skips_stale_entries(patterns):
+    entries = [
+        {"link": "https://old", "title": "OpenAI sandbox escape", "summary": "", "published_ts": 1_000},
+        {"link": "https://new", "title": "OpenAI sandbox escape", "summary": "", "published_ts": 9_000},
+        {"link": "https://undated", "title": "OpenAI sandbox escape", "summary": "", "published_ts": None},
+    ]
+    kept = filter_entries(entries, set(), *patterns, min_ts=5_000)
+    assert [e["link"] for e in kept] == ["https://new", "https://undated"]
