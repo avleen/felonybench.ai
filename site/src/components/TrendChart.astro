@@ -29,7 +29,7 @@ const chart = layout(series, new Date().toISOString().slice(0, 10));
             <line x1={chart.labelX - 6} x2={chart.labelX + 2} y1={s.labelAnchorY} y2={s.labelY} class="leader" stroke={s.color} />
           )}
           <circle cx={chart.labelX} cy={s.labelY} r="3.5" fill={s.color} />
-          <text x={chart.labelX + 10} y={s.labelY + 4} class="label">{s.org} {fmt(s.final)}</text>
+          <text x={chart.labelX + 10} y={s.labelY + 4} class="label">{`${s.org} ${fmt(s.final)}`}</text>
         </g>
       ))}
     </svg>
