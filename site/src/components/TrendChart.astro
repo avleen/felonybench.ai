@@ -1,0 +1,65 @@
+---
+import { layout, W, H, PAD } from "../lib/chart";
+import { fmt } from "../lib/data";
+const { series } = Astro.props;
+const chart = layout(series, new Date().toISOString().slice(0, 10));
+---
+{!chart ? <p class="muted">No incidents yet.</p> : (
+  <>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Cumulative FelonyBench score by org over time" class="trend">
+      {chart.yTicks.map((t) => (
+        <g>
+          <line x1={PAD.left} x2={W - PAD.right} y1={t.y} y2={t.y} class="grid" />
+          <text x={PAD.left - 8} y={t.y + 4} text-anchor="end" class="tick">{t.value}</text>
+        </g>
+      ))}
+      {chart.xTicks.map((t) => <text x={t.x} y={H - 8} text-anchor="middle" class="tick">{t.label}</text>)}
+      {chart.orgs.map((s) => (
+        <g>
+          <path d={s.path} fill="none" stroke={s.color} stroke-width="2.5" stroke-linejoin="round" />
+          {s.markers.map((m) => (
+            <a href={`/incident/${m.incident_id}/`}>
+              <circle cx={m.cx} cy={m.cy} r="5" fill={s.color} stroke="var(--paper)" stroke-width="1.5">
+                <title>{`${s.org} · ${m.date} · +${fmt(m.delta)} (total ${fmt(m.cumulative)})`}</title>
+              </circle>
+            </a>
+          ))}
+          {/* When a label was nudged off its line, a short leader connects it back. */}
+          {Math.abs(s.labelY - s.labelAnchorY) > 1 && (
+            <line x1={chart.labelX - 6} x2={chart.labelX + 2} y1={s.labelAnchorY} y2={s.labelY} class="leader" stroke={s.color} />
+          )}
+          <circle cx={chart.labelX} cy={s.labelY} r="3.5" fill={s.color} />
+          <text x={chart.labelX + 10} y={s.labelY + 4} class="label">{s.org} {fmt(s.final)}</text>
+        </g>
+      ))}
+    </svg>
+    <details class="table-fallback">
+      <summary>View as table</summary>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Org</th><th>Date</th><th class="num">Change</th><th class="num">Cumulative</th></tr></thead>
+          <tbody>
+            {chart.orgs.flatMap((s) => s.markers.map((m, idx) => (
+              <tr>
+                <td>{idx === 0 ? s.org : ""}</td>
+                <td class="num"><a href={`/incident/${m.incident_id}/`}>{m.date}</a></td>
+                <td class="num">+{fmt(m.delta)}</td>
+                <td class="num">{fmt(m.cumulative)}</td>
+              </tr>
+            )))}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </>
+)}
+
+<style>
+  .trend { width: 100%; height: auto; }
+  .grid { stroke: var(--rule); }
+  .tick { fill: var(--muted); font: 12px var(--mono); }
+  .label { fill: var(--ink); font: 600 13px var(--mono); }
+  .leader { stroke-width: 1; stroke-dasharray: 2 2; opacity: 0.6; }
+  .table-fallback { margin-top: 8px; }
+  .table-fallback summary { cursor: pointer; color: var(--link); font-size: 14px; }
+</style>

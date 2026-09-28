@@ -1,0 +1,30 @@
+---
+import Layout from "../layouts/Layout.astro";
+import TrendChart from "../components/TrendChart.astro";
+import scores, { LEAGUES, TIERS } from "../lib/data";
+---
+<Layout title="Trends">
+  <h1>Trends</h1>
+  <p class="muted">Cumulative score by org. Every step up is a new incident. Click a dot for the case file.</p>
+  <form id="trend-controls" class="controls">
+    {[["league", LEAGUES], ["tier", TIERS]].map(([name, options]: any) => (
+      <fieldset>{options.map((o: any, i: number) => <label><input type="radio" name={name} value={o.key} checked={i === 0} /> {o.label}</label>)}</fieldset>
+    ))}
+  </form>
+  {LEAGUES.map((l) => TIERS.map((t) => (
+    <div data-trend={`${l.key}-${t.key}`} hidden={!(l.key === "open" && t.key === "verified")}>
+      <TrendChart series={scores.trends[l.key][t.key]} />
+    </div>
+  )))}
+</Layout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("#trend-controls")!;
+  const sync = () => {
+    const d = new FormData(form);
+    const key = `${d.get("league")}-${d.get("tier")}`;
+    document.querySelectorAll<HTMLElement>("[data-trend]").forEach((el) => (el.hidden = el.dataset.trend !== key));
+  };
+  form.addEventListener("change", sync);
+  sync();
+</script>

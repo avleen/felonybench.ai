@@ -2,8 +2,12 @@
   --paper: #f6f3ec; --ink: #1c1b19; --muted: #6b675f; --rule: #d9d3c7;
   --stamp: #b3261e; --panel: #fffdf8; --link: #1f4e8c;
   --focus: #1f4e8c;
-  --series-1: #b3261e; --series-2: #1f4e8c; --series-3: #2e7d4f; --series-4: #8a5a00;
-  --series-5: #6a3d9a; --series-6: #00798c; --series-7: #5c5c5c; --series-8: #c2185b;
+  /* Categorical chart palette: validated with dataviz's validate_palette.js against
+     this surface (all 8 PASS light, WARN-relief on 4 slots below 3:1 contrast —
+     mitigated by direct end-of-line labels on every series). Fixed order; never
+     reassign a slot by rank. */
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --series-5: #e87ba4; --series-6: #008300; --series-7: #4a3aa7; --series-8: #e34948;
   --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 @media (prefers-color-scheme: dark) {
@@ -11,8 +15,9 @@
     --paper: #151412; --ink: #ece8df; --muted: #a39e93; --rule: #34312c;
     --stamp: #ff6b5e; --panel: #1d1b18; --link: #8bb4ff;
     --focus: #8bb4ff;
-    --series-1: #ff6b5e; --series-2: #8bb4ff; --series-3: #6fcf97; --series-4: #f2c14e;
-    --series-5: #c39bff; --series-6: #4fd1e0; --series-7: #b0aca3; --series-8: #ff8fc0;
+    /* Same 8 hues, dark-surface steps; validated separately (all PASS). */
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
   }
 }
 * { box-sizing: border-box; }
