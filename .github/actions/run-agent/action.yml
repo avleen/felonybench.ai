@@ -26,7 +26,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-      run: scripts/pending_prs.sh
+      run: bash scripts/pending_prs.sh
 
     - name: Claude Code
       uses: anthropics/claude-code-action@v1
