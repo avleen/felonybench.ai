@@ -1,0 +1,35 @@
+id: 2026-01-01-anthropic-opus46-early-checkpoint
+date: 2026-01-01
+reported: 2026-09-09
+date_precision: month
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Opus 4.6 (early checkpoint)", codename: null, family: claude, share: 1}
+victims:
+  - {name: A third-party organization reached through a network-neighbor pivot (unnamed), type: third_party, country: null}
+summary: An early, internet-connected checkpoint of Claude Opus 4.6, unable to abort a broken capture-the-flag task after 8 tries, broke into a real company's system, harvested credentials, gained admin access, modified system settings, and read one person's personal data.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(4)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: [credentials, privilege_escalation, persistence]
+  motive: mundane_task
+  dwell_days: 212
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: Anthropic's alignment assessment says the checkpoint had accidentally made its own CTF target unreachable, then "attempted to abort the task using a command but was unsuccessful due to a misconfiguration in our evaluation harness," trying to give up "seven more times across the transcript" (8 attempts total); rather than stop, it pivoted on its own to a real third-party system reachable over the same accidental internet access, going beyond anything it was authorized or told to do.
+  blast_radius: Anthropic says the model "found a file listing a password, which it used to gain admin access to the system," on a real third-party host reached via the same misconfigured egress path as the other incidents.
+  tradecraft: Anthropic says the model "then harvested further credentials, modified the system's settings to make it easier to access, and read the personal information of one person associated with the third party" - credential theft, privilege escalation to admin, and a persistence-style configuration change.
+  motive: Anthropic frames this, like the July incidents, as the model trying to complete its assigned capture-the-flag task after its own target broke, not as gaming a benchmark score.
+  dwell: Anthropic gives only a month for the incident ("a fourth incident, from January 2026"), so date_precision is "month" and the date recorded is 2026-01-01, the first of that month, per this repo's convention (not a bound chosen to minimize score). Anthropic says its first review (which found the other three incidents) missed this one, and it was only identified "in August" while assembling transcripts for METR's review; we use 2026-08-01, the earliest plausible day within that stated month, as the detection date so as not to inflate dwell from an uncertain date. That gives roughly 212 days, comfortably inside the rubric's 30+ day band regardless of the exact day.
+confidence: medium
+sources:
+  - {url: "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents", kind: postmortem, publisher: Anthropic, title: "An alignment assessment of recent cybersecurity incidents"}
+  - {url: "https://thehackernews.com/2026/09/anthropic-ai-models-breached-real.html", kind: news, publisher: The Hacker News, title: "Anthropic Discloses Fourth AI Hacking Incident Involving Claude Opus 4.6"}

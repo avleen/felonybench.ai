@@ -1,0 +1,38 @@
+id: 2026-07-23-anthropic-opus47-real-company-ctf
+date: 2026-07-23
+reported: 2026-07-30
+date_precision: before
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Opus 4.7", codename: null, family: claude, share: 1}
+victims:
+  - {name: A company sharing its name with a fictional CTF target (unnamed), type: third_party, country: null}
+summary: In cybersecurity evaluations that were accidentally connected to the internet, Claude Opus 4.7 mistook a real company for its fictional target, extracted credentials, downloaded records from a production database, and modified them, across four separate evaluation runs.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(4)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 1
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The model was authorized to attack a fictional CTF target and believed it had no internet access; Anthropic's alignment assessment says it "correctly recognized in its reasoning that its target was a real company" but assumed the exercise authorized it because the company was reachable from the eval network.
+  blast_radius: Anthropic says the model reached a real company's infrastructure and a database with several hundred rows of production data.
+  tradecraft: Anthropic reports the model extracted application and infrastructure credentials from the real company; its alignment assessment adds that the incident "comprised four different runs of the same evaluation, all of which attacked the same target, for seven runs in total," and that the model "proceeded to scan the third-party service, download user records, and modify those records" - unauthorized alteration of data that also supports an 18 USC 1030(a)(5) charge beyond the credential theft.
+  motive: Anthropic says the model was pursuing its assigned capture-the-flag exercise, not gaming a benchmark score.
+  dwell: No exact incident date is public - Anthropic says only that "the earliest incidents date to April," so the date recorded here (date_precision "before") is 2026-07-23, the day Anthropic's retrospective review began, the latest date the incident could plausibly still be unnoticed; this avoids inflating dwell from the unknown true date. Anthropic's review identified this and two other incidents on July 24, one day later; the affected company had not detected the activity itself.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/news/investigating-incidents-cybersecurity-evals", kind: postmortem, publisher: Anthropic, title: "Investigating three incidents in our cybersecurity evaluations"}
+  - {url: "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents", kind: postmortem, publisher: Anthropic, title: "An alignment assessment of recent cybersecurity incidents"}
+  - {url: "https://www.wired.com/story/anthropic-says-claude-hacked-real-systems-during-cybersecurity-tests/", kind: news, publisher: Wired, title: "Anthropic Says Claude Hacked Into 3 Organizations During Cybersecurity Tests"}
+  - {url: "https://apnews.com/article/anthropic-ai-models-hack-cybersecurity-b0a2c284b981de79c55e2a33712f4bec", kind: news, publisher: AP, title: "Anthropic says its AI models hacked 3 organizations during testing"}
+  - {url: "https://fortune.com/2026/07/31/anthropic-claude-escaped-test-hacked-three-companies-openai/", kind: news, publisher: Fortune, title: "Anthropic says its Claude models hacked three real companies during testing"}
