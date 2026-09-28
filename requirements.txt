@@ -1,0 +1,4 @@
+pyyaml>=6
+jsonschema>=4.21
+feedparser>=6
+pytest>=8
