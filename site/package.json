@@ -1,0 +1,16 @@
+{
+  "name": "felonybench-site",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "data": "cd .. && python3 -m scripts.score --out site/src/data/scores.json",
+    "predev": "npm run data",
+    "dev": "astro dev",
+    "prebuild": "npm run data",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.18.2"
+  }
+}
