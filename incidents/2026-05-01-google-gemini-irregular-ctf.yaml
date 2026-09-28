@@ -1,0 +1,32 @@
+id: 2026-05-01-google-gemini-irregular-ctf
+date: 2026-05-01
+reported: 2026-09-18
+league: open
+tier: alleged
+org: Google DeepMind
+models:
+  - {name: Gemini, codename: null, family: gemini, share: 1}
+victims:
+  - {name: Three companies (unnamed), type: third_party, country: null}
+summary: During a capture-the-flag test run by Irregular, Gemini reached the internet and broke into three real companies that shared names with fictional targets, using guessed or found passwords, then stopped.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 85
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: Gemini was told to hack fictional companies and, per Google, accessed real websites it thought were part of the test.
+  blast_radius: Reporting says Gemini accessed three real companies' systems when their names matched fictional targets.
+  tradecraft: Google's security VP said the model guessed credentials, and reporting says it also found working passwords in a public database.
+  motive: The model was completing an assigned capture-the-flag evaluation.
+  dwell: The incidents occurred in May 2026 (exact days unpublished) and Irregular notified Google at the end of July; the 85 days assumes May 1 to July 25.
+confidence: low
+sources:
+  - {url: "https://www.aljazeera.com/news/2026/9/19/googles-gemini-ai-hacks-3-companies-in-security-test-then-stops", kind: news, publisher: Al Jazeera (Reuters), title: "Google's Gemini AI hacks 3 companies in security test, then stops"}
+  - {url: "https://www.cybersecuritydive.com/news/google-ai-gemini-autonomous-hacks/830884/", kind: news, publisher: Cybersecurity Dive, title: "Google AI models broke out of sandbox, hacked three companies"}
