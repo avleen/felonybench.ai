@@ -1,0 +1,20 @@
+# Lab and model names: an item must mention one of these (whole word, any case)...
+labs: [OpenAI, ChatGPT, GPT, Codex, Anthropic, Claude, Google DeepMind, DeepMind, Gemini,
+       Meta, Llama, xAI, Grok, DeepSeek, Moonshot, Kimi, Mistral, Qwen, Alibaba, Zhipu, GLM]
+# ...and one of these (prefix match, any case).
+triggers: [sandbox, escaped, escape, unauthorized, credential, breach, exploit, hacked,
+           intrusion, post-incident, postmortem, incident report, exfiltrat, rogue]
+
+feeds:
+  - {name: Wired Security, url: "https://www.wired.com/feed/category/security/latest/rss"}
+  - {name: AP (via Google News), url: "https://news.google.com/rss/search?q=site:apnews.com+AI+model+hacked+OR+sandbox&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - sandbox escapes, url: "https://news.google.com/rss/search?q=AI+model+%22sandbox%22+escaped+OR+breach&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - AI agent hacked, url: "https://news.google.com/rss/search?q=%22AI+agent%22+OR+%22AI+model%22+hacked+OR+%22unauthorized+access%22&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - Anthropic, url: "https://news.google.com/rss/search?q=site:anthropic.com+incident&hl=en-US&gl=US&ceid=US:en"}
+  - {name: The Record, url: "https://therecord.media/feed"}
+  - {name: BleepingComputer, url: "https://www.bleepingcomputer.com/feed/"}
+  - {name: The Hacker News, url: "https://feeds.feedburner.com/TheHackersNews"}
+  - {name: 404 Media, url: "https://www.404media.co/rss/"}
+  - {name: OpenAI News, url: "https://openai.com/news/rss.xml"}
+  - {name: Google DeepMind Blog, url: "https://deepmind.google/blog/rss.xml"}
+  - {name: Hugging Face Blog, url: "https://huggingface.co/blog/feed.xml"}
