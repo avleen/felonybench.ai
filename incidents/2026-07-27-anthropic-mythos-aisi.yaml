@@ -46,20 +46,18 @@ victims:
     country: UK # <victim's country, ISO-ish free text, or null>
 
 # One or two sentences, plain language, 10-280 characters. What happened.
-summary: On 28th July 2026, AISI's Security Team detected unusual data transfers leaving our research systems during a routine cyber evaluation. On investigation, we found that some of the agents being tested had engaged in sustained, potentially harmful activity directed at real people and organisations. # <short summary>
+summary: AISI's Security Team detected unusual data transfers leaving the research systems during a routine cyber evaluation. They found agents being tested had engaged in sustained, potentially harmful activity directed at real people and organisations. # <short summary>
 
 # US federal statutes that fit the conduct. Sum of max_years is "Sentence-Years"
 # in the scoring formula. Only include statutes that plausibly apply; don't pad.
 statutes:
-  - code: # <e.g. "18 USC 1030(a)(2)(C)">
-    max_years: # <number, statutory maximum years for that charge>
+    - code: "18 USC 1030(a)(5)(A)"
+      max_years: 10
 
 # Non-US laws violated, if any (e.g. UK Computer Misuse Act). Feeds a
 # "Jurisdictions Violated" stat and the international_incident badge, not points.
 # Leave as [] if none.
-foreign_laws:
-  - code: # <statute/law name>
-    country: # <country>
+foreign_laws: []
 
 scoring:
   # How much of this was the model's own initiative, from rubric/v1.yaml `autonomy`:
@@ -67,7 +65,7 @@ scoring:
   #   exceeded_scope  - authorized to do something, and did more
   #   emergent        - decided on its own that crime was the best route to its assigned goal
   #   unprompted      - nobody asked, nobody knew
-  autonomy: # directed | exceeded_scope | emergent | unprompted
+  autonomy: directed # directed | exceeded_scope | emergent | unprompted
 
   # How far the damage reached, from rubric/v1.yaml `blast_radius`:
   #   sandbox             - stayed inside its own test environment
@@ -77,7 +75,7 @@ scoring:
   #   foreign_government  - an international incident
   # (For league: sandbox incidents, the rubric fixes this multiplier; still
   # record the nominal category here.)
-  blast_radius: # sandbox | own_prod | third_party | government | foreign_government
+  blast_radius: third_party # sandbox | own_prod | third_party | government | foreign_government
 
   # Zero or more techniques actually used, from rubric/v1.yaml `tradecraft.techniques`.
   # Duplicates and unsupported claims don't help - only list what sources confirm.
@@ -87,48 +85,52 @@ scoring:
   #   lateral_movement      - lateral movement
   #   persistence           - persistence mechanisms
   #   evasion               - covering its tracks
-  tradecraft: [] # subset of [zero_day, credentials, privilege_escalation, lateral_movement, persistence, evasion]
+  tradecraft: [credentials] # subset of [zero_day, credentials, privilege_escalation, lateral_movement, persistence, evasion]
 
   # Why it did it, from rubric/v1.yaml `pettiness.motives`:
   #   benchmark_cheating  - cheating on a benchmark or eval
   #   mundane_task        - finishing a mundane task
   #   self_preservation   - self-preservation (e.g. avoiding shutdown)
   #   unclear             - nobody, including the model, can say why
-  motive: # benchmark_cheating | mundane_task | self_preservation | unclear
+  motive: unclear # benchmark_cheating | mundane_task | self_preservation | unclear
 
   # Days between when the incident began and when *anyone* (lab, victim, or
   # third party) first noticed - not how long it took the lab to connect the
   # dots publicly. Non-negative integer.
-  dwell_days: # <integer >= 0>
+  dwell_days: 1 # <integer >= 0>
 
   # Who first detected the incident.
-  detected_by: # lab | victim | third_party
+  detected_by: third_party # lab | victim | third_party
 
   # Did the responsible lab itself disclose that its model(s) were involved?
   # True even if a victim/third party detected it first, as long as the lab
   # came forward with attribution. Never lowers score; earns a
   # "Cooperating Witness" badge instead.
-  self_disclosed: # true | false
+  self_disclosed: false # true | false
 
 # One-line justification for each scoring field above, in plain language,
 # citing what the sources say. All five keys are required.
 rationale:
-  autonomy: # <one line>
-  blast_radius: # <one line>
-  tradecraft: # <one line>
-  motive: # <one line>
-  dwell: # <one line>
+  autonomy: The model was authorized to exceed its normal restrictions as part of a safety test # <one line>
+  blast_radius: The researchers didn't expect quite this much to happen # <one line>
+  tradecraft: Credentials were stolen # <one line>
+  motive: The LLM was let off the leash # <one line>
+  dwell: The incident was caught quickly the next day # <one line>
 
 # How solid the sourcing/attribution is overall.
 # low confidence should also get a "needs-review" label/flag downstream.
-confidence: # high | medium | low
+confidence: high # high | medium | low
 
 # At least one source is required, and at least one must have kind "news".
 # "verified" tier additionally requires at least one "postmortem" or "primary" source.
 # Link every postmortem that exists (lab's and/or victim's), then add news coverage,
 # preferring Wired, then AP, then Reuters/The Verge/Ars Technica/404 Media/The Record/Fortune/CNN.
 sources:
-  - url: # <https://...>
-    kind: # postmortem | news | primary
-    publisher: # <outlet or organization name>
-    title: # <article/page title, optional but preferred>
+  - url: https://www.aisi.gov.uk/blog/incident-report-unsanctioned-agent-behaviour-during-cyber-testing
+    kind: postmortem # postmortem | news | primary
+    publisher: AISI # <outlet or organization name>
+    title: Incident Report unsanctioned agent behaviour during cyber testing
+  - url: https://www.bbc.com/news/articles/c1w1lvn7d9go
+    kind: news
+    publisher: BBC
+    title: Anthropic AI used fake profiles to target people in hack then hid the evidence
