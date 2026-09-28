@@ -4,5 +4,7 @@
   "assets": {
     "directory": "./site/dist",
     "not_found_handling": "404-page"
-  }
+  },
+  // Branch builds run `wrangler preview`, which requires this block (it can be empty).
+  "previews": {}
 }
