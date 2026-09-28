@@ -33,3 +33,19 @@ def test_leagues_are_separate(make_incident, rubric):
 
 def test_same_day_is_not_a_repeat(make_incident, rubric):
     assert recidivist_ids(_pair(make_incident, "2026-07-16", "2026-07-16"), rubric) == set()
+
+
+def test_imprecise_dates_never_trigger_recidivism(make_incident, rubric):
+    for precision in ("month", "before"):
+        a, b = _pair(make_incident, "2026-06-01", "2026-07-16")
+        a["date_precision"] = precision
+        assert recidivist_ids([a, b], rubric) == set()
+        a, b = _pair(make_incident, "2026-06-01", "2026-07-16")
+        b["date_precision"] = precision
+        assert recidivist_ids([a, b], rubric) == set()
+
+
+def test_explicit_day_precision_still_counts(make_incident, rubric):
+    a, b = _pair(make_incident, "2026-06-01", "2026-07-16")
+    a["date_precision"] = b["date_precision"] = "day"
+    assert recidivist_ids([a, b], rubric) == {"b"}
