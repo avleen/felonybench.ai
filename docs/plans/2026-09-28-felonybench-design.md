@@ -171,11 +171,11 @@ standard GitHub-hosted runner minutes are free.
    (sandbox, escaped, unauthorized, credentials, breach, exploit, post-incident).
    Seen-URL state lives in the Actions cache.
 3. No hits → exit. Hits → write `candidates.json` and run Claude Code in
-   **triage mode** on Sonnet (60 turns / 30 min).
+   **triage mode** on Opus at medium effort (60 turns / 30 min).
 
 ### `sweep.yml` — weekly, Monday 10:00 UTC (US night hours) + `workflow_dispatch`
 
-- Runs on Opus (150 turns / 90 min) — a full checklist across every lab and
+- Runs on Opus at medium effort (150 turns / 90 min) — a full checklist across every lab and
   evaluator source takes longer than the daily triage pass.
 - Broadened search templates: beyond sandbox escapes, also government/agency
   systems, package-registry supply-chain compromises, wiki/forum spam,

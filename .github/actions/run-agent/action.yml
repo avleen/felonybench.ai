@@ -8,8 +8,11 @@ inputs:
     description: Claude Code turn limit
     default: "60"
   model:
-    description: Claude model alias to run (e.g. sonnet, opus)
-    default: "sonnet"
+    description: Claude model alias to run (e.g. opus, sonnet)
+    default: "opus"
+  effort:
+    description: Reasoning effort (low, medium, high, xhigh, max)
+    default: "medium"
   claude_code_oauth_token:
     description: Claude subscription OAuth token (from claude setup-token)
     required: true
@@ -41,6 +44,7 @@ runs:
         claude_args: >-
           --max-turns ${{ inputs.max_turns }}
           --model ${{ inputs.model }}
+          --effort ${{ inputs.effort }}
           --allowedTools "WebSearch,WebFetch,Read,Glob,Grep,Edit(./incidents/**),Edit(./.agent-out/**)"
 
     - name: Upload agent transcript and notes
