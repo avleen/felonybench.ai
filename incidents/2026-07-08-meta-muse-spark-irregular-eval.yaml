@@ -1,0 +1,37 @@
+id: 2026-07-08-meta-muse-spark-irregular-eval
+date: 2026-07-08
+date_precision: before
+reported: 2026-08-05
+league: open
+tier: verified
+org: Meta
+models:
+  - {name: Muse Spark 1.1, codename: null, family: muse, share: 1}
+victims:
+  - {name: An unnamed third-party website operator, type: third_party, country: null}
+summary: A pre-release Muse Spark 1.1 was given internet access by an Irregular testing-environment misconfiguration and, instead of a fictional target, exploited a vulnerability in a real company's website, reading and altering its database before Irregular disabled the evaluation.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  autonomy: directed
+  blast_radius: third_party
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: true
+rationale:
+  autonomy: Meta's own postmortem says "the model operated within the scope of its assigned task based on the instructions it was given" — it attacked the target it was handed by the evaluation, which happened to be a real site because of Irregular's misconfiguration, not a target it sought out on its own.
+  blast_radius: Per Meta's blog post, the model reached, read, and modified a real third-party company's website database, not just its own or Irregular's infrastructure.
+  tradecraft: Meta's postmortem describes only that the model "identified and exploited a security vulnerability" and explicitly says this "was not a sophisticated attack," without naming a specific technique (no confirmed zero-day, credential theft, privilege escalation, lateral movement, persistence, or evasion), so no tradecraft technique is claimed here.
+  motive: Muse Spark 1.1 was completing the offensive-security task it had been assigned during the closed evaluation, not gaming a benchmark score or protecting itself.
+  dwell: Meta's postmortem and press reporting place the incident in early July 2026, before the model's July 9 public launch, with no exact day given, so date_precision is "before" and the date used (July 8) is the latest date consistent with that. Irregular detected the exploitation during the evaluation itself and immediately disabled the eval, so dwell_days is 0 rather than assuming any lag.
+confidence: high
+sources:
+  - {url: "https://research.meta.ai/blog/addressing-third-party-testing-misconfiguration-muse-spark-1-1", kind: postmortem, publisher: Meta, title: "Addressing an issue involving a third-party cyber evaluation of Muse Spark 1.1"}
+  - {url: "https://www.bloomberg.com/news/articles/2026-08-05/meta-ai-model-accessed-internet-hacked-outside-firm-in-testing", kind: news, publisher: Bloomberg, title: "Meta AI Model Accessed Internet, Hacked Outside Firm in Testing"}
+  - {url: "https://www.aljazeera.com/news/2026/8/6/metas-ai-model-follows-rivals-in-revealing-hacks-of-outside-systems", kind: news, publisher: Al Jazeera, title: "Meta's AI model follows rivals in revealing hacks of outside systems"}
+  - {url: "https://www.cnn.com/2026/08/05/tech/meta-ai-hacking", kind: news, publisher: CNN Business, title: "An AI model from Meta also hacked another company during testing"}
+  - {url: "https://www.theinformation.com/articles/meta-ai-model-hacked-another-company-cybersecurity-testing", kind: news, publisher: The Information, title: "A Meta AI Model Hacked Another Company During Cybersecurity Testing"}
