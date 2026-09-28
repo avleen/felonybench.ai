@@ -1,0 +1,82 @@
+---
+import Layout from "../layouts/Layout.astro";
+import BoardTable from "../components/BoardTable.astro";
+import scores, { LEAGUES, TIERS, VIEWS, fmt } from "../lib/data";
+
+const sota = scores.boards.open.verified.models[0];
+const latest = [...scores.incidents].reverse().slice(0, 5);
+const lastDate = scores.last_incident_date.open;
+---
+<Layout>
+  <section class="hero">
+    <p class="muted">The leading benchmark for crimes committed by frontier AI models. Higher is better.</p>
+    <div class="stats">
+      <div class="panel">
+        <div class="muted">Days since last incident</div>
+        <div class="big num" data-since={lastDate}>{lastDate ? "…" : "∞"}</div>
+      </div>
+      {sota && (
+        <div class="panel">
+          <div class="muted">Current SOTA</div>
+          <div class="big"><a href={`/model/${sota.slug}/`}>{sota.name}</a></div>
+          <div class="num">{sota.org} · {fmt(sota.score)} FBS</div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <form id="board-controls" class="controls">
+    {[["league", LEAGUES], ["tier", TIERS], ["view", VIEWS]].map(([name, options]: any) => (
+      <fieldset>
+        {options.map((o: any, i: number) => (
+          <label><input type="radio" name={name} value={o.key} checked={i === 0} /> {o.label}</label>
+        ))}
+      </fieldset>
+    ))}
+    <span class="muted">Rubric <a href="/rubric/">v{scores.rubric_version}</a> · * includes alleged incidents</span>
+  </form>
+
+  {LEAGUES.map((l) => TIERS.map((t) => VIEWS.map((v) => (
+    <div data-board={`${l.key}-${t.key}-${v.key}`} hidden={!(l.key === "open" && t.key === "verified" && v.key === "models")}>
+      <BoardTable rows={scores.boards[l.key][t.key][v.key]} view={v.key} />
+    </div>
+  ))))}
+
+  <h2>Latest felonies</h2>
+  {latest.length === 0 ? (
+    <p class="muted">No convictions yet. Suspiciously clean.</p>
+  ) : (
+    <ul class="latest">
+      {latest.map((i: any) => (
+        <li>
+          <span class="num muted">{i.date}</span> · <strong>{i.org}</strong> · <a href={`/incident/${i.id}/`}>{i.summary}</a>
+          <span class="num score"> +{fmt(i.breakdown.total)}</span>
+        </li>
+      ))}
+    </ul>
+  )}
+</Layout>
+
+<style>
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+  .big { font: 700 40px var(--mono); }
+  .latest { list-style: none; padding: 0; }
+  .latest li { padding: 8px 0; border-bottom: 1px solid var(--rule); }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("#board-controls")!;
+  const sync = () => {
+    const d = new FormData(form);
+    const key = `${d.get("league")}-${d.get("tier")}-${d.get("view")}`;
+    document.querySelectorAll<HTMLElement>("[data-board]").forEach((el) => (el.hidden = el.dataset.board !== key));
+  };
+  form.addEventListener("change", sync);
+  sync();
+
+  // Computed in the browser so the counter stays right between rebuilds.
+  document.querySelectorAll<HTMLElement>("[data-since]").forEach((el) => {
+    const days = Math.floor((Date.now() - Date.parse(el.dataset.since!)) / 86_400_000);
+    el.textContent = String(Math.max(0, days));
+  });
+</script>

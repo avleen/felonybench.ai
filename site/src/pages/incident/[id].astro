@@ -1,0 +1,63 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import scores, { fmt, rubric, REPO } from "../../lib/data";
+
+export function getStaticPaths() {
+  return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
+}
+
+const { incident: i } = Astro.props;
+const b = i.breakdown;
+const s = i.scoring;
+const byKind = (kind: string) => i.sources.filter((src: any) => src.kind === kind);
+const rows = [
+  ["Sentence-Years", fmt(b.sentence_years), i.statutes.map((st: any) => st.code).join(", ")],
+  ["× Autonomy", fmt(b.autonomy), `${rubric.autonomy[s.autonomy].label}: ${i.rationale.autonomy}`],
+  ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
+  ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
+  ["+ Pettiness", fmt(b.pettiness), `${rubric.pettiness.motives[s.motive].label}: ${i.rationale.motive}`],
+  ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
+  ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
+];
+const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
+---
+<Layout title={i.summary} description={i.summary}>
+  <p class="muted num">Case No. FB-{i.id}</p>
+  <h1>{i.summary}</h1>
+  <p><span class="stamp">{i.tier}</span> {i.badges.map((k: string) => <span class="badge">{rubric.badges[k].label}</span>)}</p>
+
+  <dl class="facts">
+    <dt>Occurred</dt><dd class="num">{i.date}</dd>
+    <dt>Reported</dt><dd class="num">{i.reported}</dd>
+    <dt>Defendant(s)</dt><dd>{i.org}: {i.models.map((m: any, n: number) => <>{n > 0 && ", "}<a href={`/model/${m.slug}/`}>{m.name}</a></>)}</dd>
+    <dt>Victim(s)</dt><dd>{i.victims.map((v: any) => v.name).join(", ")}</dd>
+    <dt>League</dt><dd>{i.league === "open" ? "Open League" : "Sandbox League"}</dd>
+  </dl>
+
+  <h2>Score: <span class="num">{fmt(b.total)}</span></h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Component</th><th class="num">Value</th><th>Reasoning</th></tr></thead>
+      <tbody>{rows.map(([k, v, why]) => <tr><td>{k}</td><td class="num">{v}</td><td>{why}</td></tr>)}</tbody>
+    </table>
+  </div>
+
+  <h2>Charges (had a human done it)</h2>
+  <ul>{i.statutes.map((st: any) => <li><code>{st.code}</code>, up to {st.max_years} years</li>)}</ul>
+  {i.foreign_laws.length > 0 && <ul>{i.foreign_laws.map((f: any) => <li>{f.code} ({f.country})</li>)}</ul>}
+
+  {sourceGroups.map(([heading, kind]) => byKind(kind).length > 0 && (
+    <>
+      <h2>{heading}</h2>
+      <ul>{byKind(kind).map((src: any) => <li><a href={src.url}>{src.title ?? src.publisher}</a> <span class="muted">({src.publisher})</span></li>)}</ul>
+    </>
+  ))}
+
+  <p class="muted">Confidence: {i.confidence}. <a href={`${REPO}/commits/main/incidents/${i.id}.yaml`}>Record history</a> · <a href={`${REPO}/issues/new?title=${encodeURIComponent(`Correction: ${i.id}`)}`}>Report an error</a></p>
+</Layout>
+
+<style>
+  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
+  .facts dt { color: var(--muted); }
+  .facts dd { margin: 0; }
+</style>

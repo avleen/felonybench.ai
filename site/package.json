@@ -1,0 +1,18 @@
+{
+  "name": "felonybench-site",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "data": "cd .. && python3 -m scripts.score --out site/src/data/scores.json",
+    "predev": "npm run data",
+    "dev": "astro dev",
+    "prebuild": "npm run data",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "astro": "^5.18.2",
+    "satori": "^0.33.5"
+  }
+}

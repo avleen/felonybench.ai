@@ -1,0 +1,37 @@
+---
+import { fmt, blastLabel, rubric } from "../lib/data";
+const { rows, view } = Astro.props;
+const byModel = view === "models";
+---
+{rows.length === 0 ? (
+  <p class="muted">No convictions yet. Suspiciously clean.</p>
+) : (
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th><th>{byModel ? "Model" : "Org"}</th>{byModel && <th>Org</th>}
+          <th class="num">FBS</th><th class="num">Sentence-Years</th><th>Peak Blast Radius</th>
+          <th class="num">Incidents</th><th>Badges</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r: any) => (
+          <tr>
+            <td class="num">#{r.rank}</td>
+            <td>
+              {byModel ? <a href={`/model/${r.slug}/`}>{r.name}</a> : r.name}
+              {r.alleged > 0 && <span title={`${r.alleged} alleged incident(s)`}>*</span>}
+            </td>
+            {byModel && <td>{r.org}</td>}
+            <td class="num score">{fmt(r.score)}</td>
+            <td class="num">{fmt(r.sentence_years)}</td>
+            <td>{blastLabel(r.peak_blast_radius)}</td>
+            <td class="num">{r.incidents.length}</td>
+            <td>{r.badges.map((b: string) => <span class="badge" title={rubric.badges[b].description}>{rubric.badges[b].label}</span>)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}

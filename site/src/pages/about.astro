@@ -1,0 +1,14 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { REPO } from "../lib/data";
+---
+<Layout title="About">
+  <h1>About FelonyBench</h1>
+  <p>AI labs keep publishing post-incident reviews in which their models, while being tested, broke out of their sandboxes and did things that would be crimes if a person did them. The industry already ranks models on how well they write code and solve math. We rank them on this.</p>
+  <p><strong>This is satire.</strong> Scores describe what the reported conduct would constitute if a human had done it. No model or company has been charged with anything. Every incident links to the lab's own account and to independent reporting, so you can judge for yourself.</p>
+  <p>The companies whose systems were broken into are victims, not punchlines.</p>
+  <h2>Corrections</h2>
+  <p>Found an error? <a href={`${REPO}/issues/new`}>Open an issue</a> or a pull request against the incident file. Fixes go through the same review as everything else, and the git history keeps the record.</p>
+  <h2>Prior art</h2>
+  <p>Inspired by <a href="https://felonybench.com">felonybench.com</a> and <a href="https://felonybench.org">felonybench.org</a>. We just added more dimensions, because <code>.ai</code> makes everything better.</p>
+</Layout>

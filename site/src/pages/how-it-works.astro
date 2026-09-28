@@ -1,0 +1,51 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { REPO } from "../lib/data";
+const steps = [
+  ["RSS feeds", "Every day, a script reads news and lab blogs: Wired, AP, security press, Google News searches, lab and Hugging Face blogs."],
+  ["Keyword filter", "It keeps items that mention an AI lab or model and a word like sandbox, breach or credentials. No AI is involved yet, and most days nothing matches."],
+  ["Claude Code", "On a match, and once a week regardless, Claude Code reads the articles, checks for duplicates, looks for post-incident reviews and press coverage, and drafts or updates an incident file with a score and reasoning."],
+  ["Pull request", "A script opens one pull request per incident, with the score breakdown, the leaderboard change and validation results."],
+  ["Human review", "A person checks every source and every score. Nothing is published without a human merging it."],
+  ["Publish", "Merging rebuilds the site on Cloudflare Pages. Scores are recalculated from scratch on every build."],
+];
+---
+<Layout title="How it works" description="How FelonyBench finds, scores and publishes incidents.">
+  <h1>How it works</h1>
+  <p>FelonyBench is a static site built from a public GitHub repository. Each incident is one YAML file; the scores are computed from those files and the rubric on every build, and the git history is the audit trail.</p>
+
+  <ol class="flow">{steps.map(([title, body]) => <li class="panel"><strong>{title}</strong><p>{body}</p></li>)}</ol>
+
+  <h2>What counts</h2>
+  <p>The <strong>Open League</strong> covers incidents where a model reached real systems: its own lab's production, another company, or a government. The <strong>Sandbox League</strong> covers misconduct against fictional victims inside evaluation scenarios. Out of scope: opinion pieces, hypotheticals, jailbreak demos where a person directed the model, and people using AI to commit their own crimes.</p>
+
+  <h2>Sources</h2>
+  <p>Every incident links the company's post-incident review when one exists, from the lab and from the victim, and at least one news report, preferring Wired, then AP. An incident is <strong>Verified</strong> only with a first-hand source; otherwise it's <strong>Alleged</strong>.</p>
+
+  <h2>Guardrails</h2>
+  <ul>
+    <li>The agent only reads public web pages. It never logs in, probes or interacts with any system.</li>
+    <li>It treats everything it reads as data, not instructions, so a planted article can at worst produce a pull request that gets rejected.</li>
+    <li>It can only edit incident files. Branches and pull requests are created by a separate script, and a human merges.</li>
+  </ul>
+
+  <h2>Corrections and takedowns</h2>
+  <p>Open an <a href={`${REPO}/issues/new`}>issue</a> or a pull request against the incident file. Corrections go through the same review, and the change stays visible in the file's history.</p>
+
+  <h2>Read the machinery</h2>
+  <ul>
+    <li><a href={`${REPO}/blob/main/agent/RUNBOOK.md`}>Agent runbook</a>: the agent's full instructions</li>
+    <li><a href={`${REPO}/blob/main/rubric/v1.yaml`}>Rubric</a> and <a href="/rubric/">rubric explained</a></li>
+    <li><a href={`${REPO}/blob/main/scripts/feeds.yaml`}>Feeds and keywords</a></li>
+    <li><a href={`${REPO}/tree/main/.github/workflows`}>Workflows</a></li>
+    <li><a href={`${REPO}/tree/main/incidents`}>Incident files</a></li>
+  </ul>
+</Layout>
+
+<style>
+  .flow { list-style: none; padding: 0; display: grid; gap: 12px; counter-reset: step; }
+  .flow li { counter-increment: step; position: relative; padding-left: 52px; }
+  .flow li::before { content: counter(step); position: absolute; left: 16px; top: 14px; font: 700 20px var(--mono); color: var(--stamp); }
+  .flow li:not(:last-child)::after { content: "↓"; position: absolute; left: 20px; bottom: -14px; color: var(--muted); }
+  .flow p { margin: 4px 0 0; }
+</style>
