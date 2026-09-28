@@ -34,6 +34,19 @@ Don't search beyond what's needed to verify and source the candidates.
    `incidents/`, for incident disclosures in their safety sections.
 3. Backfill: for every existing incident, search for a post-incident review
    (from the lab and from the victim) and for Wired or AP coverage that isn't linked yet.
+4. Follow promised follow-ups: if any source says a lab "will publish a retrospective /
+   full report / transcript", search for whether that has since been published.
+
+### Coverage checklist (sweep mode)
+
+A sweep is not done until you have run the searches and recorded the result for **each**
+of: OpenAI, Anthropic, Google DeepMind, Meta, xAI, DeepSeek, Moonshot, Mistral,
+Alibaba/Qwen, Zhipu — plus the evaluator firms as sources, not subjects: Irregular, METR,
+Apollo, Palisade. Always write `.agent-out/sweep-report.md`, even if nothing was found,
+with a per-lab table with columns: searches run, leads found, leads written up, leads
+rejected (with reason). A sweep that stops before every lab has a row is a failure — do
+not stop early. (Triage mode stays focused on the given candidates and doesn't need this
+checklist.)
 
 ## Scope
 
@@ -61,9 +74,35 @@ Moonshot, Mistral, Alibaba/Qwen, Zhipu) and its current model names:
 - "reward hacking" production
 - "post-incident review"
 - "model exfiltrated"
+- "government system" / "agency system" / "health portal"
+- "package registry" / "supply chain" / "malicious package" (PyPI, npm, RubyGems, crates)
+- "wiki spam" / "forum spam"
+- "credentials leaked" / "credentials used"
+- "rogue agent" / "went rogue"
+- "hacked" / "breached"
+- "retrospective" / "alignment assessment" / "incident report" / "fourth incident"
 
 Also check: incidentdatabase.ai, the OECD AI Incidents Monitor, UK AISI and US CAISI
 publications, and METR, Apollo Research and Palisade Research reports.
+
+## Lead sources
+
+- felonybench.org and felonybench.com: check their incident lists as a checklist of
+  known incidents to confirm you've covered.
+- incidentdatabase.ai: search it, and read the `/cite/<n>/` pages for incidents you find —
+  they list the exact URLs of Wired/AP/Reuters coverage, which is often the fastest way
+  to a working news link.
+- Wikipedia articles on an incident, if one exists: follow their references.
+
+## Blocked pages
+
+If `WebFetch` fails (403/451), don't give up on the source — try, in order: the AIID
+`/cite/` page for the same incident, the Wikipedia article's references, a wire-service
+reprint (Al Jazeera, Yahoo, BNN carry Reuters and AP), or the outlet's own syndication. A
+news link may be included even if you never got the body to load, as long as its URL and
+title are confirmed by at least two independent listings (e.g. an AIID cite page plus a
+search result) — say in your notes that the body was never fetched and how the URL was
+confirmed.
 
 ## Deduplicate first
 
@@ -91,6 +130,14 @@ Each source has a `kind`:
   incident happened. `reported` is when it was first made public.
 - Follow `agent/incident-template.yaml` exactly. Only use values that exist in
   `rubric/v1.yaml`.
+- **Imprecise dates:** never invent a day. If sources only give a month, set
+  `date_precision: month` and use the 1st of that month as `date`. If sources only give
+  an upper bound (e.g. "before the review began on..."), set `date_precision: before` and
+  use that latest possible date. Set `date_precision: day` when the exact day is known
+  (this is also the default meaning when the field is omitted on old incidents). Compute
+  `dwell_days` from the LATEST possible incident date, never an earlier guess, so an
+  unknown date can only shrink `dwell_days`, never inflate it — say so explicitly in the
+  `dwell` rationale line when `date_precision` isn't `day`.
 - `statutes`: the US federal statutes the conduct would violate if done by a human, with
   the maximum prison term for the most fitting subsection (first offense, aggravated
   where the facts support it). Common ones: 18 USC 1030(a)(2)(C) (5 aggravated),
@@ -120,4 +167,6 @@ For every incident file you create or edit, write `.agent-out/<id>.md`:
 
 ## When you find nothing
 
-That's normal, especially in triage. Write nothing, and stop.
+That's normal, especially in triage. Write nothing incident-wise, and stop — but in
+sweep mode, `.agent-out/sweep-report.md` is still required (see the coverage checklist
+above): finding nothing is a valid row, stopping before every lab has a row is not.
