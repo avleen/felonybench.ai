@@ -60,6 +60,8 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
 
     if to_date(incident["reported"]) < to_date(incident["date"]):
         errors.append("reported: earlier than date")
+    if incident.get("date_precision") == "month" and to_date(incident["date"]).day != 1:
+        errors.append("date_precision: 'month' dates must be the first of the month")
     return errors
 
 

@@ -21,3 +21,9 @@ export const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDig
 export const blastLabel = (key: string) => rubric.blast_radius[key]?.label ?? key;
 export const incidentsFor = (slug: string) =>
   (scores as any).incidents.filter((i: any) => i.models.some((m: any) => m.slug === slug));
+
+// Incidents dated only to the month show as "April 2026", never as a made-up day.
+export const occurred = (i: any) =>
+  i.date_precision === "month"
+    ? new Date(`${i.date}T00:00:00Z`).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })
+    : i.date;

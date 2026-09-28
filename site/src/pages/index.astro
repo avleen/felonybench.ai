@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BoardTable from "../components/BoardTable.astro";
-import scores, { LEAGUES, TIERS, VIEWS, fmt } from "../lib/data";
+import scores, { LEAGUES, TIERS, VIEWS, fmt, occurred } from "../lib/data";
 
 const sota = scores.boards.open.verified.models[0];
 const latest = [...scores.incidents].reverse().slice(0, 5);
@@ -49,7 +49,7 @@ const lastDate = scores.last_incident_date.open;
     <ul class="latest">
       {latest.map((i: any) => (
         <li>
-          <span class="num muted">{i.date}</span> · <strong>{i.org}</strong> · <a href={`/incident/${i.id}/`}>{i.summary}</a>
+          <span class="num muted">{occurred(i)}</span> · <strong>{i.org}</strong> · <a href={`/incident/${i.id}/`}>{i.summary}</a>
           <span class="num score"> +{fmt(i.breakdown.total)}</span>
         </li>
       ))}

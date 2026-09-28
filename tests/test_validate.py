@@ -82,3 +82,15 @@ def test_victim_type_comes_from_rubric(make_incident, rubric):
     incident = make_incident()
     incident["victims"][0]["type"] = "moon_base"
     assert any("victims" in e for e in _errors(incident, rubric))
+
+
+def test_month_precision_dates_must_be_first_of_month(make_incident, rubric):
+    incident = make_incident(id="2026-07-01-openai-x", date="2026-07-01", date_precision="month")
+    assert _errors(incident, rubric, stem="2026-07-01-openai-x") == []
+    incident = make_incident(id="2026-07-16-openai-x", date_precision="month")
+    assert any("date_precision" in e for e in _errors(incident, rubric, stem="2026-07-16-openai-x"))
+
+
+def test_date_precision_values(make_incident, rubric):
+    assert any("date_precision" in e for e in _errors(make_incident(date_precision="year"), rubric))
+    assert _errors(make_incident(date_precision="day"), rubric) == []

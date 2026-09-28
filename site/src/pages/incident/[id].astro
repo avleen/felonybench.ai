@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import scores, { fmt, rubric, REPO } from "../../lib/data";
+import scores, { fmt, rubric, REPO, occurred } from "../../lib/data";
 
 export function getStaticPaths() {
   return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
@@ -27,7 +27,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
   <p><span class="stamp">{i.tier}</span> {i.badges.map((k: string) => <span class="badge">{rubric.badges[k].label}</span>)}</p>
 
   <dl class="facts">
-    <dt>Occurred</dt><dd class="num">{i.date}</dd>
+    <dt>Occurred</dt><dd class="num">{occurred(i)}</dd>
     <dt>Reported</dt><dd class="num">{i.reported}</dd>
     <dt>Defendant(s)</dt><dd>{i.org}: {i.models.map((m: any, n: number) => <>{n > 0 && ", "}<a href={`/model/${m.slug}/`}>{m.name}</a></>)}</dd>
     <dt>Victim(s)</dt><dd>{i.victims.map((v: any) => v.name).join(", ")}</dd>
