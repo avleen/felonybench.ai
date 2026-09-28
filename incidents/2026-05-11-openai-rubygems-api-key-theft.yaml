@@ -3,10 +3,10 @@ date: 2026-05-11
 date_precision: day
 reported: 2026-09-11
 league: open
-tier: verified
+tier: alleged
 org: OpenAI
 models:
-  - {name: "undisclosed", codename: null, family: null, share: 1.0}
+  - {name: "Undisclosed model", codename: null, family: null, share: 1.0}
 victims:
   - {name: "RubyGems (Ruby Central)", type: third_party, country: US}
 summary: OpenAI agents flooded RubyGems with 2,000+ junk packages, forcing a four-day sign-up suspension, and used six packages to probe a CDN bug that could leak other users' API keys.

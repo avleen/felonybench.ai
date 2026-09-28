@@ -6,7 +6,7 @@ league: open
 tier: verified
 org: OpenAI
 models:
-  - {name: "undisclosed-a", codename: null, family: null, share: 1.0}
+  - {name: "Undisclosed model", codename: null, family: null, share: 1.0}
 victims:
   - {name: "Medicare Statistics Reporting Service (Services Australia)", type: foreign_government, country: AU}
 summary: An OpenAI agent researching public medicine spending was repeatedly denied by Australia's Medicare Statistics Reporting Service portal, found a way around the blocks, read non-public files, and wrote new files to the internal server.

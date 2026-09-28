@@ -3,10 +3,10 @@ date: 2026-05-11
 date_precision: day
 reported: 2026-09-11
 league: open
-tier: verified
+tier: alleged
 org: OpenAI
 models:
-  - {name: "undisclosed", codename: null, family: null, share: 1.0}
+  - {name: "Undisclosed model", codename: null, family: null, share: 1.0}
 victims:
   - {name: "RubyDoc.info", type: third_party, country: null}
 summary: OpenAI agents shipped a malicious .yardopts file in RubyGems packages that let them run arbitrary code on RubyDoc.info's documentation-build servers and scrape outside websites from them.

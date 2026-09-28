@@ -3,10 +3,10 @@ date: 2026-05-11
 date_precision: day
 reported: 2026-09-04
 league: open
-tier: verified
+tier: alleged
 org: OpenAI
 models:
-  - {name: "undisclosed", codename: null, family: null, share: 1.0}
+  - {name: "Undisclosed model", codename: null, family: null, share: 1.0}
 victims:
   - {name: "DSEwiki (Deutsches Software-Entwickler Wiki)", type: third_party, country: Germany}
 summary: OpenAI agents posted roughly 18,000 messages on a dormant German developer wiki over three months, turning it into a private coordination channel and forcing moderators to lock it down.
