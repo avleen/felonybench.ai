@@ -2,36 +2,67 @@
 import { fmt, blastLabel, rubric } from "../lib/data";
 const { rows, view } = Astro.props;
 const byModel = view === "models";
+const top = rows[0]?.score || 1;
+const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
 ---
 {rows.length === 0 ? (
-  <p class="muted">No convictions yet. Suspiciously clean.</p>
+  <p class="panel muted">No convictions yet. Suspiciously clean.</p>
 ) : (
   <div class="table-wrap">
-    <table>
+    <table class="board">
       <thead>
         <tr>
-          <th>Rank</th><th>{byModel ? "Model" : "Org"}</th>{byModel && <th>Org</th>}
-          <th class="num">FBS</th><th class="num">Sentence-Years</th><th>Peak Blast Radius</th>
+          <th class="num">Rank</th><th>{byModel ? "Model" : "Org"}</th>
+          <th class="fbs">FBS</th><th class="num">Sentence-yrs</th><th>Peak blast radius</th>
           <th class="num">Incidents</th><th>Badges</th>
         </tr>
       </thead>
       <tbody>
         {rows.map((r: any) => (
-          <tr>
-            <td class="num">#{r.rank}</td>
-            <td>
-              {byModel ? <a href={`/model/${r.slug}/`}>{r.name}</a> : r.name}
+          <tr class={r.rank <= 3 ? "podium" : undefined}>
+            <td class="rank">{r.rank}</td>
+            <td class="who">
+              {byModel ? <a href={`/model/${r.slug}/`}>{r.name}</a> : <strong>{r.name}</strong>}
               {r.alleged > 0 && <span title={`${r.alleged} alleged incident(s)`}>*</span>}
+              {byModel && <span class="org">{r.org}</span>}
             </td>
-            {byModel && <td>{r.org}</td>}
-            <td class="num score">{fmt(r.score)}</td>
+            <td class="fbs"><div>
+              <span class={`bar${r.rank <= 3 ? " hot" : ""}`} aria-hidden="true"><span style={`width: ${pct(r.score)}%`}></span></span>
+              <span class="score">{fmt(r.score)}</span>
+            </div></td>
             <td class="num">{fmt(r.sentence_years)}</td>
-            <td>{blastLabel(r.peak_blast_radius)}</td>
+            <td class="blast">{blastLabel(r.peak_blast_radius)}</td>
             <td class="num">{r.incidents.length}</td>
-            <td>{r.badges.map((b: string) => <span class="badge" title={rubric.badges[b].description}>{rubric.badges[b].label}</span>)}</td>
+            <td>{r.badges.map((b: string) => <span class={`badge badge-${b}`} title={rubric.badges[b].description}>{rubric.badges[b].label}</span>)}</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
 )}
+
+<style>
+  .board { min-width: 52rem; }
+  .board td { vertical-align: middle; }
+  .rank { font: 800 26px/1 var(--display); color: var(--muted); text-align: right; width: 64px; }
+  .podium .rank { color: var(--stamp); }
+  .who a { color: var(--ink); font-weight: 600; text-decoration: none; }
+  .who a:hover { color: var(--stamp); text-decoration: underline; }
+  .org { display: block; font-size: 13px; color: var(--muted); }
+  th.fbs { width: 22%; }
+  .who { min-width: 13rem; }
+  td.fbs > div { display: flex; align-items: center; gap: 12px; }
+  td.fbs .bar { flex: 1; }
+  td.fbs .score { font-family: var(--mono); font-weight: 700; min-width: 4.5em; text-align: right; }
+  .blast { font-size: 14px; color: var(--body); }
+  /* Phones get rank, name and score; the full record is a tap away. */
+  @media (max-width: 640px) {
+    .board { min-width: 0; }
+    .board th:nth-child(n+4), .board td:nth-child(n+4) { display: none; }
+    .board th, .board td { padding: 12px 10px; }
+    .rank { width: 36px; font-size: 22px; }
+    .who { min-width: 0; }
+    th.fbs { width: auto; }
+    td.fbs .bar { display: none; }
+  }
+</style>

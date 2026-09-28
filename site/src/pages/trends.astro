@@ -7,8 +7,8 @@ import scores, { LEAGUES, TIERS } from "../lib/data";
   <h1>Trends</h1>
   <p class="muted">Cumulative score by org. Every step up is a new incident. Click a dot for the case file.</p>
   <form id="trend-controls" class="controls">
-    {[["league", LEAGUES], ["tier", TIERS]].map(([name, options]: any) => (
-      <fieldset>{options.map((o: any, i: number) => <label><input type="radio" name={name} value={o.key} checked={i === 0} /> {o.label}</label>)}</fieldset>
+    {[["league", "League", LEAGUES], ["tier", "Evidence", TIERS]].map(([name, legend, options]: any) => (
+      <fieldset><legend class="sr-only">{legend}</legend>{options.map((o: any, i: number) => <label><input type="radio" name={name} value={o.key} checked={i === 0} />{o.label}</label>)}</fieldset>
     ))}
   </form>
   {LEAGUES.map((l) => TIERS.map((t) => (

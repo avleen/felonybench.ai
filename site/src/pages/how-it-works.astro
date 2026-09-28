@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { REPO } from "../lib/data";
+import { CORRECTIONS_EMAIL } from "../lib/data";
 const steps = [
   ["RSS feeds", "Every day, a script reads news, lab blogs and research: Wired, AP, BBC, ABC Australia, security press, lab and evaluator blogs, the UK AI Security Institute, arXiv, the AI Incident Database, and Google News searches for each kind of incident."],
   ["Keyword filter", "It keeps items that mention an AI lab, model or evaluator and a word like sandbox, breach, credentials, crypto mining, phishing or cancelled. No AI is involved yet, and most days nothing matches."],
@@ -12,7 +12,7 @@ const steps = [
 ---
 <Layout title="How it works" description="How FelonyBench finds, scores and publishes incidents.">
   <h1>How it works</h1>
-  <p>FelonyBench is a static site built from a public GitHub repository. Each incident is one YAML file; the scores are computed from those files and the rubric on every build, and the git history is the audit trail.</p>
+  <p>FelonyBench is a static site. Each incident is one YAML file; the scores are computed from those files and the rubric on every build, and every change to an incident is recorded.</p>
 
   <ol class="flow">{steps.map(([title, body]) => <li class="panel"><strong>{title}</strong><p>{body}</p></li>)}</ol>
 
@@ -32,16 +32,10 @@ const steps = [
   </ul>
 
   <h2>Corrections and takedowns</h2>
-  <p>Open an <a href={`${REPO}/issues/new`}>issue</a> or a pull request against the incident file. Corrections go through the same review, and the change stays visible in the file's history.</p>
+  <p>Email <a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a>. Corrections go through the same review as new incidents.</p>
 
-  <h2>Read the machinery</h2>
-  <ul>
-    <li><a href={`${REPO}/blob/main/agent/RUNBOOK.md`}>Agent runbook</a>: the agent's full instructions</li>
-    <li><a href={`${REPO}/blob/main/rubric/v1.yaml`}>Rubric</a> and <a href="/rubric/">rubric explained</a></li>
-    <li><a href={`${REPO}/blob/main/scripts/feeds.yaml`}>Feeds and keywords</a></li>
-    <li><a href={`${REPO}/tree/main/.github/workflows`}>Workflows</a></li>
-    <li><a href={`${REPO}/tree/main/incidents`}>Incident files</a></li>
-  </ul>
+  <h2>Scoring</h2>
+  <p>See <a href="/rubric/">the rubric</a> for how each incident is scored.</p>
 </Layout>
 
 <style>

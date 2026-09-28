@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import scores, { rubric, fmt, REPO } from "../lib/data";
+import scores, { rubric, fmt } from "../lib/data";
 
 const example = scores.boards.open.verified.orgs.length
   ? [...scores.incidents].filter((i: any) => i.league === "open" && i.tier === "verified").sort((a: any, b: any) => b.breakdown.total - a.breakdown.total)[0]
@@ -74,7 +74,6 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
 
   <h2>Changelog</h2>
   <ul>{rubric.changelog.map((c: any) => <li><strong>v{c.version}</strong> ({c.date}): {c.notes} All history is recalculated whenever the rubric changes.</li>)}</ul>
-  <p class="muted">Source: <a href={`${REPO}/blob/main/rubric/v1.yaml`}>rubric/v1.yaml</a></p>
 </Layout>
 
 <style>

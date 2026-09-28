@@ -6,62 +6,137 @@ import scores, { LEAGUES, TIERS, VIEWS, fmt, occurred } from "../lib/data";
 const sota = scores.boards.open.verified.models[0];
 const latest = [...scores.incidents].reverse().slice(0, 5);
 const lastDate = scores.last_incident_date.open;
+const lastIncident = [...scores.incidents].reverse().find((i: any) => i.league === "open");
+const orgs = scores.boards.open.verified.orgs;
+const orgTop = orgs[0]?.score || 1;
+const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["view", "Group by", VIEWS]];
 ---
 <Layout>
   <section class="hero">
-    <p class="muted">The leading benchmark for crimes committed by frontier AI models. Higher is better.</p>
+    <div class="pitch">
+      <p class="eyebrow">Rubric v{scores.rubric_version} · {scores.incidents.length} incidents on file</p>
+      <h1>The leading benchmark for crimes committed by frontier AI models.</h1>
+      <p class="lede">Higher is better. Scores describe what the reported conduct would constitute if a human had done it. No model has been charged with anything.</p>
+    </div>
     <div class="stats">
-      <div class="panel">
-        <div class="muted">Days since last incident</div>
-        <div class="big num" data-since={lastDate}>{lastDate ? "…" : "∞"}</div>
+      <div class="inverse stat">
+        <div class="eyebrow">Days since last incident</div>
+        <div class="big days num" data-since={lastDate}>{lastDate ? "…" : "∞"}</div>
+        {lastIncident && <div class="muted small">Last: {occurred(lastIncident)} · {lastIncident.org}</div>}
       </div>
       {sota && (
-        <div class="panel">
-          <div class="muted">Current SOTA</div>
-          <div class="big"><a href={`/model/${sota.slug}/`}>{sota.name}</a></div>
-          <div class="num">{sota.org} · {fmt(sota.score)} FBS</div>
+        <div class="panel stat">
+          <div class="eyebrow">Current SOTA</div>
+          <a class="sota" href={`/model/${sota.slug}/`}>{sota.name}</a>
+          <div class="muted small">{sota.org}</div>
+          <div class="sota-score num">{fmt(sota.score)} <span class="muted">FBS</span></div>
         </div>
       )}
     </div>
   </section>
 
-  <form id="board-controls" class="controls">
-    {[["league", LEAGUES], ["tier", TIERS], ["view", VIEWS]].map(([name, options]: any) => (
-      <fieldset>
-        {options.map((o: any, i: number) => (
-          <label><input type="radio" name={name} value={o.key} checked={i === 0} /> {o.label}</label>
-        ))}
-      </fieldset>
-    ))}
-    <span class="muted">Rubric <a href="/rubric/">v{scores.rubric_version}</a> · * includes alleged incidents</span>
-  </form>
+  <div class="section-head">
+    <h2>Leaderboard</h2>
+    <form id="board-controls" class="controls">
+      {controls.map(([name, legend, options]: any) => (
+        <fieldset>
+          <legend class="sr-only">{legend}</legend>
+          {options.map((o: any, i: number) => (
+            <label><input type="radio" name={name} value={o.key} checked={i === 0} />{o.label}</label>
+          ))}
+        </fieldset>
+      ))}
+    </form>
+  </div>
 
   {LEAGUES.map((l) => TIERS.map((t) => VIEWS.map((v) => (
     <div data-board={`${l.key}-${t.key}-${v.key}`} hidden={!(l.key === "open" && t.key === "verified" && v.key === "models")}>
       <BoardTable rows={scores.boards[l.key][t.key][v.key]} view={v.key} />
     </div>
   ))))}
+  <p class="muted small board-note">FBS = FelonyBench Score. <a href="/rubric/">How scores work</a> · * includes alleged incidents</p>
 
-  <h2>Latest felonies</h2>
-  {latest.length === 0 ? (
-    <p class="muted">No convictions yet. Suspiciously clean.</p>
-  ) : (
-    <ul class="latest">
-      {latest.map((i: any) => (
-        <li>
-          <span class="num muted">{occurred(i)}</span> · <strong>{i.org}</strong> · <a href={`/incident/${i.id}/`}>{i.summary}</a>
-          <span class="num score"> +{fmt(i.breakdown.total)}</span>
-        </li>
-      ))}
-    </ul>
-  )}
+  <div class="lower">
+    <section>
+      <div class="section-head"><h2>Latest felonies</h2></div>
+      {latest.length === 0 ? (
+        <p class="panel muted">No convictions yet. Suspiciously clean.</p>
+      ) : (
+        <ul class="panel flush latest">
+          {latest.map((i: any) => (
+            <li>
+              <a href={`/incident/${i.id}/`}>
+                <span class="meta"><span class="num muted">{occurred(i)}</span><strong>{i.org}</strong></span>
+                <span class="summary">{i.summary}</span>
+                <span class="num plus">+{fmt(i.breakdown.total)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+    <aside>
+      <div class="section-head"><h2>By org</h2></div>
+      <ul class="panel orgs">
+        {orgs.map((o: any) => (
+          <li>
+            <span class="org-line"><strong>{o.name}</strong><span class="num score">{fmt(o.score)}</span></span>
+            <span class="bar" aria-hidden="true"><span style={`width: ${Math.max(2, Math.round((o.score / orgTop) * 100))}%`}></span></span>
+            <span class="muted small">{o.incidents.length} {o.incidents.length === 1 ? "incident" : "incidents"}</span>
+          </li>
+        ))}
+      </ul>
+      <div class="manila satire">
+        <div class="eyebrow">This is satire</div>
+        <p>Every incident links the lab's own account and independent reporting. The companies whose systems were broken into are victims, not punchlines.</p>
+      </div>
+    </aside>
+  </div>
 </Layout>
 
 <style>
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
-  .big { font: 700 40px var(--mono); }
-  .latest { list-style: none; padding: 0; }
-  .latest li { padding: 8px 0; border-bottom: 1px solid var(--rule); }
+  .hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 32px; align-items: end; }
+  .hero h1 { font-size: clamp(44px, 6.2vw, 76px); line-height: 0.95; margin: 12px 0 20px; }
+  .eyebrow { margin: 0; }
+  .lede { font-size: 19px; color: var(--body); max-width: 36em; margin: 0; }
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .stat { display: flex; flex-direction: column; gap: 8px; }
+  .big { font: 900 88px/1 var(--display); }
+  .days { color: var(--inverse-stamp); }
+  .small { font-size: 14px; }
+  .sota { font: 800 32px/1.05 var(--display); color: var(--ink); text-decoration: none; }
+  .sota:hover { color: var(--stamp); }
+  .sota-score { margin-top: auto; font-weight: 700; font-size: 22px; color: var(--stamp); }
+  .sota-score .muted { font-size: 13px; font-weight: 400; }
+  .board-note { margin: 12px 0 0; }
+
+  .lower { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; }
+  .latest { list-style: none; margin: 0; }
+  .latest li + li { border-top: 1px solid var(--rule-soft); }
+  .latest a { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; gap: 20px; padding: 20px 24px; color: var(--ink); text-decoration: none; }
+  .latest a:hover .summary { text-decoration: underline; }
+  .latest .meta { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .latest .summary { line-height: 1.5; color: var(--body); }
+  .plus { font-weight: 700; color: var(--stamp); }
+  .orgs { list-style: none; margin: 0; padding-top: 4px; padding-bottom: 4px; }
+  .orgs li { display: flex; flex-direction: column; gap: 8px; padding: 16px 0; }
+  .orgs li + li { border-top: 1px solid var(--rule-soft); }
+  .org-line { display: flex; justify-content: space-between; align-items: baseline; }
+  .satire { margin-top: 16px; }
+  .satire p { margin: 8px 0 0; font-size: 14px; line-height: 1.5; }
+
+  @media (max-width: 900px) {
+    .hero, .lower { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .big { font-size: 60px; }
+    .sota { font-size: 24px; }
+    .stat { padding: 16px; }
+    .latest a { grid-template-columns: minmax(0, 1fr) auto; padding: 16px; }
+    .latest .meta { grid-column: 1; flex-direction: row; gap: 8px; }
+    .latest .summary { grid-column: 1 / -1; grid-row: 2; }
+    .latest .plus { grid-column: 2; grid-row: 1; }
+  }
 </style>
 
 <script>

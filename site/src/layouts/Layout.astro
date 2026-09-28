@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
-import { REPO, rubric } from "../lib/data";
+import Mark from "../components/Mark.astro";
+import { CORRECTIONS_EMAIL, rubric } from "../lib/data";
 
 interface Props { title?: string; description?: string; ogImage?: string }
 const {
@@ -23,20 +24,29 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(ogImage, Astro.site).href} />
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      <a class="wordmark" href="/">FELONY<span>BENCH</span>.ai</a>
-      <nav>{nav.map(([href, label]) => <a href={href} aria-current={here === href ? "page" : undefined}>{label}</a>)}</nav>
+      <div class="wrap">
+        <a class="wordmark" href="/" aria-label="FelonyBench.ai home">
+          <Mark size={36} />
+          <span class="wordmark-text">FELONYBENCH</span>
+          <span class="wordmark-tld">.AI</span>
+        </a>
+        <nav>{nav.map(([href, label]) => <a href={href} aria-current={here === href ? "page" : undefined}>{label}</a>)}</nav>
+      </div>
     </header>
     <main id="main"><slot /></main>
-    <footer>
-      <p>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet).</p>
-      <p>Rubric v{rubric.version} · <a href={REPO}>Source, data and corrections on GitHub</a></p>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="disclaimer"><Mark size={32} inverse /> <span>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet). Rubric v{rubric.version}.</span></p>
+        <p class="contact"><span>Corrections and takedowns</span><a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a></p>
+      </div>
     </footer>
   </body>
 </html>

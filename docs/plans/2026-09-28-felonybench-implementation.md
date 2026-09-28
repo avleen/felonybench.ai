@@ -2143,14 +2143,14 @@ git push
 
 **Step 1: Configure what `gh` can** (confirm with the user before running):
 ```bash
-gh repo edit avleen/felonybench.ai --delete-branch-on-merge --description "The leading benchmark for crimes committed by frontier AI models." --homepage https://felonybench.ai
+gh repo edit OWNER/felonybench.ai --delete-branch-on-merge --description "The leading benchmark for crimes committed by frontier AI models." --homepage https://felonybench.ai
 gh label create agent --color 5319e7 --description "Opened by the FelonyBench agent" --force
 gh label create needs-review --color d93f0b --description "Low confidence or failed validation" --force
 # Let Actions open PRs:
-gh api -X PUT repos/avleen/felonybench.ai/actions/permissions/workflow \
+gh api -X PUT repos/OWNER/felonybench.ai/actions/permissions/workflow \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
 # Protect main: PRs required, 1 approval, admins may bypass for their own changes.
-gh api -X PUT repos/avleen/felonybench.ai/branches/main/protection --input - <<'EOF'
+gh api -X PUT repos/OWNER/felonybench.ai/branches/main/protection --input - <<'EOF'
 {"required_status_checks": {"strict": false, "contexts": ["validate"]},
  "enforce_admins": false,
  "required_pull_request_reviews": {"required_approving_review_count": 1},
@@ -2214,7 +2214,7 @@ import scores from "../data/scores.json";
 
 export default scores as any;
 export const rubric = (scores as any).rubric;
-export const REPO = "https://github.com/avleen/felonybench.ai";
+export const REPO = "https://github.com/OWNER/felonybench.ai";
 
 export const LEAGUES = [
   { key: "open", label: "Open League" },
@@ -3048,7 +3048,7 @@ git push
 
 ### Task 22: Cloudflare Pages (needs the user)
 
-The user connects the repo in the Cloudflare dashboard (Workers & Pages → Create → Pages → Connect to Git → `avleen/felonybench.ai`) with:
+The user connects the repo in the Cloudflare dashboard (Workers & Pages → Create → Pages → Connect to Git → `OWNER/felonybench.ai`) with:
 
 | Setting | Value |
 |---|---|

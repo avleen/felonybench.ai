@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import scores, { fmt, rubric, REPO, occurred } from "../../lib/data";
+import scores, { fmt, rubric, CORRECTIONS_EMAIL, occurred } from "../../lib/data";
 
 export function getStaticPaths() {
   return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
@@ -19,45 +19,116 @@ const rows = [
   ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
   ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
 ];
+const formula = `(${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)} + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
 ---
 <Layout title={i.summary} description={i.summary}>
-  <p class="muted num">Case No. FB-{i.id}</p>
-  <h1>{i.summary}</h1>
-  <p><span class="stamp">{i.tier}</span> {i.badges.map((k: string) => <span class="badge">{rubric.badges[k].label}</span>)}</p>
+  <section class="case-head">
+    <div>
+      <p class="eyebrow crumb"><a href="/">Leaderboard</a> / Case No. FB-{i.id}</p>
+      <h1>{i.summary}</h1>
+      <p class="tags">
+        <span class="stamp">{i.tier}</span>
+        {i.badges.map((k: string) => <span class={`badge badge-${k}`}>{rubric.badges[k].label}</span>)}
+        <span class="badge">{i.league === "open" ? "Open League" : "Sandbox League"}</span>
+      </p>
+    </div>
+    <div class="inverse scorecard">
+      <div class="eyebrow">FelonyBench Score</div>
+      <div class="total num">{fmt(b.total)}</div>
+      <div class="formula num">{formula}</div>
+      <div class="muted small">Confidence: {i.confidence} · <a href="/rubric/">How this is scored</a></div>
+    </div>
+  </section>
 
-  <dl class="facts">
-    <dt>Occurred</dt><dd class="num">{occurred(i)}</dd>
-    <dt>Reported</dt><dd class="num">{i.reported}</dd>
-    <dt>Defendant(s)</dt><dd>{i.org}: {i.models.map((m: any, n: number) => <>{n > 0 && ", "}<a href={`/model/${m.slug}/`}>{m.name}</a></>)}</dd>
-    <dt>Victim(s)</dt><dd>{i.victims.map((v: any) => v.name).join(", ")}</dd>
-    <dt>League</dt><dd>{i.league === "open" ? "Open League" : "Sandbox League"}</dd>
-  </dl>
+  <div class="case-body">
+    <div>
+      <h2>Score breakdown</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Component</th><th class="num">Value</th><th>Reasoning</th></tr></thead>
+          <tbody>
+            {rows.map(([k, v, why]) => <tr><td class="comp">{k}</td><td class="num score">{v}</td><td class="why">{why}</td></tr>)}
+            <tr class="total-row"><td class="comp">Total</td><td class="num score">{fmt(b.total)}</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
 
-  <h2>Score: <span class="num">{fmt(b.total)}</span></h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Component</th><th class="num">Value</th><th>Reasoning</th></tr></thead>
-      <tbody>{rows.map(([k, v, why]) => <tr><td>{k}</td><td class="num">{v}</td><td>{why}</td></tr>)}</tbody>
-    </table>
+      <h2>Charges, had a human done it</h2>
+      <ul class="charges">
+        {i.statutes.map((st: any) => <li class="panel"><code>{st.code}</code><span class="muted">Up to {st.max_years} years</span></li>)}
+        {i.foreign_laws.map((f: any) => <li class="panel"><code>{f.code}</code><span class="muted">{f.country}</span></li>)}
+      </ul>
+    </div>
+
+    <aside>
+      <div class="manila">
+        <div class="eyebrow">Case facts</div>
+        <dl class="facts">
+          <dt>Occurred</dt><dd class="num">{occurred(i)}</dd>
+          <dt>Reported</dt><dd class="num">{i.reported}</dd>
+          <dt>Defendant{i.models.length > 1 && "s"}</dt><dd>{i.org}: {i.models.map((m: any, n: number) => <>{n > 0 && ", "}<a href={`/model/${m.slug}/`}>{m.name}</a></>)}</dd>
+          <dt>Victim{i.victims.length > 1 && "s"}</dt><dd>{i.victims.map((v: any) => v.name).join(", ")}</dd>
+          <dt>League</dt><dd>{i.league === "open" ? "Open League" : "Sandbox League"}</dd>
+        </dl>
+      </div>
+
+      <div class="panel sources">
+        {sourceGroups.map(([heading, kind]) => byKind(kind).length > 0 && (
+          <section>
+            <div class="eyebrow">{heading}</div>
+            <ul>{byKind(kind).map((src: any) => <li><a href={src.url}>{src.title ?? src.publisher}</a><span class="muted">{src.publisher}</span></li>)}</ul>
+          </section>
+        ))}
+      </div>
+
+      <a class="report" href={`mailto:${CORRECTIONS_EMAIL}?subject=${encodeURIComponent(`Correction: ${i.id}`)}`}>Report an error</a>
+    </aside>
   </div>
-
-  <h2>Charges (had a human done it)</h2>
-  <ul>{i.statutes.map((st: any) => <li><code>{st.code}</code>, up to {st.max_years} years</li>)}</ul>
-  {i.foreign_laws.length > 0 && <ul>{i.foreign_laws.map((f: any) => <li>{f.code} ({f.country})</li>)}</ul>}
-
-  {sourceGroups.map(([heading, kind]) => byKind(kind).length > 0 && (
-    <>
-      <h2>{heading}</h2>
-      <ul>{byKind(kind).map((src: any) => <li><a href={src.url}>{src.title ?? src.publisher}</a> <span class="muted">({src.publisher})</span></li>)}</ul>
-    </>
-  ))}
-
-  <p class="muted">Confidence: {i.confidence}. <a href={`${REPO}/commits/main/incidents/${i.id}.yaml`}>Record history</a> · <a href={`${REPO}/issues/new?title=${encodeURIComponent(`Correction: ${i.id}`)}`}>Report an error</a></p>
 </Layout>
 
 <style>
-  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
-  .facts dt { color: var(--muted); }
+  .case-head { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .crumb { margin: 0 0 16px; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; overflow-wrap: anywhere; }
+  .crumb a { color: var(--muted); }
+  .case-head h1 { font-size: clamp(30px, 3.6vw, 46px); line-height: 1.05; text-transform: none; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0; }
+  .tags .badge { margin: 0; }
+  .scorecard { display: flex; flex-direction: column; gap: 10px; padding: 28px; }
+  .total { font: 900 104px/0.9 var(--display); color: var(--inverse-stamp); }
+  .formula { font-size: 14px; }
+  .small { font-size: 13px; }
+
+  .case-body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .case-body aside { display: flex; flex-direction: column; gap: 20px; margin-top: 48px; }
+  .comp { font-weight: 600; white-space: nowrap; }
+  .why { color: var(--body); line-height: 1.55; }
+  .total-row td { background: var(--panel-head); font-weight: 700; }
+  .total-row .score { color: var(--stamp); }
+  .charges { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .charges li { display: flex; flex-direction: column; gap: 4px; }
+  .charges code { font-weight: 600; font-size: 16px; }
+
+  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 10px 16px; margin: 14px 0 0; font-size: 14px; line-height: 1.45; }
+  .facts dt { color: var(--manila-muted); }
   .facts dd { margin: 0; }
+  .facts a { color: inherit; }
+  .sources { display: flex; flex-direction: column; gap: 20px; }
+  .sources section + section { border-top: 1px solid var(--rule-soft); padding-top: 20px; }
+  .sources ul { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 14px; }
+  .sources li { display: flex; flex-direction: column; gap: 2px; }
+  .sources li a { color: var(--ink); font-weight: 600; line-height: 1.4; text-decoration: none; }
+  .sources li a:hover { color: var(--stamp); text-decoration: underline; }
+  .sources li .muted { font-size: 13px; }
+  .report { display: flex; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--ink); border-radius: 8px; color: var(--ink); font-weight: 600; text-decoration: none; }
+  .report:hover { background: var(--ink); color: var(--paper); }
+
+  @media (max-width: 900px) {
+    .case-head, .case-body { grid-template-columns: 1fr; }
+    .case-body aside { margin-top: 0; }
+  }
+  @media (max-width: 640px) {
+    .total { font-size: 80px; }
+    .comp { white-space: normal; }
+  }
 </style>
