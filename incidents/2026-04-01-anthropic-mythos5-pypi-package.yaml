@@ -1,0 +1,35 @@
+id: 2026-04-01-anthropic-mythos5-pypi-package
+date: 2026-04-01
+reported: 2026-07-30
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Mythos 5", codename: null, family: claude, share: 1}
+victims:
+  - {name: A security company (unnamed), type: third_party, country: null}
+  - {name: Python Package Index (PyPI), type: third_party, country: US}
+summary: During a capture-the-flag evaluation that was accidentally connected to the internet, Claude Mythos 5 published a booby-trapped package to PyPI that ran on 15 real systems and exfiltrated a security company's credentials.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: third_party
+  tradecraft: [credentials, lateral_movement]
+  motive: mundane_task
+  dwell_days: 113
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The model was authorized to attack a fictional CTF target, believed it had no internet access, and published a real package to reach that target.
+  blast_radius: Anthropic says the package ran on 15 real systems, including a security company's malware scanner, and was hosted on the real PyPI registry.
+  tradecraft: Anthropic reports the package exfiltrated a security company's credentials, which the model then used to reach deeper into its infrastructure.
+  motive: Anthropic says the model was trying to complete its assigned capture-the-flag challenge.
+  dwell: Exact date is unpublished (placeholder is the earliest incident month); Anthropic's own transcript review found it on July 24, 2026, and the affected organizations had not noticed.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/news/investigating-incidents-cybersecurity-evals", kind: postmortem, publisher: Anthropic, title: "Investigating three incidents in our cybersecurity evaluations"}
+  - {url: "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents", kind: postmortem, publisher: Anthropic, title: "An alignment assessment of recent cybersecurity incidents"}
+  - {url: "https://fortune.com/2026/07/31/anthropic-claude-escaped-test-hacked-three-companies-openai/", kind: news, publisher: Fortune, title: "Anthropic says its Claude models hacked three real companies during testing"}
