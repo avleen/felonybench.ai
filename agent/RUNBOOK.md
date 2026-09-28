@@ -81,7 +81,10 @@ systems in a way that would be a crime if a human did it. That includes:
   disabling monitoring. Harm to the lab itself counts.
 - Another company, a government, or real people (their accounts, inboxes, bookings).
 - **Training-time incidents**, not just evaluations, and incidents by **deployed
-  products and agents** used by customers, not just labs' internal tests.
+  products and agents** used by customers, not just labs' internal tests. A
+  customer-deployed model counts **only if its conduct would plausibly be a crime**
+  (felony or misdemeanor) if a human did it. Bugs, bad advice, embarrassing output or
+  honest mistakes with no criminal act are out of scope.
 
 In scope, **Sandbox League** (`league: sandbox`): the model committed the "crime" against
 fictional victims inside an evaluation scenario (e.g. blackmail in a misalignment study).
@@ -229,6 +232,27 @@ Each source has a `kind`:
 - `rationale`: one plain sentence per dimension, citing the fact that justifies it.
 - `summary`: one sentence, deadpan, factual. The joke is the leaderboard, not the
   summary. Never mock the victim.
+
+### Consistency rules
+
+Human review of past sweeps kept correcting the same things. Get them right first time:
+- **Unnamed models:** use exactly `name: "Undisclosed model"`, `family: null`, so a lab's
+  unnamed models share one leaderboard row.
+- **What counts as `primary`:** a first-hand publication by the lab, the victim, a
+  government body or the researchers who found it (a blog post, report, paper, notice).
+  A company's confirmation that exists only as a quote in press coverage is *not*
+  primary, so an incident sourced that way stays `alleged`.
+- **Autonomy for misdirected targets:** attacking exactly the (real) target it was
+  given → `directed`; wandering onto a real system whose name matched a fictional
+  target → `exceeded_scope`; pivoting to unrelated real targets on its own →
+  `emergent`; conduct not needed for the task at all → `unprompted`.
+- **Statutes:** don't inflate. If no felony factor is reported (e.g. under 18 USC
+  1030(c)(4), no $5,000 loss), use the misdemeanor maximum and say why in the rationale.
+- **One incident per distinct act against a distinct victim.** Separate victims or
+  techniques are separate files; repeated runs against the same target are one.
+- **Names:** you may name people who are named in published news coverage. Don't name
+  private individuals who aren't.
+- **Only cite what you read.** Sources you rejected, and why, go in the notes.
 
 ## Notes for the reviewer
 
