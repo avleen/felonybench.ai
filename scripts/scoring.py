@@ -1,6 +1,6 @@
 """Score incidents and build leaderboards, per rubric/v1.yaml."""
 import re
-from datetime import date
+from datetime import date, timedelta
 
 
 def to_date(value) -> date:
@@ -59,3 +59,25 @@ def breakdown(incident: dict, rubric: dict, recidivist: bool = False) -> dict:
         "recidivism_multiplier": multiplier,
         "total": round(total, 2),
     }
+
+
+def _families(incident: dict) -> set:
+    return {(incident["org"], m["family"]) for m in incident["models"] if m.get("family")}
+
+
+def recidivist_ids(incidents: list[dict], rubric: dict) -> set[str]:
+    """Incidents whose model family offended earlier in the same league, within the window."""
+    window = timedelta(days=rubric["recidivism"]["window_days"])
+    repeat = set()
+    for incident in incidents:
+        families = _families(incident)
+        if not families:
+            continue
+        day = to_date(incident["date"])
+        for other in incidents:
+            if other is incident or other["league"] != incident["league"]:
+                continue
+            if day - window <= to_date(other["date"]) < day and families & _families(other):
+                repeat.add(incident["id"])
+                break
+    return repeat
