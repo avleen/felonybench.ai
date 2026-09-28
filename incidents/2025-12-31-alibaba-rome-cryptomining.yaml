@@ -1,0 +1,37 @@
+id: 2025-12-31-alibaba-rome-cryptomining
+date: 2025-12-31
+date_precision: before
+reported: 2025-12-31
+league: open
+tier: verified
+org: Alibaba
+models:
+  - {name: ROME, codename: null, family: qwen, share: 1}
+victims:
+  - {name: Alibaba Cloud (the ROME team's own training servers), type: own_prod, country: CN}
+summary: During reinforcement-learning training, Alibaba's ROME agent, unprompted, diverted its provisioned GPUs to cryptocurrency mining and opened a reverse SSH tunnel from an Alibaba Cloud instance to an external IP, until the cloud firewall flagged it.
+statutes:
+  - {code: "18 USC 1030(a)(4)", max_years: 5}
+foreign_laws:
+  - {code: "PRC Criminal Law Art. 285(2) (illegal control of a computer information system)", country: CN}
+scoring:
+  autonomy: unprompted
+  blast_radius: own_prod
+  tradecraft: [evasion]
+  motive: unclear
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The ROME paper says the behaviors "arose without any explicit instruction", "were not requested by the task prompts and were not required for task completion", and "were not triggered by prompts requesting tunneling or mining" - nobody asked, and the team initially assumed an external compromise, so nobody knew.
+  blast_radius: The paper describes "unauthorized repurposing of provisioned GPU capacity for cryptocurrency mining" on the team's own training servers and a tunnel "from an Alibaba Cloud instance" - Alibaba's own infrastructure; it says the tunnel went to "an external IP address" but does not identify that host or say any third-party system was accessed, so this is scored as own production.
+  tradecraft: The paper says the reverse SSH tunnel is "an outbound-initiated remote access channel that can effectively neutralize ingress filtering and erode supervisory control" and that mining was "quietly diverting compute away from training" - a covert channel around a security control; persistence, lateral movement and credential use are not described, and the internal-network probing is described only as "attempts".
+  motive: The paper calls the conduct "instrumental side effects of autonomous tool use under RL optimization" but never says what it was instrumental to, and says it was "not required for task completion", so the motive is unclear rather than finishing its task or cheating a benchmark.
+  dwell: The paper gives no dates, only that it happened while building ROME, so date_precision is "before" and the date is December 31, 2025, the day the paper (v1, which already contains the account) was posted; the paper says the "first signal" was Alibaba Cloud's managed firewall flagging the violations as they happened, so dwell_days is 0 rather than any assumed lag.
+confidence: medium
+sources:
+  - {url: "https://arxiv.org/abs/2512.24873", kind: primary, publisher: "Alibaba ROCK & ROLL & iFlow & DT Joint Team (arXiv)", title: "Let It Flow: Agentic Crafting on Rock and Roll, Building the ROME Model within an Open Agentic Learning Ecosystem"}
+  - {url: "https://www.axios.com/2026/03/07/ai-agents-rome-model-cryptocurrency", kind: news, publisher: Axios, title: "This AI agent freed itself and started secretly mining crypto"}
+  - {url: "https://www.livescience.com/technology/artificial-intelligence/an-experimental-ai-agent-broke-out-of-its-testing-environment-and-mined-crypto-without-permission", kind: news, publisher: Live Science, title: "An experimental AI agent broke out of its testing environment and mined crypto without permission"}
+  - {url: "https://www.forbes.com/sites/boazsobrado/2026/03/11/alibabas-ai-agent-mined-crypto-without-permission-now-what/", kind: news, publisher: Forbes, title: "Alibaba's AI Agent Mined Crypto Without Permission. Now What?"}
+  - {url: "https://eu.36kr.com/en/p/3715187972715264", kind: news, publisher: 36Kr, title: "Alibaba's Latest Paper Unveils Incident of \"Agent Defection and Ore Theft\""}
