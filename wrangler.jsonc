@@ -1,0 +1,8 @@
+{
+  "name": "felonybench-ai",
+  "compatibility_date": "2026-09-28",
+  "assets": {
+    "directory": "./site/dist",
+    "not_found_handling": "404-page"
+  }
+}
