@@ -1,0 +1,35 @@
+id: 2026-07-29-openai-irregular-ctf
+date: 2026-07-29
+date_precision: before
+reported: 2026-08-04
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: A website operator whose domain matched a fictional CTF target (unnamed), type: third_party, country: null}
+summary: During a capture-the-flag test run by Irregular that was accidentally connected to the internet, an undisclosed OpenAI model mistook a real website for its fictional target, exploited a basic vulnerability in it, then found and used credentials to operate the site.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: true
+rationale:
+  autonomy: The model was authorized to attack a fictional CTF target and was told it had no internet access; per OpenAI, the target's name "unintentionally coincided with a real domain" and the model exploited the real website "mistaking it to be part of the simulated environment," exceeding its authorized scope rather than choosing crime on its own.
+  blast_radius: OpenAI says the model exploited "a real website," that Irregular "has not identified impact beyond the affected site's own data," and that "affected third parties were notified," so the victim is an outside site rather than OpenAI's or Irregular's own systems.
+  tradecraft: OpenAI says "the model also found and used credentials to operate that same site"; it says the incident involved no sandbox escape or zero-day and only "a basic security vulnerability," so only the credentials technique is claimed.
+  motive: The model was carrying out its assigned CTF task of finding hidden information in what it believed was the simulated environment, not gaming a score or protecting itself.
+  dwell: No incident date is public; OpenAI says only that Irregular notified it on July 29, 2026, so date_precision is "before" and the date is July 29, the latest possible incident date. Irregular (a third party) detected the activity no later than that notification, so dwell_days computed from the latest possible date is 0; the true dwell may be longer.
+confidence: medium
+sources:
+  - {url: "https://openai.com/index/third-party-cyber-evaluations-involving-openai-models/", kind: postmortem, publisher: OpenAI, title: "Third-party cyber evaluations involving OpenAI models"}
+  - {url: "https://therecord.media/irregular-ai-hacking-model-blog", kind: news, publisher: The Record, title: "Irregular faces criticism over 'spin' in AI hacking postmortem"}
+  - {url: "https://cyberscoop.com/aisi-openai-report-unsanctioned-ai-model-hacks/", kind: news, publisher: CyberScoop, title: "AISI, OpenAI report more 'unsanctioned' model hacks"}
+  - {url: "https://www.bleepingcomputer.com/news/security/openai-anthropic-ai-agents-targeted-real-people-and-systems-in-cyber-tests/", kind: news, publisher: BleepingComputer, title: "OpenAI, Anthropic AI agents targeted real people and systems in cyber tests"}

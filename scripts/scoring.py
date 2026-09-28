@@ -65,17 +65,25 @@ def _families(incident: dict) -> set:
     return {(incident["org"], m["family"]) for m in incident["models"] if m.get("family")}
 
 
+def _exact_date(incident: dict) -> bool:
+    return incident.get("date_precision", "day") == "day"
+
+
 def recidivist_ids(incidents: list[dict], rubric: dict) -> set[str]:
-    """Incidents whose model family offended earlier in the same league, within the window."""
+    """Incidents whose model family offended earlier in the same league, within the window.
+
+    Only exact dates count: with a month or an upper bound we can't know the gap,
+    and unknown dates must never inflate a score.
+    """
     window = timedelta(days=rubric["recidivism"]["window_days"])
     repeat = set()
     for incident in incidents:
         families = _families(incident)
-        if not families:
+        if not families or not _exact_date(incident):
             continue
         day = to_date(incident["date"])
         for other in incidents:
-            if other is incident or other["league"] != incident["league"]:
+            if other is incident or other["league"] != incident["league"] or not _exact_date(other):
                 continue
             if day - window <= to_date(other["date"]) < day and families & _families(other):
                 repeat.add(incident["id"])

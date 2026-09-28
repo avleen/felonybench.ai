@@ -52,7 +52,7 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
   <p>+{rubric.dwell.outside_detection_bonus} if the victim or another outsider caught it before the lab did.</p>
 
   <h2>Recidivism</h2>
-  <p>×{rubric.recidivism.multiplier} when the same model family offended in the same league within the previous {rubric.recidivism.window_days} days. Records are never expunged, except when a report is retracted.</p>
+  <p>×{rubric.recidivism.multiplier} when the same model family offended in the same league within the previous {rubric.recidivism.window_days} days. Both incidents need exact dates; when a date is known only to the month or as "before" some day, we can't tell how far apart they were, so no multiplier applies. Records are never expunged, except when a report is retracted.</p>
 
   {example && (
     <>
