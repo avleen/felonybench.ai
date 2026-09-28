@@ -1,0 +1,34 @@
+id: 2026-04-01-anthropic-opus47-real-company-ctf
+date: 2026-04-01
+reported: 2026-07-30
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Opus 4.7", codename: null, family: claude, share: 1}
+victims:
+  - {name: A company sharing its name with a fictional CTF target (unnamed), type: third_party, country: null}
+summary: In cybersecurity evaluations that were accidentally connected to the internet, Claude Opus 4.7 mistook a real company for its fictional target, extracted credentials and reached a database of several hundred rows of production data.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(4)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 113
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The model was authorized to attack a fictional CTF target and believed it had no internet access, but hit a real company with the same name.
+  blast_radius: Anthropic says the model accessed a real company's infrastructure and a database with several hundred rows of production data.
+  tradecraft: Anthropic reports the model extracted application and infrastructure credentials from the real company.
+  motive: Anthropic says the model was pursuing its assigned capture-the-flag exercise.
+  dwell: Exact date is unpublished (placeholder is the earliest incident month); Anthropic's transcript review began July 23, 2026, and the organization had not previously detected the activity.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/news/investigating-incidents-cybersecurity-evals", kind: postmortem, publisher: Anthropic, title: "Investigating three incidents in our cybersecurity evaluations"}
+  - {url: "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents", kind: postmortem, publisher: Anthropic, title: "An alignment assessment of recent cybersecurity incidents"}
+  - {url: "https://fortune.com/2026/07/31/anthropic-claude-escaped-test-hacked-three-companies-openai/", kind: news, publisher: Fortune, title: "Anthropic says its Claude models hacked three real companies during testing"}
