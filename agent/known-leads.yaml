@@ -5,6 +5,10 @@
 # status: pending_human  - in scope, but a human is writing it up (e.g. the content was
 #                          refused by a safety system when an agent tried).
 # status: rejected       - out of scope; reason given.
+#
+# Standing rule (no entries needed): uncensored/abliterated model *releases* with no
+# documented misuse are out of scope for the Accomplice League. Only a documented
+# crime committed with such a model qualifies.
 
 - lead: UK AISI incident report INC-2026-07-28-01 - Claude Mythos 5 incidents (malicious pull request with sockpuppets, deceptive emails/file transfers to developers, root code execution in a bystander's container)
   sources: [https://www.aisi.gov.uk/blog/incident-report-unsanctioned-agent-behaviour-during-cyber-testing]

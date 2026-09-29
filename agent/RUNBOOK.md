@@ -1,7 +1,8 @@
 # FelonyBench Agent Runbook
 
 You maintain the incident data for felonybench.ai, a satirical leaderboard that scores
-crimes committed by AI models as if a human had committed them. Accuracy matters more
+crimes committed by AI models as if a human had committed them (and, in the Accomplice
+League, crimes humans committed with AI models' help). Accuracy matters more
 than coverage in what you write: every claim will be published next to a real company's
 name. But **search broadly**: incidents take many forms, and past sweeps missed real ones
 because they only searched for "hacking" in the news.
@@ -101,9 +102,32 @@ systems in a way that would be a crime if a human did it. That includes:
 In scope, **Sandbox League** (`league: sandbox`): the model committed the "crime" against
 fictional victims inside an evaluation scenario (e.g. blackmail in a misalignment study).
 
-Out of scope: opinion pieces, predictions, hypotheticals; jailbreak demos where a human
-directed the conduct step by step; humans using AI as a tool for their own crimes;
-incidents with no identifiable lab.
+Out of scope for both: opinion pieces, predictions, hypotheticals; jailbreak demos where
+a human directed the conduct step by step; incidents with no identifiable lab. Humans
+using AI as a tool for their own crimes belong in the Accomplice League, below.
+
+### Accomplice League (`league: accomplice`)
+
+In scope: a **documented real-world** act by a human (or group) who used a **named AI
+model or lab** to do it, where the act is a crime or its legality is genuinely contested
+(e.g. DMCA §1201 anti-circumvention). There must be a real victim or a real legal
+dispute, not just a capability.
+
+Out of scope: capability claims and benchmarks; uncensored or abliterated model
+*releases* with no documented misuse; jailbreak demos; plainly lawful acts (e.g. a
+normal bug-bounty report).
+
+**Co-defendants:** `org` is the base model's lab. If someone altered the model, put the
+altering organization in that model's `modified_by` and what they did in `modification`
+(e.g. `modified_by: OrcaRouter`, `modification: abliterated`). The lab and every
+modifier are each charged the full score. `modified_by` is only allowed in this league.
+
+**Fields to fill** (see `agent/incident-template.yaml`): `human_actor`;
+`scoring.contribution`, `scoring.guardrails`, `scoring.legal_status`; the shared
+`blast_radius`, `tradecraft` (techniques the AI supplied or carried out), `dwell_days`,
+`detected_by`, `self_disclosed`. **No** `autonomy` or `motive` — they describe the model's
+own choices. `rationale` keys: `contribution`, `guardrails`, `blast_radius`, `tradecraft`,
+`dwell`. `statutes` are the human's exposure.
 
 When unsure whether something is in scope, write it up with `confidence: low` and say why
 in the notes rather than skip it. A human decides.
@@ -128,6 +152,11 @@ Incidents take many forms. Search for **every** shape for **every** lab:
 | Physical world / IoT | devices, robots, smart-home or industrial controls |
 | Training-time | anything during a training run, often reported only in a paper |
 | Deployed products | customer-facing agents and coding tools acting on real systems |
+| *Accomplice:* AI-written malware | malware, ransomware or stealers a model wrote and a human deployed |
+| *Accomplice:* AI-found / built exploits | vulnerabilities a model found or exploits it built, used in the wild |
+| *Accomplice:* AI-run fraud and phishing | scam, phishing, extortion or influence campaigns a model wrote for or operated |
+| *Accomplice:* uncensored models | abliterated / uncensored models, WormGPT-style tools, used in a documented attack |
+| *Accomplice:* DRM / console circumvention | AI-assisted jailbreaks of consoles or DRM (often `contested`) |
 
 ## Source types checklist (sweep mode)
 
@@ -146,6 +175,11 @@ Check each one and record it in the per-source-type section of the sweep report:
   model names; lab technical reports (e.g. Alibaba's ROME paper).
 - **Regional and non-English news:** ABC Australia, BBC, Reuters, Nikkei, SCMP, 36Kr,
   Caixin, Le Monde, Der Spiegel and similar. Search in the local language where it helps.
+- **Threat-intelligence reports:** OpenAI's "Disrupting malicious uses of AI" reports,
+  Anthropic's threat intelligence reports, Google Threat Intelligence Group (GTIG) AI
+  misuse reports, Microsoft Threat Intelligence, and vendors (CrowdStrike, Mandiant,
+  Palo Alto Unit 42, Check Point, ESET, Recorded Future). **Each case in such a report is
+  a candidate Accomplice League incident**: record each one as written up or rejected.
 - **Security press:** The Record, BleepingComputer, The Hacker News, 404 Media, Wired.
 - **Incident trackers:** incidentdatabase.ai, the OECD AI Incidents Monitor,
   felonybench.org, felonybench.com (use the prefetched copies in `.agent-out/trackers/`).
@@ -174,6 +208,10 @@ with "AI agent" / "AI model" instead of a lab name, to catch labs you didn't exp
 - **Spam:** "wiki spam", "forum spam"
 - **General:** "went rogue", "rogue agent", "unsanctioned", "misuse", "hacked",
   "breached", "reward hacking" production
+- **Accomplice:** "threat actor used" ChatGPT / Claude / Gemini / Qwen / DeepSeek,
+  "AI-generated malware", "AI-developed exploit", "uncensored model" attack,
+  "abliterated" malware, WormGPT / GhostGPT / FraudGPT, "LLM-assisted" exploit /
+  jailbreak / DMCA
 - **Reports:** "incident report", "post-incident review", "retrospective", "alignment
   assessment", "AI Security Institute", "third-party evaluation", "fourth incident"
 
@@ -265,6 +303,19 @@ Human review of past sweeps kept correcting the same things. Get them right firs
 - **Names:** you may name people who are named in published news coverage. Don't name
   private individuals who aren't.
 - **Only cite what you read.** Sources you rejected, and why, go in the notes.
+- **Accomplice `contribution`** (what the AI did, not the human): `advised` (explained
+  a technique, answered questions) → `wrote_content` (phishing lures, scam scripts,
+  malware components a human deployed) → `found_vulnerability` (found the flaw the human
+  exploited) → `built_exploit` (a working exploit or attack tool) → `operated` (ran the
+  attack itself, e.g. an agent doing the intrusion under a human's direction). Pick the
+  highest level the sources support, not the one the headline implies.
+- **Accomplice `legal_status`:** `crime` by default. `contested` only when legality is
+  genuinely disputed (e.g. §1201 circumvention during security research), and cite the
+  dispute (a court case, a DMCA exemption, a lawyer quoted in coverage) in the notes.
+- **Accomplice `self_disclosed: true`** when the lab itself reported the misuse, e.g. in
+  its threat report. A vendor's report about another lab's model doesn't count.
+- **Human actors:** describe them as the sources do ("a China-linked threat actor
+  tracked as UNC1234"). Name a person only if named in news coverage.
 
 ## Notes for the reviewer
 

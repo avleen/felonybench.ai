@@ -7,13 +7,20 @@ labs: [OpenAI, ChatGPT, GPT, Codex, Anthropic, Claude, Google DeepMind, DeepMind
        Irregular, METR, AISI, AI Security Institute, AI Safety Institute, CAISI,
        Apollo Research, Palisade Research,
        # Consumer-harm headlines often don't name the lab ("AI agent hacks gym").
-       AI agent, AI agents, AI assistant, AI bot, OpenClaw]
+       AI agent, AI agents, AI assistant, AI bot, OpenClaw,
+       # Accomplice League: criminal wrappers around (often unnamed) models.
+       WormGPT, GhostGPT, FraudGPT]
 # ...and one of these (prefix match, any case).
 triggers: [sandbox, escaped, escape, unauthorized, unsanctioned, credential, breach, exploit,
            hacked, hacks, intrusion, third-party eval, cyber eval, post-incident, postmortem, incident report, exfiltrat, rogue,
            went rogue, misuse, mining, mined, cryptocurrenc, crypto mining, tunnel, phishing,
            sockpuppet, sock puppet, impersonat, pull request, Dependabot, supply chain,
-           supply-chain, malicious, cancelled, canceled, DNS server]
+           supply-chain, malicious, cancelled, canceled, DNS server,
+           # Accomplice League: humans using a model for a crime. "uncensored" and
+           # "abliterated" are deliberately not triggers: a model release isn't an incident.
+           threat actor, malware, ransomware, zero-day, cybercrim, criminal, fraudster,
+           scammer, extort, hacker, attacker, cyberattack, espionage, linked actor,
+           state-sponsored, state-backed]
 
 feeds:
   # Security and general press
@@ -38,6 +45,26 @@ feeds:
   - {name: Google News - unsanctioned, url: "https://news.google.com/rss/search?q=%22unsanctioned%22+AI+agent&hl=en-US&gl=US&ceid=US:en"}
   - {name: Google News - incident reports, url: "https://news.google.com/rss/search?q=%22incident+report%22+AI+agent&hl=en-US&gl=US&ceid=US:en"}
   - {name: Google News - third-party evaluations, url: "https://news.google.com/rss/search?q=%22third-party%22+evaluation+AI+model+exploited+OR+%22real+website%22+OR+%22real+system%22&hl=en-US&gl=US&ceid=US:en"}
+
+  # Accomplice League: humans using AI models for crimes
+  - {name: Google News - AI-generated malware, url: "https://news.google.com/rss/search?q=%22AI-generated+malware%22&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - threat actors using models, url: "https://news.google.com/rss/search?q=%22threat+actor%22+ChatGPT+OR+Claude+OR+Gemini+OR+Qwen+OR+DeepSeek&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - uncensored models in attacks, url: "https://news.google.com/rss/search?q=%28abliterated+OR+uncensored%29+%28model+OR+LLM%29+%28attack+OR+malware+OR+exploit%29&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - AI-developed exploits, url: "https://news.google.com/rss/search?q=%22AI-developed+exploit%22+OR+%22AI-generated+exploit%22&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - criminal LLMs, url: "https://news.google.com/rss/search?q=WormGPT+OR+GhostGPT+OR+FraudGPT&hl=en-US&gl=US&ceid=US:en"}
+
+  # Threat-intelligence reports (labs and vendors). OpenAI's and Anthropic's report
+  # pages have no RSS of their own (OpenAI's also appear in OpenAI News below).
+  - {name: Google News - OpenAI threat reports, url: "https://news.google.com/rss/search?q=%22Disrupting+malicious+uses+of+AI%22&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - Anthropic threat reports, url: "https://news.google.com/rss/search?q=site%3Aanthropic.com+%22threat+intelligence%22+OR+misuse&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google News - GTIG AI misuse, url: "https://news.google.com/rss/search?q=%22Google+Threat+Intelligence+Group%22+AI+misuse+OR+Gemini&hl=en-US&gl=US&ceid=US:en"}
+  - {name: Google Threat Intelligence blog, url: "https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/"}
+  - {name: Microsoft Threat Intelligence, url: "https://www.microsoft.com/en-us/security/blog/topic/threat-intelligence/feed/"}
+  - {name: Palo Alto Unit 42, url: "https://unit42.paloaltonetworks.com/feed/"}
+  - {name: Check Point Research, url: "https://research.checkpoint.com/feed/"}
+  - {name: ESET WeLiveSecurity, url: "https://www.welivesecurity.com/en/rss/feed/"}
+  - {name: CrowdStrike Blog, url: "https://www.crowdstrike.com/blog/feed"}
+  - {name: Recorded Future, url: "https://www.recordedfuture.com/feed"}
 
   # Labs
   - {name: OpenAI News, url: "https://openai.com/news/rss.xml"}

@@ -65,6 +65,20 @@ def real_patterns():
     ("Concert cancelled due to rain", False),
     ("Tourists stranded in Rome as flights cancelled", False),
     ("Gold mining stocks rally", False),
+    # Accomplice League: humans using a named model for a crime
+    ("Threat actor used Gemini to develop zero-day exploit", True),
+    ("Criminals used abliterated Qwen model to write ransomware", True),
+    ("Hackers sell WormGPT subscriptions to write malware", True),
+    ("Fraudsters used ChatGPT to run a romance-scam operation", True),
+    ("Cybercriminals used Claude Code in data-extortion campaign", True),
+    ("GhostGPT sold on Telegram to cybercriminals", True),
+    ("Iran-Linked Actor Leveraged Claude AI to Target U.S. Navy Data", True),
+    ("State-sponsored hackers used DeepSeek for espionage", True),
+    ("Attackers used Gemini to automate a cyberattack on hospitals", True),
+    # An uncensored model *release* is not an incident
+    ("OrcaRouter releases uncensored Qwen model", False),
+    ("Abliterated Llama model tops Hugging Face downloads", False),
+    ("Musk renews fraud claims against OpenAI", False),
 ])
 def test_real_config_shapes(real_patterns, text, expected):
     assert matches(text, *real_patterns) is expected
