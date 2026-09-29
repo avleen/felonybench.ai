@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import TrendChart from "../components/TrendChart.astro";
-import scores, { LEAGUES, TIERS } from "../lib/data";
+import { LEAGUES, TIERS, CONFIDENCE_VIEWS } from "../lib/data";
 ---
 <Layout title="Trends">
   <h1>Trends</h1>
@@ -13,7 +13,7 @@ import scores, { LEAGUES, TIERS } from "../lib/data";
   </form>
   {LEAGUES.map((l) => TIERS.map((t) => (
     <div data-trend={`${l.key}-${t.key}`} hidden={!(l.key === "open" && t.key === "verified")}>
-      <TrendChart series={scores.trends[l.key][t.key]} />
+      {CONFIDENCE_VIEWS.map(({ key, data }) => <div data-conf={key}><TrendChart series={data.trends[l.key][t.key]} /></div>)}
     </div>
   )))}
 </Layout>

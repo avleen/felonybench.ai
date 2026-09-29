@@ -25,6 +25,10 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
     <meta property="og:image" content={new URL(ogImage, Astro.site).href} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      // Before first paint, so a reader who chose to see low-confidence reports doesn't get a flash of the default view.
+      try { if (localStorage.getItem("fb-confidence") === "all") document.documentElement.classList.add("show-low"); } catch {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -41,6 +45,18 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
         <nav>{nav.map(([href, label]) => <a href={href} aria-current={here === href ? "page" : undefined}>{label}</a>)}</nav>
       </div>
     </header>
+    <div class="confidence-bar">
+      <div class="wrap">
+        <form id="confidence-control" class="controls">
+          <fieldset>
+            <legend class="sr-only">Which reports to count</legend>
+            <label><input type="radio" name="confidence" value="confident" checked /><span class="long">High &amp; medium confidence</span><span class="short">High &amp; medium</span></label>
+            <label><input type="radio" name="confidence" value="all" /><span class="long">Include low confidence</span><span class="short">All</span></label>
+          </fieldset>
+        </form>
+        <a class="muted" href="/how-it-works/#confidence">What's this?</a>
+      </div>
+    </div>
     <main id="main"><slot /></main>
     <footer class="site-footer">
       <div class="wrap">
@@ -48,6 +64,21 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
         <p class="contact"><span>Corrections and takedowns</span><a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a></p>
       </div>
     </footer>
+    <script>
+      const form = document.querySelector<HTMLFormElement>("#confidence-control")!;
+      const root = document.documentElement;
+      const input = (value: string) => form.querySelector<HTMLInputElement>(`input[value="${value}"]`)!;
+      input(root.classList.contains("show-low") ? "all" : "confident").checked = true;
+      form.addEventListener("change", () => {
+        const all = input("all").checked;
+        root.classList.toggle("show-low", all);
+        try { localStorage.setItem("fb-confidence", all ? "all" : "confident"); } catch {}
+      });
+      document.querySelectorAll("[data-show-low]").forEach((button) => button.addEventListener("click", () => {
+        input("all").checked = true;
+        form.dispatchEvent(new Event("change"));
+      }));
+    </script>
   </body>
 </html>
 

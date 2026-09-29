@@ -1,5 +1,5 @@
 ---
-import { fmt, occurred, leagueLabel } from "../lib/data";
+import { fmt, occurred, leagueLabel, isLow } from "../lib/data";
 const { incidents } = Astro.props;
 ---
 <div class="table-wrap">
@@ -7,9 +7,9 @@ const { incidents } = Astro.props;
     <thead><tr><th>Date</th><th>Incident</th><th>League</th><th>Tier</th><th class="num">Score</th></tr></thead>
     <tbody>
       {incidents.map((i: any) => (
-        <tr>
+        <tr data-low={isLow(i) ? "" : undefined}>
           <td class="when">{occurred(i)}</td>
-          <td class="what"><a href={`/incident/${i.id}/`}>{i.summary}</a></td>
+          <td class="what"><a href={`/incident/${i.id}/`}>{i.summary}</a>{isLow(i) && <span class="low-tag">Low confidence</span>}</td>
           <td class="nowrap">{leagueLabel(i.league)}</td>
           <td>{i.tier}</td>
           <td class="num score">{fmt(i.breakdown.total)}</td>

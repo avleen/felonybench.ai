@@ -25,6 +25,9 @@ const steps = [
   <h2>Sources</h2>
   <p>Every incident links the company's post-incident review when one exists, from the lab and from the victim, and at least one news report, preferring Wired, then AP. An incident is <strong>Verified</strong> only with a first-hand source; otherwise it's <strong>Alleged</strong>.</p>
 
+  <h2 id="confidence">Confidence</h2>
+  <p>Each incident also records how solid its sourcing and attribution are: <strong>high</strong>, <strong>medium</strong> or <strong>low</strong>. Low means the case was written up despite real doubts, such as whether it's in scope, which model was involved, or whether the act happened as reported. By default the site leaves low-confidence reports out entirely: they don't appear in lists and don't count toward any score, rank or trend. Use the switch at the top of any page to include them; your choice is remembered in this browser.</p>
+
   <h2>Guardrails</h2>
   <ul>
     <li>The agent only reads public web pages. It never logs in, probes or interacts with any system.</li>

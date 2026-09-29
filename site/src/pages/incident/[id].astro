@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import scores, { fmt, rubric, CORRECTIONS_EMAIL, occurred, leagueLabel, coDefendants, chargedOrgs, hasCoDefendants } from "../../lib/data";
+import scores, { isLow, fmt, rubric, CORRECTIONS_EMAIL, occurred, leagueLabel, coDefendants, chargedOrgs, hasCoDefendants } from "../../lib/data";
 
 export function getStaticPaths() {
   return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
@@ -11,6 +11,7 @@ const b = i.breakdown;
 const s = i.scoring;
 const byKind = (kind: string) => i.sources.filter((src: any) => src.kind === kind);
 const accomplice = i.league === "accomplice";
+const low = isLow(i);
 const acc = rubric.accomplice;
 const why = (key: string) => i.rationale[key] ? `: ${i.rationale[key]}` : ".";
 const rows = [
@@ -39,12 +40,21 @@ const joint = accomplice && hasCoDefendants(i);
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
 ---
 <Layout title={i.summary} description={i.summary}>
+  {low && (
+    <div class="panel low-notice" data-conf="confident">
+      <p class="eyebrow">Low-confidence report</p>
+      <p>This report is hidden because you're viewing high- and medium-confidence reports only. It isn't counted in the scores you're seeing.</p>
+      <button type="button" class="show-low-button" data-show-low>Show low-confidence reports</button>
+    </div>
+  )}
+  <div data-conf={low ? "all" : undefined}>
   <section class="case-head">
     <div>
       <p class="eyebrow crumb"><a href="/">Leaderboard</a> / Case No. FB-{i.id}</p>
       <h1>{i.summary}</h1>
       <p class="tags">
         <span class="stamp">{i.tier}</span>
+        {low && <span class="badge">Low confidence</span>}
         {i.badges.map((k: string) => <span class={`badge badge-${k}`}>{rubric.badges[k].label}</span>)}
         <span class="badge">{leagueLabel(i.league)}</span>
       </p>
@@ -106,9 +116,12 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
       <a class="report" href={`mailto:${CORRECTIONS_EMAIL}?subject=${encodeURIComponent(`Correction: ${i.id}`)}`}>Report an error</a>
     </aside>
   </div>
+  </div>
 </Layout>
 
 <style>
+  .low-notice { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .low-notice p { margin: 0; }
   .case-head { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
   .crumb { margin: 0 0 16px; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; overflow-wrap: anywhere; }
   .crumb a { color: var(--muted); }

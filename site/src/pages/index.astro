@@ -1,38 +1,50 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BoardTable from "../components/BoardTable.astro";
-import scores, { LEAGUES, TIERS, VIEWS, fmt, occurred, coDefendants } from "../lib/data";
+import scores, { LEAGUES, TIERS, VIEWS, CONFIDENCE_VIEWS, fmt, occurred, coDefendants } from "../lib/data";
 
-const sota = scores.boards.open.verified.models[0];
-const latest = [...scores.incidents].reverse().slice(0, 5);
-const lastDate = scores.last_incident_date.open;
-const lastIncident = [...scores.incidents].reverse().find((i: any) => i.league === "open");
-const orgs = scores.boards.open.verified.orgs;
-const orgTop = orgs[0]?.score || 1;
+// Everything below the controls exists once per confidence view; CSS shows the one the reader picked.
+const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
+  const counted = scores.incidents.filter((i: any) => key === "all" || data.incident_ids.includes(i.id));
+  const orgs = data.boards.open.verified.orgs;
+  return {
+    key,
+    data,
+    count: counted.length,
+    sota: data.boards.open.verified.models[0],
+    latest: [...counted].reverse().slice(0, 5),
+    lastDate: data.last_incident_date.open,
+    lastIncident: [...counted].reverse().find((i: any) => i.league === "open"),
+    orgs,
+    orgTop: orgs[0]?.score || 1,
+  };
+});
 const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["view", "Group by", VIEWS]];
 ---
 <Layout>
   <section class="hero">
     <div class="pitch">
-      <p class="eyebrow">Rubric v{scores.rubric_version} · {scores.incidents.length} incidents on file</p>
+      <p class="eyebrow">Rubric v{scores.rubric_version} · {views.map((v) => <span data-conf={v.key}>{v.count} incidents on file</span>)}</p>
       <h1>The leading benchmark for crimes committed by frontier AI models.</h1>
       <p class="lede">Higher is better. Scores describe what the reported conduct would constitute if a human had done it. No model has been charged with anything.</p>
     </div>
-    <div class="stats">
-      <div class="inverse stat">
-        <div class="eyebrow">Days since last incident</div>
-        <div class="big days num" data-since={lastDate}>{lastDate ? "…" : "∞"}</div>
-        {lastIncident && <div class="muted small">Last: {occurred(lastIncident)} · {lastIncident.org}</div>}
-      </div>
-      {sota && (
-        <div class="panel stat">
-          <div class="eyebrow">Current SOTA</div>
-          <a class="sota" href={`/model/${sota.slug}/`}>{sota.name}</a>
-          <div class="muted small">{sota.org}</div>
-          <div class="sota-score num">{fmt(sota.score)} <span class="muted">FBS</span></div>
+    {views.map(({ key, sota, lastDate, lastIncident }) => (
+      <div class="stats" data-conf={key}>
+        <div class="inverse stat">
+          <div class="eyebrow">Days since last incident</div>
+          <div class="big days num" data-since={lastDate}>{lastDate ? "…" : "∞"}</div>
+          {lastIncident && <div class="muted small">Last: {occurred(lastIncident)} · {lastIncident.org}</div>}
         </div>
-      )}
-    </div>
+        {sota && (
+          <div class="panel stat">
+            <div class="eyebrow">Current SOTA</div>
+            <a class="sota" href={`/model/${sota.slug}/`}>{sota.name}</a>
+            <div class="muted small">{sota.org}</div>
+            <div class="sota-score num">{fmt(sota.score)} <span class="muted">FBS</span></div>
+          </div>
+        )}
+      </div>
+    ))}
   </section>
 
   <div class="section-head">
@@ -51,7 +63,9 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
 
   {LEAGUES.map((l) => TIERS.map((t) => VIEWS.map((v) => (
     <div data-board={`${l.key}-${t.key}-${v.key}`} hidden={!(l.key === "open" && t.key === "verified" && v.key === "models")}>
-      <BoardTable rows={scores.boards[l.key][t.key][v.key]} view={v.key} league={l.key} />
+      {views.map(({ key, data }) => (
+        <div data-conf={key}><BoardTable rows={data.boards[l.key][t.key][v.key]} view={v.key} league={l.key} /></div>
+      ))}
     </div>
   ))))}
   <p class="muted small board-note">FBS = FelonyBench Score. <a href="/rubric/">How scores work</a> · * includes alleged incidents</p>
@@ -59,33 +73,39 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
   <div class="lower">
     <section>
       <div class="section-head"><h2>Latest felonies</h2></div>
-      {latest.length === 0 ? (
-        <p class="panel muted">No convictions yet. Suspiciously clean.</p>
-      ) : (
-        <ul class="panel flush latest">
-          {latest.map((i: any) => (
-            <li>
-              <a href={`/incident/${i.id}/`}>
-                <span class="meta"><span class="num muted">{occurred(i)}</span><strong>{coDefendants(i)}</strong></span>
-                <span class="summary">{i.summary}</span>
-                <span class="num plus">+{fmt(i.breakdown.total)}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      {views.map(({ key, latest }) => (
+        <div data-conf={key}>
+          {latest.length === 0 ? (
+            <p class="panel muted">No convictions yet. Suspiciously clean.</p>
+          ) : (
+            <ul class="panel flush latest">
+              {latest.map((i: any) => (
+                <li>
+                  <a href={`/incident/${i.id}/`}>
+                    <span class="meta"><span class="num muted">{occurred(i)}</span><strong>{coDefendants(i)}</strong></span>
+                    <span class="summary">{i.summary}</span>
+                    <span class="num plus">+{fmt(i.breakdown.total)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
     </section>
     <aside>
       <div class="section-head"><h2>By org</h2></div>
-      <ul class="panel orgs">
-        {orgs.map((o: any) => (
-          <li>
-            <span class="org-line"><strong>{o.name}</strong><span class="num score">{fmt(o.score)}</span></span>
-            <span class="bar" aria-hidden="true"><span style={`width: ${Math.max(2, Math.round((o.score / orgTop) * 100))}%`}></span></span>
-            <span class="muted small">{o.incidents.length} {o.incidents.length === 1 ? "incident" : "incidents"}</span>
-          </li>
-        ))}
-      </ul>
+      {views.map(({ key, orgs, orgTop }) => (
+        <ul class="panel orgs" data-conf={key}>
+          {orgs.map((o: any) => (
+            <li>
+              <span class="org-line"><strong>{o.name}</strong><span class="num score">{fmt(o.score)}</span></span>
+              <span class="bar" aria-hidden="true"><span style={`width: ${Math.max(2, Math.round((o.score / orgTop) * 100))}%`}></span></span>
+              <span class="muted small">{o.incidents.length} {o.incidents.length === 1 ? "incident" : "incidents"}</span>
+            </li>
+          ))}
+        </ul>
+      ))}
       <div class="manila satire">
         <div class="eyebrow">This is satire</div>
         <p>Every incident links the lab's own account and independent reporting. The companies whose systems were broken into are victims, not punchlines.</p>
