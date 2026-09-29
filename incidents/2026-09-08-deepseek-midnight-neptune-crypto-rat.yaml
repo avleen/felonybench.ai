@@ -1,0 +1,36 @@
+id: 2026-09-08-deepseek-midnight-neptune-crypto-rat
+date: 2026-09-08
+date_precision: before
+reported: 2026-09-08
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: Financially motivated North Korea-nexus threat clusters tracked by Google as MIDNIGHT NEPTUNE (formerly UNC1069)
+models:
+  - {name: "DeepSeek-Coder", codename: null, family: deepseek, share: 1}
+victims:
+  - {name: "Cryptocurrency organizations (unnamed)", type: third_party, country: null}
+summary: North Korean crypto thieves used AI coding assistants such as DeepSeek-Coder to build Python remote-access trojans with persistence, process injection, fileless execution and defense evasion, as the foothold in attacks on cryptocurrency firms.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [persistence, evasion]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Google says the clusters "used AI coding assistants such as DeepSeek-Coder to develop Python-based Remote Access Trojans (RATs)" for the foothold stage of their attacks; humans deployed them, so this is written content (malware components).
+  guardrails: DeepSeek-Coder is an open-weight model; Google doesn't say it was jailbroken or modified, so guardrails are scored intact.
+  blast_radius: Google says the lures and malware were used "to target cryptocurrency organizations" to "support cryptocurrency theft"; the victims are private companies, so blast radius is third party.
+  tradecraft: Google says the DeepSeek-Coder-built RATs incorporated "cross-platform persistence" and "defense evasion". Lateral-movement scripts are attributed only to unnamed "LLMs", so they aren't credited here.
+  dwell: The report gives no dates for the activity, so date_precision is before with the report's publication date (2026-09-08); dwell is counted from that latest possible date (0 days) and never inflated. Google, not DeepSeek, detected and reported it.
+  statutes: Planting a remote-access trojan in a victim's systems to steal cryptocurrency is unauthorized access for private financial gain, the felony form of 18 USC 1030(a)(2)(C) under 1030(c)(2)(B)(i) (5 years).
+confidence: low
+sources:
+  - {url: "https://cloud.google.com/blog/topics/threat-intelligence/from-prompting-to-autonomy-the-evolution-of-adversarial-ai", kind: primary, publisher: Google Threat Intelligence Group, title: "GTIG AI Threat Tracker: From Prompting to Autonomy – The Evolution of Adversarial AI"}
+  - {url: "https://thehackernews.com/2026/09/autonomous-ai-agents-compromise.html", kind: news, publisher: The Hacker News, title: "Autonomous AI Agents Compromise Thousands of Credentials in Under Six Hours"}
