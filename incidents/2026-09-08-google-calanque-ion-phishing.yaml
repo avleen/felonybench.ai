@@ -1,0 +1,36 @@
+id: 2026-09-08-google-calanque-ion-phishing
+date: 2026-09-08
+date_precision: before
+reported: 2026-09-08
+league: accomplice
+tier: verified
+org: Google DeepMind
+human_actor: An Iranian government-backed actor tracked by Google as CALANQUE ION (previously APT42)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Individuals targeted with social-engineering lures, whose data was exfiltrated (unnamed)", type: third_party, country: null}
+summary: Iran's APT42 used Gemini to find targets' email addresses, write localized social-engineering lures, build staging and delivery infrastructure, and summarize the data it stole.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Google says the group used Gemini "to identify target email addresses, conduct OSINT research, and translate content across local languages to craft localized pretext lures and summarize exfiltrated data", and to "develop tactical staging and delivery infrastructure"; humans ran the operation, so this is written content.
+  guardrails: Google's report describes no jailbreak; it says the activity triggered Gemini's safety responses and Google disabled the associated assets, so guardrails are scored intact.
+  blast_radius: The targets are unnamed individuals reached by social engineering, so blast radius is third party.
+  tradecraft: The group only attempted to reverse-engineer licensing algorithms to bypass EDR, and none of the rubric's techniques is credited to Gemini.
+  dwell: The report gives no dates for the activity, so date_precision is before with the report's publication date (2026-09-08); dwell is counted from that latest possible date (0 days) and never inflated. Google found the misuse itself.
+  statutes: Summarizing "exfiltrated data" means the group got into victims' accounts or systems, which is unauthorized access under 18 USC 1030(a)(2)(C); no loss or other felony factor is reported, so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://cloud.google.com/blog/topics/threat-intelligence/from-prompting-to-autonomy-the-evolution-of-adversarial-ai", kind: primary, publisher: Google Threat Intelligence Group, title: "GTIG AI Threat Tracker: From Prompting to Autonomy – The Evolution of Adversarial AI"}
+  - {url: "https://thehackernews.com/2026/09/autonomous-ai-agents-compromise.html", kind: news, publisher: The Hacker News, title: "Autonomous AI Agents Compromise Thousands of Credentials in Under Six Hours"}
