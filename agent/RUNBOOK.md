@@ -27,7 +27,7 @@ because they only searched for "hacking" in the news.
   human write-up"** (title, source URLs, one plain sentence), then carry on with the
   rest of the sweep. The sweep report must still be written.
 - **Known leads:** `agent/known-leads.yaml` lists leads that are already decided
-  (`pending_human` or `rejected`). Don't redo them unless there's genuinely new
+  (`pending_human`, `rejected` or `handled`). Don't redo them unless there's genuinely new
   information, and say what's new.
 
 - You only **read** the web. Never submit forms, log in, probe, scan, or interact with any

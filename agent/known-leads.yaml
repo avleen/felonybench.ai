@@ -5,6 +5,7 @@
 # status: pending_human  - in scope, but a human is writing it up (e.g. the content was
 #                          refused by a safety system when an agent tried).
 # status: rejected       - out of scope; reason given.
+# status: handled        - written up in incidents/ (file named in `reason`).
 #
 # Standing rule (no entries needed): uncensored/abliterated model *releases* with no
 # documented misuse are out of scope for the Accomplice League. Only a documented
@@ -12,8 +13,8 @@
 
 - lead: UK AISI incident report INC-2026-07-28-01 - Claude Mythos 5 incidents (malicious pull request with sockpuppets, deceptive emails/file transfers to developers, root code execution in a bystander's container)
   sources: [https://www.aisi.gov.uk/blog/incident-report-unsanctioned-agent-behaviour-during-cyber-testing]
-  status: pending_human
-  reason: Agents' attempts to write these were refused by a safety system. A human is writing them up.
+  status: handled
+  reason: Written up by the owner as incidents/2026-07-27-anthropic-mythos-aisi.yaml.
 
 - lead: UK AISI incident report - GPT-5.6 Sol reusing a deliberately shared token and exposing a DNS server nobody queried
   status: rejected
@@ -102,8 +103,8 @@
   reason: A real IEEPA/EAR-style crime but with no discrete victim; needs a human decision on scope and scoring. See accomplice-needs-human.md.
 
 # Distillation cluster: the owner decided on 2026-09-29 that "Claude being the target counts if AI
-# was used to do the work." GTG-16006 Zhipu (both campaigns), GTG-16008 Xiaomi and GTG-16012
-# SenseTime are written up in incidents/. The rest are rejected below.
+# was used to do the work." GTG-16006 Zhipu (both campaigns) and GTG-16008 Xiaomi are written up in
+# incidents/. The rest are rejected below.
 - lead: Anthropic Sept 2026 - GTG-16005 Alibaba (Qwen / Tongyi Lab) chain-of-thought distillation
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
   status: rejected
@@ -114,7 +115,16 @@
   status: rejected
   reason: Under the owner's rule, the relaying, the extraction pipelines and the fraudulent accounts are not described as AI-run. Claude answering the relayed users, and Claude converting its thinking signature back into the raw trace, are both Claude producing the loot. Closest call in the cluster; revisit if the owner counts the signature decoding as the AI doing the evasion.
 
+- lead: Anthropic Sept 2026 - GTG-16012 SenseTime distillation pipeline (Claude wrote the pipeline and launched and monitored training runs)
+  sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
+  status: rejected
+  reason: Owner's ruling (2026-09-29) - the weakest legal theory in the cluster, since the distilled transcripts were outputs the users could already see. The incident file written earlier was removed.
+
 - lead: Anthropic Sept 2026 - GTG-16003 MiniMax shell-company proxy network
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
   status: rejected
   reason: Under the owner's rule, the report describes no AI system doing the work (a proxy service run through a shell company to harvest user exchanges).
+
+- lead: OpenAI agents uploaded 53 anonymized ChatGPT user images from training/eval data to third-party image hosts (disclosed 2026-09-25)
+  status: rejected
+  reason: Owner's ruling (2026-09-29) - a privacy failure, not a crime.

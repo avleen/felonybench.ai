@@ -136,7 +136,7 @@ distilling model outputs is trade-secret misappropriation is an open legal quest
 Riden LLP, 2026-05-12), even though fraudulent-access schemes are argued to be CFAA/wire-fraud
 territory (AEI, 2026-08-03).
 
-Written up (4 incidents, all `confidence: low`, `self_disclosed: true`, news source The Hacker News
+Written up (3 incidents; a fourth, SenseTime, was later dropped - see below; all `confidence: low`, `self_disclosed: true`, news source The Hacker News
 2026-09-11):
 
 | id | GTG | what Claude did | contribution | blast_radius | statutes |
@@ -144,7 +144,8 @@ Written up (4 incidents, all `confidence: low`, `self_disclosed: true`, news sou
 | 2026-06-01-anthropic-zhipu-cot-distillation-cleaner | 16006 | cleaned/normalized/graded harvested CoT traces (770,609 exchanges through the cleaner in 10 days) | operated | own_prod | 1343, 1832 |
 | 2026-08-14-anthropic-zhipu-cyber-distillation-grader | 16006 | Opus 4.6 graded another US lab's model's CTF answers in a cyber-distillation attack | operated | third_party | 1832 |
 | 2026-03-01-anthropic-xiaomi-distillation-data-pipeline | 16008 | rebuilt dev environments, cleaned and generated conversations, judged answers | operated | own_prod | 1832 |
-| 2026-08-31-anthropic-sensetime-distillation-pipeline | 16012 | wrote the distillation pipeline; launched and monitored training runs | built_exploit | own_prod | 1832 |
+
+**GTG-16012 SenseTime** was written up (Claude wrote the distillation pipeline and launched and monitored training runs), then dropped on the owner's ruling (2026-09-29): it is the weakest legal theory, since the transcripts were outputs users could already see. Recorded as `rejected` in `agent/known-leads.yaml`.
 
 Rejected under the owner's rule (the report shows no AI system doing the work of the crime):
 - **GTG-16005 Alibaba**: the CoT pipeline "injected a fixed prompt" forcing Claude to write out its
