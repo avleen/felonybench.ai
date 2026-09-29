@@ -174,7 +174,7 @@ so both are written up as Accomplice incidents (org Anthropic, own_prod, `contri
 | id | GTG | statutes | score |
 |---|---|---|---|
 | 2026-07-31-anthropic-moonshot-thinking-signature-replay | 16002 | 17 USC 1201(a)(1)(A) (5, via 1204), 1832, 1343 (the report ties 5,380 fraudulent accounts to Moonshot) | 19.5 |
-| 2026-07-01-anthropic-deepseek-thinking-signature-replay | 16001 | 17 USC 1201(a)(1)(A), 1832 (no fraudulent accounts of DeepSeek's own are described, so no 1343) | 9.5 |
+| 2026-07-01-anthropic-deepseek-thinking-signature-replay | 16001 | 17 USC 1201(a)(1)(A), 1832, 1343 (owner's call: Alibaba's fraudulent accounts were "funneling requests from DeepSeek") | 19.5 |
 
 Dates: Moonshot's traffic is attributed to "between May and July 2026" (`before`, 2026-07-31);
 DeepSeek's to "14 days in July 2026" (`month`, 2026-07-01). The silent relaying of customers'

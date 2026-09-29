@@ -46,9 +46,8 @@ GitHub Actions runs Claude Code (Opus, medium effort, on the owner's subscriptio
 ### Owner decisions, still to implement
 
 **Update (2026-09-29, branch `claude/tender-turing-oggg9v`):** items 1–7 below are done on that
-branch and waiting on the owner's review: the Moonshot and DeepSeek incidents (scores 19.5 and
-9.5; DeepSeek has no 1343 charge because the report ties no fraudulent accounts of its own to the
-campaign), SenseTime dropped, the image-upload lead rejected, the AISI incident's fields fixed
+branch and waiting on the owner's review: the Moonshot and DeepSeek incidents (both charged
+with wire fraud; DeepSeek's on the owner's call), SenseTime dropped, the image-upload lead rejected, the AISI incident's fields fixed
 (score 17.5 → 27), `scripts/pdf_text.py`, known-leads tidied (new `handled` status), and Actions
 bumped to checkout v7, setup-python v7, cache v6, upload-artifact v7. Still open: PR #19's news
 source, and item 8 (run a sweep after this merges).
