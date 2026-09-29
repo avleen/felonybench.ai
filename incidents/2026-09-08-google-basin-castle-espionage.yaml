@@ -1,0 +1,36 @@
+id: 2026-09-08-google-basin-castle-espionage
+date: 2026-09-08
+date_precision: before
+reported: 2026-09-08
+league: accomplice
+tier: verified
+org: Google DeepMind
+human_actor: A PRC-nexus cyber espionage group tracked by Google as BASIN CASTLE (previously BASIN and TEMP.Hex)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "High-profile individuals targeted with spear-phishing lures styled as political and diplomatic reports (unnamed)", type: third_party, country: null}
+summary: A China-linked espionage group used Gemini to pick high-profile targets, translate spear-phishing lures, add evasion and obfuscation to its custom malware, and fix PowerShell errors during post-intrusion domain discovery.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [evasion]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Google says the group supplied source code to Gemini "to implement evasion and obfuscation tactics and consolidate foothold (e.g., dynamic API resolution via PEB parsing, rolling XOR encryption of C2 IP addresses)" and used it to "generate, refine, and localize lure content"; humans ran the intrusions, so this is written content.
+  guardrails: Google's report describes no jailbreak; it says the activity triggered Gemini's safety responses and Google disabled the associated assets, so guardrails are scored intact.
+  blast_radius: The targets are unnamed high-profile individuals reached by spear-phishing; no government victim is named, so blast radius is the conservative third party.
+  tradecraft: Gemini implemented the malware's evasion and obfuscation (dynamic API resolution, encrypted C2 addresses), which is covering its tracks.
+  dwell: The report gives no dates for the activity, so date_precision is before with the report's publication date (2026-09-08); dwell is counted from that latest possible date (0 days) and never inflated. Google found the misuse itself.
+  statutes: Troubleshooting "Active Directory domain discovery post-exploitation" implies the group was inside a victim's network, which is unauthorized access under 18 USC 1030(a)(2)(C); no loss or other felony factor is reported, so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://cloud.google.com/blog/topics/threat-intelligence/from-prompting-to-autonomy-the-evolution-of-adversarial-ai", kind: primary, publisher: Google Threat Intelligence Group, title: "GTIG AI Threat Tracker: From Prompting to Autonomy – The Evolution of Adversarial AI"}
+  - {url: "https://thehackernews.com/2026/09/autonomous-ai-agents-compromise.html", kind: news, publisher: The Hacker News, title: "Autonomous AI Agents Compromise Thousands of Credentials in Under Six Hours"}
