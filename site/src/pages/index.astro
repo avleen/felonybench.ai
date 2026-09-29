@@ -1,11 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BoardTable from "../components/BoardTable.astro";
-import scores, { LEAGUES, TIERS, VIEWS, CONFIDENCE_VIEWS, fmt, occurred, coDefendants } from "../lib/data";
+import scores, { LEAGUES, TIERS, VIEWS, CONFIDENCE_VIEWS, fmt, occurred, coDefendants, inView } from "../lib/data";
 
 // Everything below the controls exists once per confidence view; CSS shows the one the reader picked.
 const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
-  const counted = scores.incidents.filter((i: any) => key === "all" || data.incident_ids.includes(i.id));
+  const counted = scores.incidents
+    .filter((i: any) => key === "all" || data.incident_ids.includes(i.id))
+    .map((i: any) => inView(i, key));
   const orgs = data.boards.open.verified.orgs;
   return {
     key,

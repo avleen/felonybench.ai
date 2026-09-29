@@ -238,5 +238,10 @@ def build_scores(incidents: list[dict], rubric: dict, generated_at: str) -> dict
         "rubric": rubric,
         "incidents": scored,
         **_views(scored, rubric),
-        "confident": {"incident_ids": [i["id"] for i in confident], **_views(confident, rubric)},
+        "confident": {
+            "incident_ids": [i["id"] for i in confident],
+            # Per-incident scores in this view, for pages that show an incident's score or badges.
+            "scored": {i["id"]: {"breakdown": i["breakdown"], "badges": i["badges"]} for i in confident},
+            **_views(confident, rubric),
+        },
     }

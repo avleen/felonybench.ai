@@ -1,40 +1,44 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import scores, { isLow, fmt, rubric, CORRECTIONS_EMAIL, occurred, leagueLabel, coDefendants, chargedOrgs, hasCoDefendants } from "../../lib/data";
+import scores, { isLow, scoreVariants, fmt, rubric, CORRECTIONS_EMAIL, occurred, leagueLabel, coDefendants, chargedOrgs, hasCoDefendants } from "../../lib/data";
 
 export function getStaticPaths() {
   return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
 }
 
 const { incident: i } = Astro.props;
-const b = i.breakdown;
 const s = i.scoring;
 const byKind = (kind: string) => i.sources.filter((src: any) => src.kind === kind);
 const accomplice = i.league === "accomplice";
 const low = isLow(i);
 const acc = rubric.accomplice;
 const why = (key: string) => i.rationale[key] ? `: ${i.rationale[key]}` : ".";
-const rows = [
-  ["Sentence-Years", fmt(b.sentence_years), i.statutes.map((st: any) => st.code).join(", ")],
-  ...(accomplice ? [
-    ["× Contribution", fmt(b.contribution), `${acc.contribution[s.contribution].label}${why("contribution")}`],
-    ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
-    ["× Legal status", fmt(b.legal_status), `${acc.legal_status[s.legal_status].label}${why("legal_status")}`],
-    ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
-    ["+ Guardrails", fmt(b.guardrails), `${acc.guardrails[s.guardrails].label}${why("guardrails")}`],
-  ] : [
-    ["× Autonomy", fmt(b.autonomy), `${rubric.autonomy[s.autonomy].label}: ${i.rationale.autonomy}`],
-    ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
-    ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
-    ["+ Pettiness", fmt(b.pettiness), `${rubric.pettiness.motives[s.motive].label}: ${i.rationale.motive}`],
-  ]),
-  ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
-  ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
-];
-const product = accomplice
-  ? `${fmt(b.sentence_years)} × ${fmt(b.contribution)} × ${fmt(b.blast_radius)} × ${fmt(b.legal_status)} + ${fmt(b.tradecraft)} + ${fmt(b.guardrails)} + ${fmt(b.dwell)}`
-  : `${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)} + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)}`;
-const formula = `(${product})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
+// The breakdown table and formula for one scoring of this incident (see scoreVariants).
+const scoreRows = (b: any) => {
+  const rows = [
+    ["Sentence-Years", fmt(b.sentence_years), i.statutes.map((st: any) => st.code).join(", ")],
+    ...(accomplice ? [
+      ["× Contribution", fmt(b.contribution), `${acc.contribution[s.contribution].label}${why("contribution")}`],
+      ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
+      ["× Legal status", fmt(b.legal_status), `${acc.legal_status[s.legal_status].label}${why("legal_status")}`],
+      ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
+      ["+ Guardrails", fmt(b.guardrails), `${acc.guardrails[s.guardrails].label}${why("guardrails")}`],
+    ] : [
+      ["× Autonomy", fmt(b.autonomy), `${rubric.autonomy[s.autonomy].label}: ${i.rationale.autonomy}`],
+      ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
+      ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
+      ["+ Pettiness", fmt(b.pettiness), `${rubric.pettiness.motives[s.motive].label}: ${i.rationale.motive}`],
+    ]),
+    ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
+    ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
+  ];
+  const product = accomplice
+    ? `${fmt(b.sentence_years)} × ${fmt(b.contribution)} × ${fmt(b.blast_radius)} × ${fmt(b.legal_status)} + ${fmt(b.tradecraft)} + ${fmt(b.guardrails)} + ${fmt(b.dwell)}`
+    : `${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)} + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)}`;
+  const formula = `(${product})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
+  return { rows, formula };
+};
+const variants = scoreVariants(i).map((v: any) => ({ key: v.key, b: v.i.breakdown, badges: v.i.badges, ...scoreRows(v.i.breakdown) }));
 const charged = coDefendants(i);
 const joint = accomplice && hasCoDefendants(i);
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
@@ -55,30 +59,34 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
       <p class="tags">
         <span class="stamp">{i.tier}</span>
         {low && <span class="badge">Low confidence</span>}
-        {i.badges.map((k: string) => <span class={`badge badge-${k}`}>{rubric.badges[k].label}</span>)}
+        {variants.map((v) => <span class="variant" data-conf={v.key}>{v.badges.map((k: string) => <span class={`badge badge-${k}`}>{rubric.badges[k].label}</span>)}</span>)}
         <span class="badge">{leagueLabel(i.league)}</span>
       </p>
     </div>
-    <div class="inverse scorecard">
-      <div class="eyebrow">FelonyBench Score</div>
-      <div class="total num">{fmt(b.total)}</div>
-      <div class="formula num">{formula}</div>
-      <div class="muted small">Confidence: {i.confidence} · <a href="/rubric/">How this is scored</a></div>
-    </div>
+    {variants.map(({ key, b, formula }) => (
+      <div class="inverse scorecard" data-conf={key}>
+        <div class="eyebrow">FelonyBench Score</div>
+        <div class="total num">{fmt(b.total)}</div>
+        <div class="formula num">{formula}</div>
+        <div class="muted small">Confidence: {i.confidence} · <a href="/rubric/">How this is scored</a></div>
+      </div>
+    ))}
   </section>
 
   <div class="case-body">
     <div>
       <h2>Score breakdown</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Component</th><th class="num">Value</th><th>Reasoning</th></tr></thead>
-          <tbody>
-            {rows.map(([k, v, why]) => <tr><td class="comp">{k}</td><td class="num score">{v}</td><td class="why">{why}</td></tr>)}
-            <tr class="total-row"><td class="comp">Total</td><td class="num score">{fmt(b.total)}</td><td></td></tr>
-          </tbody>
-        </table>
-      </div>
+      {variants.map(({ key, b, rows }) => (
+        <div class="table-wrap" data-conf={key}>
+          <table>
+            <thead><tr><th>Component</th><th class="num">Value</th><th>Reasoning</th></tr></thead>
+            <tbody>
+              {rows.map(([k, v, why]) => <tr><td class="comp">{k}</td><td class="num score">{v}</td><td class="why">{why}</td></tr>)}
+              <tr class="total-row"><td class="comp">Total</td><td class="num score">{fmt(b.total)}</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      ))}
 
       <h2>{accomplice ? "Charges the human could face" : "Charges, had a human done it"}</h2>
       <ul class="charges">
@@ -100,9 +108,9 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
         </dl>
       </div>
 
-      {joint && (
-        <p class="joint muted">Charged jointly and severally: {chargedOrgs(i)} are each liable for the full {fmt(b.total)}. <a href="/rubric/#accomplice-league">Why</a></p>
-      )}
+      {joint && variants.map(({ key, b }) => (
+        <p class="joint muted" data-conf={key}>Charged jointly and severally: {chargedOrgs(i)} are each liable for the full {fmt(b.total)}. <a href="/rubric/#accomplice-league">Why</a></p>
+      ))}
 
       <div class="panel sources">
         {sourceGroups.map(([heading, kind]) => byKind(kind).length > 0 && (
@@ -120,6 +128,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
 </Layout>
 
 <style>
+  .variant { display: contents; }
   .low-notice { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
   .low-notice p { margin: 0; }
   .case-head { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start; }

@@ -27,6 +27,20 @@ export const CONFIDENCE_VIEWS = [
   { key: "all", data: scores as any },
 ];
 export const isLow = (i: any) => !(scores as any).confident.incident_ids.includes(i.id);
+// An incident as scored in one view. In the default view a hidden low-confidence report can't
+// lend it the repeat-offender multiplier, so its breakdown and badges can differ.
+export const inView = (i: any, key: string) => {
+  const rescored = key === "confident" ? (scores as any).confident.scored[i.id] : undefined;
+  return rescored ? { ...i, ...rescored } : i;
+};
+// The versions of an incident to render: one when both views score it the same (data-conf left
+// unset, so it always shows), otherwise one per view.
+export const scoreVariants = (i: any) => {
+  const confident = inView(i, "confident");
+  const same = confident === i || (confident.breakdown.total === i.breakdown.total
+    && confident.badges.join() === i.badges.join());
+  return same ? [{ key: undefined, i }] : [{ key: "confident", i: confident }, { key: "all", i }];
+};
 
 export const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 export const blastLabel = (key: string) => rubric.blast_radius[key]?.label ?? key;
