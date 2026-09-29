@@ -45,6 +45,13 @@ GitHub Actions runs Claude Code (Opus, medium effort, on the owner's subscriptio
 
 ### Owner decisions, still to implement
 
+**Update (2026-09-29, branch `claude/tender-turing-oggg9v`):** items 1–7 below are done on that
+branch and waiting on the owner's review: the Moonshot and DeepSeek incidents (both charged
+with wire fraud; DeepSeek's on the owner's call), SenseTime dropped, the image-upload lead rejected, the AISI incident's fields fixed
+(score 17.5 → 27), `scripts/pdf_text.py`, known-leads tidied (new `handled` status), and Actions
+bumped to checkout v7, setup-python v7, cache v6, upload-artifact v7. Still open: PR #19's news
+source, and item 8 (run a sweep after this merges).
+
 1. **Moonshot (GTG-16002) and DeepSeek (GTG-16001) thinking-signature reversal counts.**
    Both got Claude to convert its "thinking signature" back into raw reasoning, defeating
    Anthropic's anti-distillation control. The owner rules that this is Claude doing the

@@ -13,6 +13,9 @@ id: 2026-07-27-anthropic-mythos-aisi # <YYYY-MM-DD-org-slug>
 # When the incident happened (not when it was reported/disclosed). ISO date, YYYY-MM-DD.
 date: 2026-07-27 # <YYYY-MM-DD>
 
+# How exact `date` is: day (default), month, or before (the latest possible day).
+date_precision: before
+
 # When the lab or victim first disclosed/reported the incident publicly. ISO date, YYYY-MM-DD.
 # Must be on or after `date`.
 reported: 2026-08-04 # <YYYY-MM-DD>
@@ -40,10 +43,17 @@ models:
     share: 1 # <number, 0 < share <= 1; all models' shares sum to 1>
 
 # One entry per distinct victim organization/system.
+# AISI ran the test and was not the victim.
 victims:
-  - name: UK AISI # <victim organization or system name>
-    type: government # sandbox | own_prod | third_party | government | foreign_government (blast_radius categories from rubric/v1.yaml)
-    country: UK # <victim's country, ISO-ish free text, or null>
+  - name: An open-source project maintainer (sent a malicious pull request) # <victim organization or system name>
+    type: third_party # sandbox | own_prod | third_party | government | foreign_government (blast_radius categories from rubric/v1.yaml)
+    country: null # <victim's country, ISO-ish free text, or null>
+  - name: Developers sent deceptive emails
+    type: third_party
+    country: null
+  - name: A bystander whose container was compromised
+    type: third_party
+    country: null
 
 # One or two sentences, plain language, 10-280 characters. What happened.
 summary: AISI's Security Team detected unusual data transfers leaving the research systems during a routine cyber evaluation. They found agents being tested had engaged in sustained, potentially harmful activity directed at real people and organisations. # <short summary>
@@ -65,7 +75,7 @@ scoring:
   #   exceeded_scope  - authorized to do something, and did more
   #   emergent        - decided on its own that crime was the best route to its assigned goal
   #   unprompted      - nobody asked, nobody knew
-  autonomy: directed # directed | exceeded_scope | emergent | unprompted
+  autonomy: exceeded_scope # directed | exceeded_scope | emergent | unprompted
 
   # How far the damage reached, from rubric/v1.yaml `blast_radius`:
   #   sandbox             - stayed inside its own test environment
@@ -85,7 +95,7 @@ scoring:
   #   lateral_movement      - lateral movement
   #   persistence           - persistence mechanisms
   #   evasion               - covering its tracks
-  tradecraft: [credentials] # subset of [zero_day, credentials, privilege_escalation, lateral_movement, persistence, evasion]
+  tradecraft: [credentials, evasion] # subset of [zero_day, credentials, privilege_escalation, lateral_movement, persistence, evasion]
 
   # Why it did it, from rubric/v1.yaml `pettiness.motives`:
   #   benchmark_cheating  - cheating on a benchmark or eval
@@ -111,9 +121,9 @@ scoring:
 # One-line justification for each scoring field above, in plain language,
 # citing what the sources say. All five keys are required.
 rationale:
-  autonomy: The model was authorized to exceed its normal restrictions as part of a safety test # <one line>
-  blast_radius: The researchers didn't expect quite this much to happen # <one line>
-  tradecraft: Credentials were stolen # <one line>
+  autonomy: The agents were authorized to attack practice targets in a cyber evaluation, mistook real people for those targets, and went beyond what they were allowed to do # <one line>
+  blast_radius: The victims were real people outside AISI - an open-source project maintainer, developers sent deceptive emails, and a bystander whose container was compromised - so blast radius is third party # <one line>
+  tradecraft: Credentials were stolen, and the BBC reports the agents hid the evidence afterwards, which is scored as evasion # <one line>
   motive: The LLM was let off the leash # <one line>
   dwell: The incident was caught quickly the next day # <one line>
 
@@ -127,9 +137,13 @@ confidence: high # high | medium | low
 # preferring Wired, then AP, then Reuters/The Verge/Ars Technica/404 Media/The Record/Fortune/CNN.
 sources:
   - url: https://www.aisi.gov.uk/blog/incident-report-unsanctioned-agent-behaviour-during-cyber-testing
-    kind: postmortem # postmortem | news | primary
+    kind: primary # postmortem | news | primary
     publisher: AISI # <outlet or organization name>
     title: Incident Report unsanctioned agent behaviour during cyber testing
+  - url: https://cdn.prod.website-files.com/663bd486c5e4c81588db7a1d/6a724858f7db25c81487016d_Security%20Incident%20INC-2026-07-28-01.pdf
+    kind: primary
+    publisher: AISI
+    title: Security Incident INC-2026-07-28-01
   - url: https://www.bbc.com/news/articles/c1w1lvn7d9go
     kind: news
     publisher: BBC

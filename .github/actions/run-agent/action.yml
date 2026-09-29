@@ -34,6 +34,11 @@ runs:
         GH_TOKEN: ${{ inputs.github_token }}
       run: bash scripts/pending_prs.sh
 
+    # pypdf for scripts.pdf_text, which the agent uses to read report PDFs (both modes).
+    - name: Install agent tools
+      shell: bash
+      run: pip install -q -r requirements-agent.txt
+
     # felonybench.com sits behind a bot checkpoint that only a real browser passes, so the
     # sweep gets prefetched copies of other trackers. Never fails the run: errors are
     # written into the output files for the agent to see.
@@ -42,7 +47,7 @@ runs:
       shell: bash
       run: |
         set +e
-        pip install -q -r requirements-agent.txt && python -m playwright install --with-deps chromium \
+        python -m playwright install --with-deps chromium \
           || echo "::warning::Playwright install failed; felonybench.com prefetch will record an error"
         python -m scripts.fetch_trackers || echo "::warning::Tracker prefetch failed"
         exit 0
@@ -59,12 +64,12 @@ runs:
           --model ${{ inputs.model }}
           --effort ${{ inputs.effort }}
           --permission-mode acceptEdits
-          --allowedTools "WebSearch,WebFetch,Read,Glob,Grep,Edit(./incidents/**),Edit(./.agent-out/**)"
+          --allowedTools "WebSearch,WebFetch,Read,Glob,Grep,Edit(./incidents/**),Edit(./.agent-out/**),Bash(python -m scripts.pdf_text:*)"
           --disallowedTools "Agent"
 
     - name: Upload agent transcript and notes
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: agent-run-${{ inputs.mode }}-${{ github.run_id }}
         path: |

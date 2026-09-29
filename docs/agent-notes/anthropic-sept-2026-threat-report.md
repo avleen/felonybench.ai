@@ -152,7 +152,7 @@ distilling model outputs is trade-secret misappropriation is an open legal quest
 Riden LLP, 2026-05-12), even though fraudulent-access schemes are argued to be CFAA/wire-fraud
 territory (AEI, 2026-08-03).
 
-Written up (4 incidents, all `confidence: low`, `self_disclosed: true`, news source The Hacker News
+Written up (3 incidents; a fourth, SenseTime, was later dropped - see below; all `confidence: low`, `self_disclosed: true`, news source The Hacker News
 2026-09-11):
 
 | id | GTG | what Claude did | contribution | blast_radius | statutes |
@@ -160,7 +160,8 @@ Written up (4 incidents, all `confidence: low`, `self_disclosed: true`, news sou
 | 2026-06-01-anthropic-zhipu-cot-distillation-cleaner | 16006 | cleaned/normalized/graded harvested CoT traces (770,609 exchanges through the cleaner in 10 days) | operated | own_prod | 1343, 1832 |
 | 2026-08-14-anthropic-zhipu-cyber-distillation-grader | 16006 | Opus 4.6 graded another US lab's model's CTF answers in a cyber-distillation attack | operated | third_party | 1832 |
 | 2026-03-01-anthropic-xiaomi-distillation-data-pipeline | 16008 | rebuilt dev environments, cleaned and generated conversations, judged answers | operated | own_prod | 1832 |
-| 2026-08-31-anthropic-sensetime-distillation-pipeline | 16012 | wrote the distillation pipeline; launched and monitored training runs | built_exploit | own_prod | 1832 |
+
+**GTG-16012 SenseTime** was written up (Claude wrote the distillation pipeline and launched and monitored training runs), then dropped on the owner's ruling (2026-09-29): it is the weakest legal theory, since the transcripts were outputs users could already see. Recorded as `rejected` in `agent/known-leads.yaml`.
 
 Rejected under the owner's rule (the report shows no AI system doing the work of the crime):
 - **GTG-16005 Alibaba**: the CoT pipeline "injected a fixed prompt" forcing Claude to write out its
@@ -169,7 +170,7 @@ Rejected under the owner's rule (the report shows no AI system doing the work of
   virtual cards). Alibaba also used Claude for its RL environments, model-development
   infrastructure and architecture research, but the report does not tie that work to the
   distillation crime. Closest call after Moonshot/DeepSeek.
-- **GTG-16002 Moonshot** and **GTG-16001 DeepSeek**: the silent relaying of customers' requests to
+- **GTG-16002 Moonshot** and **GTG-16001 DeepSeek** (later reversed; see below): the silent relaying of customers' requests to
   Claude, the CoT extraction pipelines and the 5,380 fraudulent accounts (Moonshot) are not described
   as AI-built or AI-run. Claude answering the relayed customers, and the "cross-session replay" attack
   (eliciting Claude to convert its thinking signature back into the raw trace), are both Claude
@@ -180,6 +181,20 @@ Rejected under the owner's rule (the report shows no AI system doing the work of
   exposure (Yahoo/The Next Web/Quartz headlines, not fetched).
 - **GTG-16003 MiniMax**: a shell-company proxy network harvesting user exchanges with Anthropic and
   OpenAI models. The report describes no AI doing the work.
+
+**Moonshot and DeepSeek reversed (owner, 2026-09-29):** Claude converting its thinking signature
+back into the raw trace is Claude doing the work of defeating Anthropic's anti-distillation control,
+so both are written up as Accomplice incidents (org Anthropic, own_prod, `contribution: operated`,
+`legal_status: contested`, `tradecraft: [evasion]`, `self_disclosed: true`):
+
+| id | GTG | statutes | score |
+|---|---|---|---|
+| 2026-07-31-anthropic-moonshot-thinking-signature-replay | 16002 | 17 USC 1201(a)(1)(A) (5, via 1204), 1832, 1343 (the report ties 5,380 fraudulent accounts to Moonshot) | 19.5 |
+| 2026-07-01-anthropic-deepseek-thinking-signature-replay | 16001 | 17 USC 1201(a)(1)(A), 1832, 1343 (owner's call: Alibaba's fraudulent accounts were "funneling requests from DeepSeek") | 19.5 |
+
+Dates: Moonshot's traffic is attributed to "between May and July 2026" (`before`, 2026-07-31);
+DeepSeek's to "14 days in July 2026" (`month`, 2026-07-01). The silent relaying of customers'
+requests is still not counted.
 
 ### Also rejected
 - **GTG-50021** (fraudulent "cheap Claude" reseller, "kl1zy"; silently proxied traffic to another

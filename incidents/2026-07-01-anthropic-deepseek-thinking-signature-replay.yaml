@@ -1,0 +1,37 @@
+id: 2026-07-01-anthropic-deepseek-thinking-signature-replay
+date: 2026-07-01
+date_precision: month
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: DeepSeek, attributed by Anthropic with high confidence (tracked as GTG-16001)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Anthropic (Claude's raw reasoning traces, protected by its thinking-signature control)", type: own_prod, country: "US"}
+summary: DeepSeek used the same cross-session replay attack as Moonshot, getting Claude Opus to convert its "thinking signatures" back into full reasoning traces that would otherwise have been summarized, to harvest chain-of-thought data for training.
+statutes:
+  - {code: "17 USC 1201(a)(1)(A)", max_years: 5}
+  - {code: "18 USC 1832", max_years: 10}
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: contested
+  blast_radius: own_prod
+  tradecraft: [evasion]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says DeepSeek "used the same cross-session replay attack used by Moonshot to extract CoT transcripts and circumvent our technical controls", exfiltrating "reasoning traces that would have otherwise been summarized"; the owner ruled that Claude converting its own signature back into the raw trace is Claude doing the work of the evasion, so Claude ran the operation. The circumvention charge (17 USC 1201, criminal under 1204) and trade-secret theft are contested because the copyrightability and trade-secret status of model output are unsettled. Wire fraud is charged because Anthropic says some of the fraudulent accounts in Alibaba's second pool "were found to have been funneling requests from DeepSeek"
+  guardrails: No jailbreak is reported; Claude was used as shipped, so guardrails are scored intact.
+  blast_radius: The victim is Anthropic, the lab whose own model did the work, so blast radius is own lab's production.
+  tradecraft: Converting the signature back into the raw trace defeated a technical control that exists to stop distillation, which is scored as evasion.
+  dwell: Anthropic dates the traffic only to "14 days in July 2026", so date_precision is month with the 1st as the date; dwell is counted conservatively as 0 days and never inflated, and Anthropic detected it itself.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://thehackernews.com/2026/09/anthropic-says-seven-china-based-ai.html", kind: news, publisher: The Hacker News, title: "Anthropic Says Seven China-Based AI Labs Ran Industrial-Scale Claude Distillation Attacks"}

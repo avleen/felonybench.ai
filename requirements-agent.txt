@@ -1,3 +1,5 @@
-# Extra dependencies for the sweep agent's tracker prefetch (GitHub Actions only).
-# Kept out of requirements.txt so Cloudflare Pages builds don't install a browser.
+# Extra dependencies for the agent in GitHub Actions: the sweep's tracker prefetch
+# (playwright) and scripts.pdf_text (pypdf). Kept out of requirements.txt so
+# Cloudflare builds don't install them.
 playwright>=1.45
+pypdf>=5
