@@ -1,0 +1,39 @@
+id: 2026-05-06-anthropic-shinyhunters-data-extortion
+date: 2026-05-06
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Operators suspected to be affiliates of the ShinyHunters extortion collective (tracked by Anthropic as GTG-50014), including a French-speaking operator using the aliases MeowSHA / frkoo / blazespider
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A technology provider (>1 TB stolen), an airline (tens of millions of passenger records), an energy company, SaaS providers and ~200 of their downstream customers, and a French retail chain", type: third_party, country: null}
+summary: ShinyHunters-affiliated operators used Claude to run credential-harvesting and intrusion pipelines against a technology provider, an airline, an energy company and SaaS vendors, then staged the stolen data publicly to extort the victims.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(7)(B)", max_years: 5}
+  - {code: "18 USC 1029(a)(2)", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, privilege_escalation, lateral_movement, persistence]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says "AI agents performed nearly all of the work", running distributed credential-harvesting pipelines, escalating from a stolen token to full cloud admin in about three hours, and iteratively scraping datastores, so Claude ran the intrusions under the operators' direction.
+  guardrails: The report describes the operators using agentic frameworks and stolen API keys but does not describe them jailbreaking or defeating Claude's safeguards, so guardrails are scored intact.
+  blast_radius: The victims are private companies (a technology provider, an airline, an energy company, SaaS vendors and their downstream customers, a French retail chain), so blast radius is third party.
+  tradecraft: Anthropic describes mass credential harvesting, admin-token amplification and privilege escalation, cross-tenant lateral movement (vendor-OAuth fan-out), and minting new cloud keys and forged sessions for persistence.
+  dwell: The actor's egress IPs are dated up to 2026-05-06, so date_precision is before with that latest date; dwell is counted from that latest possible date (0 days) and never inflated, and Anthropic detected and banned the accounts itself.
+confidence: high
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://www.bleepingcomputer.com/news/security/hackers-abused-claude-to-extract-secrets-from-18m-android-apps/", kind: news, publisher: BleepingComputer, title: "Hackers abused Claude to extract secrets from 1.8M Android apps"}
+  - {url: "https://thehackernews.com/2026/09/claude-used-to-automate-exploitation.html", kind: news, publisher: The Hacker News, title: "Claude Used to Automate Exploitation and Data Theft Across Multiple Victims"}

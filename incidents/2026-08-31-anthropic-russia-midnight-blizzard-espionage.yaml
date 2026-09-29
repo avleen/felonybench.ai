@@ -1,0 +1,40 @@
+id: 2026-08-31-anthropic-russia-midnight-blizzard-espionage
+date: 2026-08-31
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Russian state-nexus espionage actor (tracked by Anthropic as GTG-20006; attribution consistent with public reporting linking it to Midnight Blizzard), one operator using the handle "JackPoterz"
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Ukrainian and European government ministries, embassies, defense and intelligence bodies, and a North African government technology authority", type: foreign_government, country: "Ukraine / Europe / North Africa"}
+  - {name: "Military drone manufacturers and component suppliers, hotel-WiFi vendors and their guests, and former Ukrainian officials", type: third_party, country: null}
+summary: A Russian state-nexus actor linked to Midnight Blizzard used Claude to run near-automated intrusions against Ukrainian and European government, diplomatic and drone-industry targets, exfiltrating hundreds of gigabytes of data.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+  - {code: "18 USC 1831", max_years: 15}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: [credentials, lateral_movement, persistence, evasion]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the actor "used AI to build and operate the platform that ran these cyber intrusion campaigns" and executed portions of the intrusions directly, "running commands against victim systems, harvesting credentials, and moving laterally through networks", so Claude ran the operation under the actor's direction.
+  guardrails: The report describes the actor building AI-driven workflows and modifying Claude Code skills, but does not describe them jailbreaking or defeating Claude's safeguards, so guardrails are scored intact.
+  blast_radius: Victims include more than 20 government ministries, embassies and defense bodies concentrated in Ukraine and Europe plus a North African government technology authority (300,000+ national identity records), an international incident against foreign governments.
+  tradecraft: Anthropic says the actor used AI to harvest credentials, move laterally, maintain access by auto-registering rogue devices in victim tenants (persistence), and to systematically modify and redeploy implants when detected (evasion).
+  dwell: No incident date is given beyond the December 2025-August 2026 coverage window, so date_precision is before with the window's latest date; dwell is counted from that latest possible date (0 days) and never inflated, and Anthropic detected the Claude misuse itself.
+confidence: high
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://thehackernews.com/2026/09/claude-used-to-automate-exploitation.html", kind: news, publisher: The Hacker News, title: "Claude Used to Automate Exploitation and Data Theft Across Multiple Victims"}
+  - {url: "https://www.aljazeera.com/news/2026/9/11/anthropic-claims-claude-ai-used-for-missile-projects-global-espionage", kind: news, publisher: Al Jazeera, title: "Anthropic claims Claude AI used for missile projects, global espionage"}

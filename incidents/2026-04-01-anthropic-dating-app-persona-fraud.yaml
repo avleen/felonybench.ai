@@ -1,0 +1,37 @@
+id: 2026-04-01-anthropic-dating-app-persona-fraud
+date: 2026-04-01
+date_precision: month
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A China-based app studio (tracked by Anthropic as GTG-15001) that ran a network of more than 20 deceptive dating apps advertised as fully human
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "At least 25,000 dating-app users (targeted primarily in the US)", type: third_party, country: "US"}
+summary: A China-based studio used Claude to run more than 4,700 AI personas across 20+ dating apps advertised as human, exchanging 2.36 million messages with at least 25,000 users to drive paid engagement.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says Claude "ran the autonomous conversational personas, at roughly 2.36M messages over the two-week window", talking to users directly while instructed never to disclose they were automated, so Claude operated the scam conversations under the studio's direction.
+  guardrails: Anthropic says the system prompt "read as an ordinary roleplay or companion deployment" and elicited in-persona responses in effectively all sampled exchanges, so the model was used as shipped rather than jailbroken, and guardrails are scored intact.
+  blast_radius: The victims are members of the public - at least 25,000 dating-app users the report says were charged for metered messaging - so blast radius is third party.
+  tradecraft: None of the rubric's intrusion techniques apply to a deception-and-fraud operation; the App Store review evasion is not the rubric's covering-of-tracks sense.
+  dwell: Anthropic says the personas operated "over a two-week window in April 2026" and it detected the anomalous traffic and banned the accounts, so date_precision is month (the 1st of April) and dwell is counted conservatively at 0 days from the incident window and never inflated.
+confidence: high
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://www.techlicious.com/blog/fake-dating-apps-used-claude-to-scam-25000-people-anthropic-says/", kind: news, publisher: Techlicious, title: "Fake dating apps used Claude to scam 25,000 people, Anthropic says"}
+  - {url: "https://www.storyboard18.com/digital/anthropic-uncovers-ai-dating-app-scam-with-4700-fake-personas-ws-l-110424.htm", kind: news, publisher: Storyboard18, title: "Anthropic uncovers the AI powered dating scam: 75% bots, 25% humans"}
