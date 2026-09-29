@@ -72,7 +72,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
 
       <h2>{accomplice ? "Charges the human could face" : "Charges, had a human done it"}</h2>
       <ul class="charges">
-        {i.statutes.map((st: any) => <li class="panel"><code>{st.code}</code><span class="muted">Up to {st.max_years} years</span></li>)}
+        {i.statutes.map((st: any) => <li class="panel"><code>{st.code}</code><span class="muted">Up to {st.max_years} {st.max_years === 1 ? "year" : "years"}</span></li>)}
         {i.foreign_laws.map((f: any) => <li class="panel"><code>{f.code}</code><span class="muted">{f.country}</span></li>)}
       </ul>
     </div>

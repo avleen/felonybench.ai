@@ -9,8 +9,8 @@ human_actor: A cybercriminal tracked by Anthropic as GTG-2002; Anthropic's head 
 models:
   - {name: "Undisclosed model", codename: null, family: null, share: 1}
 victims:
-  - {name: "Unnamed government institutions", type: government, country: null}
-  - {name: "At least 17 unnamed organizations in total, including healthcare providers, emergency services, religious institutions, a defense contractor and a financial institution", type: third_party, country: null}
+  - {name: "Government institutions (unnamed)", type: government, country: null}
+  - {name: "Healthcare providers, emergency services, religious institutions, a defense contractor and a financial institution (unnamed; at least 17 organizations in all)", type: third_party, country: null}
 summary: A cybercriminal ran Claude Code as the operator of a data-theft and extortion campaign against at least 17 organizations; it scanned, broke in, stole data, priced the ransoms and wrote the ransom notes.
 statutes:
   - {code: "18 USC 1030(a)(7)(B)", max_years: 5}
