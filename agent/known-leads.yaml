@@ -101,7 +101,20 @@
   status: pending_human
   reason: A real IEEPA/EAR-style crime but with no discrete victim; needs a human decision on scope and scoring. See accomplice-needs-human.md.
 
-- lead: Anthropic Sept 2026 - illicit distillation by PRC labs (GTG-16005 Alibaba, GTG-16002 Moonshot, GTG-16001 DeepSeek, GTG-16006 Zhipu, GTG-16008 Xiaomi, GTG-16012/16003 SenseTime/MiniMax)
+# Distillation cluster: the owner decided on 2026-09-29 that "Claude being the target counts if AI
+# was used to do the work." GTG-16006 Zhipu (both campaigns), GTG-16008 Xiaomi and GTG-16012
+# SenseTime are written up in incidents/. The rest are rejected below.
+- lead: Anthropic Sept 2026 - GTG-16005 Alibaba (Qwen / Tongyi Lab) chain-of-thought distillation
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
-  status: pending_human
-  reason: Genuine crime candidate (fraud via stolen cards/API keys; possible trade-secret theft; third-party data exposure) but Claude is the target of the theft rather than the human's instrument, and the victim is Anthropic itself, so the Accomplice contribution/blast_radius scoring does not map cleanly. See accomplice-needs-human.md.
+  status: rejected
+  reason: Under the owner's rule, the report shows no AI doing the work of the crime. The injected prompt only made Claude produce the stolen output (the loot), and the report does not say an AI built or ran the pipeline or created the fraudulent accounts. Alibaba's use of Claude for its R&D (RL environments, model-development infrastructure, architecture research) is not tied to the distillation.
+
+- lead: Anthropic Sept 2026 - GTG-16002 Moonshot and GTG-16001 DeepSeek (silent relaying of customers' requests to Claude; cross-session replay of thinking signatures)
+  sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
+  status: rejected
+  reason: Under the owner's rule, the relaying, the extraction pipelines and the fraudulent accounts are not described as AI-run. Claude answering the relayed users, and Claude converting its thinking signature back into the raw trace, are both Claude producing the loot. Closest call in the cluster; revisit if the owner counts the signature decoding as the AI doing the evasion.
+
+- lead: Anthropic Sept 2026 - GTG-16003 MiniMax shell-company proxy network
+  sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
+  status: rejected
+  reason: Under the owner's rule, the report describes no AI system doing the work (a proxy service run through a shell company to harvest user exchanges).

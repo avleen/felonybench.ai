@@ -122,14 +122,48 @@ crime.
 ### Illicit distillation (Section 7)
 GTG-16005 (Alibaba/Qwen - largest campaign, ~3M exchanges/day via thousands of fraudulent accounts,
 virtual cards, stolen API keys), GTG-16002 (Moonshot), GTG-16001 (DeepSeek), GTG-16006 (Zhipu),
-GTG-16008 (Xiaomi), GTG-16012/16003 (SenseTime, MiniMax). **Not written; recorded in
-`accomplice-needs-human.md`.** These are genuine crime candidates (fraud via stolen credit cards and
-API keys = 18 USC 1029; possible 18 USC 1832 trade-secret theft; Moonshot/DeepSeek/Xiaomi exposed
-third-party users' credentials and data). But they do not fit the Accomplice League's `contribution`
-model cleanly: here Claude is the *target* of the theft (its capabilities/reasoning traces are the
-loot), not the instrument the human used to attack a third party. The victim is Anthropic itself,
-which the `blast_radius` scale (model-centric `own_prod`) does not map to for a human actor. Novel
-enough to need a human decision on scope and scoring.
+GTG-16008 (Xiaomi), GTG-16012/16003 (SenseTime, MiniMax). Initially recorded as needing a human
+scope decision, because Claude is the *target* of the theft here rather than the human's instrument.
+
+**Owner's decision (2026-09-29):** "Claude being the target counts if AI was used to do the work."
+A case qualifies when an AI system did the work of the crime (harvesting, account creation, key/card
+fraud, evasion, processing the stolen material), even though the victim is Anthropic and the loot is
+Claude's output. Claude merely *producing* the stolen output is the loot, not the work; if the report
+shows only ordinary pipelines, proxy networks or humans doing the work, the case does not qualify.
+When Claude did the work, `org: Anthropic` and `blast_radius: own_prod` (or `third_party` when
+another lab is the victim). All written cases use `legal_status: contested`, because whether
+distilling model outputs is trade-secret misappropriation is an open legal question (Beck Reed
+Riden LLP, 2026-05-12), even though fraudulent-access schemes are argued to be CFAA/wire-fraud
+territory (AEI, 2026-08-03).
+
+Written up (4 incidents, all `confidence: low`, `self_disclosed: true`, news source The Hacker News
+2026-09-11):
+
+| id | GTG | what Claude did | contribution | blast_radius | statutes |
+|---|---|---|---|---|---|
+| 2026-06-01-anthropic-zhipu-cot-distillation-cleaner | 16006 | cleaned/normalized/graded harvested CoT traces (770,609 exchanges through the cleaner in 10 days) | operated | own_prod | 1343, 1832 |
+| 2026-08-14-anthropic-zhipu-cyber-distillation-grader | 16006 | Opus 4.6 graded another US lab's model's CTF answers in a cyber-distillation attack | operated | third_party | 1832 |
+| 2026-03-01-anthropic-xiaomi-distillation-data-pipeline | 16008 | rebuilt dev environments, cleaned and generated conversations, judged answers | operated | own_prod | 1832 |
+| 2026-08-31-anthropic-sensetime-distillation-pipeline | 16012 | wrote the distillation pipeline; launched and monitored training runs | built_exploit | own_prod | 1832 |
+
+Rejected under the owner's rule (the report shows no AI system doing the work of the crime):
+- **GTG-16005 Alibaba**: the CoT pipeline "injected a fixed prompt" forcing Claude to write out its
+  reasoning. That is Claude producing the loot, and the report does not say an AI built or ran the
+  pipeline or created the ~3,500-5,000 fraudulent accounts (residential proxies, disposable emails,
+  virtual cards). Alibaba also used Claude for its RL environments, model-development
+  infrastructure and architecture research, but the report does not tie that work to the
+  distillation crime. Closest call after Moonshot/DeepSeek.
+- **GTG-16002 Moonshot** and **GTG-16001 DeepSeek**: the silent relaying of customers' requests to
+  Claude, the CoT extraction pipelines and the 5,380 fraudulent accounts (Moonshot) are not described
+  as AI-built or AI-run. Claude answering the relayed customers, and the "cross-session replay" attack
+  (eliciting Claude to convert its thinking signature back into the raw trace), are both Claude
+  producing the stolen output. That is the loot, not the work. **Closest call in the cluster:** if the
+  owner counts Claude decoding its own thinking signature as the AI performing the evasion, both
+  become incidents (org Anthropic, own_prod). DeepSeek's routing chose users by checking request
+  strings, which is ordinary scripting. China's CAC is reportedly probing both labs over the user-data
+  exposure (Yahoo/The Next Web/Quartz headlines, not fetched).
+- **GTG-16003 MiniMax**: a shell-company proxy network harvesting user exchanges with Anthropic and
+  OpenAI models. The report describes no AI doing the work.
 
 ### Also rejected
 - **GTG-50021** (fraudulent "cheap Claude" reseller, "kl1zy"; silently proxied traffic to another

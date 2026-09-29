@@ -40,13 +40,11 @@ A Moscow procurement manager used Claude to route dual-use goods to Russian defe
 wrote briefings explicitly describing the routing as a way to evade European trade controls - a real
 IEEPA/EAR-style crime, but with no discrete victim, so a human should decide scope and scoring.
 
-## Illicit distillation by PRC labs (Alibaba, Moonshot, DeepSeek, Zhipu, Xiaomi, SenseTime, MiniMax)
-Sources:
-- https://www.anthropic.com/threat-intelligence-report-september-2026
-- https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf
-- https://thehackernews.com/2026/09/claude-used-to-automate-exploitation.html
-Named PRC labs ran industrial-scale distillation against Claude via thousands of fraudulent accounts
-(stolen credit cards and API keys), with some exposing third-party users' credentials and data - a
-genuine crime candidate (access-device fraud, trade-secret theft), but here Claude is the target of
-the theft rather than the human's instrument, and the victim is Anthropic itself, so the Accomplice
-League's contribution/blast_radius scoring does not map cleanly; needs a human scope decision.
+## Illicit distillation by PRC labs - RESOLVED 2026-09-29
+The owner decided that "Claude being the target counts if AI was used to do the work." Written up:
+Zhipu (two incidents), Xiaomi and SenseTime, where the report says Claude did the processing,
+grading or pipeline-writing work. Rejected: Alibaba, Moonshot, DeepSeek and MiniMax, where the report
+shows Claude only producing the stolen output. See the distillation section of
+`anthropic-sept-2026-threat-report.md`. One call remains open for the owner: whether Claude
+decoding its own thinking signature in Moonshot's and DeepSeek's "cross-session replay" attack
+counts as the AI doing the evasion. If it does, both become incidents.

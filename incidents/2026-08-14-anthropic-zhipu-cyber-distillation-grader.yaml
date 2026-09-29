@@ -1,0 +1,37 @@
+id: 2026-08-14-anthropic-zhipu-cyber-distillation-grader
+date: 2026-08-14
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Zhipu (branded outside China as Z.ai) researchers, attributed by Anthropic (tracked as GTG-16006), ahead of the release of Zhipu's GLM 5.3 model
+models:
+  - {name: "Claude Opus 4.6", codename: null, family: claude, share: 1}
+victims:
+  - {name: "An unnamed leading US frontier AI lab (the cyber capabilities of its top model)", type: third_party, country: "US"}
+summary: Zhipu researchers built capture-the-flag challenges from public vulnerability data, had another US lab's top model solve them, and used Claude Opus 4.6 to grade the answers in a campaign to distill that model's cyber skills.
+statutes:
+  - {code: "18 USC 1832", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: contested
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says Zhipu "launched a distillation attack against the top model of another leading US frontier lab" and that Claude Opus 4.6 was targeted "primarily to evaluate and grade the responses of the other US frontier model", so Claude ran the grading stage of the attack.
+  guardrails: Zhipu gave up on Fable after its cyber safeguards degraded the attack and switched to Opus 4.6 because it judged the safeguards weaker; choosing a less-guarded model is not a jailbreak, and the report describes none, so guardrails are scored intact.
+  blast_radius: The victim whose capabilities were being distilled is another US AI company, so blast radius is third party.
+  tradecraft: The report credits Claude with no intrusion techniques; it graded answers, so tradecraft is empty.
+  dwell: The report says only that the campaign came "ahead of the release of its GLM 5.3 model", which Zhipu announced on 2026-08-14, so date_precision is before with that latest date; dwell is 0 days counted from it and never inflated, and Anthropic detected it itself.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://thehackernews.com/2026/09/anthropic-says-seven-china-based-ai.html", kind: news, publisher: The Hacker News, title: "Anthropic Says Seven China-Based AI Labs Ran Industrial-Scale Claude Distillation Attacks"}
+  - {url: "https://mlq.ai/news/zhipu-releases-glm-53-through-its-coding-service-with-weights-still-two-weeks-away/", kind: news, publisher: MLQ News, title: "Zhipu releases GLM-5.3 through its coding service, with weights still two weeks away"}
