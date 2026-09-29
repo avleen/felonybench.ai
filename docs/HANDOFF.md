@@ -52,6 +52,9 @@ with wire fraud; DeepSeek's on the owner's call), SenseTime dropped, the image-u
 bumped to checkout v7, setup-python v7, cache v6, upload-artifact v7. Still open: PR #19's news
 source, and item 8 (run a sweep after this merges).
 
+**Update (later 2026-09-29):** PRs #19 (with the RFE/RL news source), #20 and #21 are all merged,
+and GTG-34007 is marked `handled` in `agent/known-leads.yaml`. Only item 8, the sweep, remains.
+
 1. **Moonshot (GTG-16002) and DeepSeek (GTG-16001) thinking-signature reversal counts.**
    Both got Claude to convert its "thinking signature" back into raw reasoning, defeating
    Anthropic's anti-distillation control. The owner rules that this is Claude doing the

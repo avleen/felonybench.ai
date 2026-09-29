@@ -56,7 +56,7 @@
 # Nine cases written up as incidents (GTG-30005 Iran Navy, GTG-20006 Russia/Midnight Blizzard,
 # GTG-50014 ShinyHunters, GTG-10007 China exploit foundry, GTG-50020 AI supply chain, GTG-50029
 # French hacktivist, GTG-15001 dating fraud, GTG-87001 Yemen guided weapons, GTG-27006 Russia dual-use
-# procurement). GTG-34007 is in an awaiting-news draft PR. The rest:
+# procurement) and GTG-34007 Iran Firefox identity harvester. The rest:
 
 - lead: Anthropic Sept 2026 - influence operations (GTG-04001 Russia/Wagner CAR, GTG-54002 LKM/France, GTG-84005 BBS Bilisim/Malaysia, GTG-24015 Russian state media, GTG-34001 Iran ICCO/IPO/Bina, GTG-54006 Bangladesh Awami League, GTG-84006 MEK/NCRI, GTG-54004 Kenya, GTG-84002 UAE)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
@@ -95,8 +95,8 @@
 
 - lead: Anthropic Sept 2026 - GTG-34007 Iranian surveillance malware (Firefox identity harvester shipped to production; national-ID phishing page; de-anonymizer)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
-  status: pending_human
-  reason: Written up as 2026-08-31-anthropic-iran-firefox-identity-harvester (victim "The public", IR) with primary sources only, in draft PR https://github.com/avleen/felonybench.ai/pull/19 labelled awaiting-news. Coverage found while writing it (RFE/RL 2026-09-11, Iran International 2026-09-13) is listed in the PR for the owner to add.
+  status: handled
+  reason: Written up as incidents/2026-08-31-anthropic-iran-firefox-identity-harvester.yaml (victim "The public", IR), with RFE/RL (2026-09-11) as its news source; merged in PR #19.
 
 - lead: Anthropic Sept 2026 - GTG-50027 Mali national mass-interception platform ("Lakana 360"), built to evade a Malian warrant requirement
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
