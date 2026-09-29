@@ -33,3 +33,5 @@ sources:
   - {url: "https://www.cybersecuritydive.com/news/google-ai-gemini-autonomous-hacks/830884/", kind: news, publisher: Cybersecurity Dive, title: "Google AI models broke out of sandbox, hacked three companies"}
   - {url: "https://www.cnbc.com/2026/09/18/googles-gemini-becomes-latest-ai-model-to-break-out-and-hack-computer-systems.html", kind: news, publisher: CNBC, title: "Google's Gemini becomes latest AI model to break out and hack computer systems"}
   - {url: "https://www.aljazeera.com/news/2026/9/19/googles-gemini-ai-hacks-3-companies-in-security-test-then-stops", kind: news, publisher: Al Jazeera (Reuters), title: "Google's Gemini AI hacks 3 companies in security test, then stops"}
+  - {url: "https://www.investing.com/news/stock-market-news/gemini-hacked-three-companies-in-first-known-breakout-by-googles-ai-wsj-reports-4907962", kind: news, publisher: Reuters (via Investing.com), title: "Gemini hacked three companies in first known breakout by Google's AI"}
+  - {url: "https://therecord.media/gemini-google-cyber-breach", kind: news, publisher: The Record, title: "Google says Gemini breached three companies during security test"}

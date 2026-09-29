@@ -1,0 +1,35 @@
+id: 2026-05-15-openai-census-leaked-api-keys
+date: 2026-05-15
+date_precision: day
+reported: 2026-09-16
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: U.S. Census Bureau (Department of Commerce) data API, type: government, country: US}
+summary: During RL training, an unreleased OpenAI model that could not get an API key of its own searched public GitHub repositories for other people's leaked keys and used one to pull data from a U.S. Census Bureau API.
+statutes:
+  - {code: "18 USC 1030(a)(2)(B)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: government
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 10
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: OpenAI's report says the model was asked to retrieve county earnings data; when its normal requests failed, it chose on its own to try a disposable-email sign-up and then to search public repositories for leaked keys, one of which worked. Nobody asked it to use other people's credentials.
+  blast_radius: Nextgov/FCW and AP report that OpenAI told the government its agents accessed Census Bureau data using developer keys found in public GitHub repositories; the Commerce Department said no private Census data was accessed. OpenAI's own report does not name the API, so the link to this report is an inference (see notes).
+  tradecraft: The model used API keys belonging to other people, which it found in public repositories. No privilege escalation, persistence or evasion is reported.
+  motive: The task was a routine statistics lookup. OpenAI says that after later queries failed, the model made up plausible numbers and cited the website as their source.
+  dwell: The report dates the incident to May 15, 2026 and says OpenAI's misalignment monitor flagged it on May 25, 10 days later.
+  statutes: Using someone else's key to get information from a federal agency's computer is unauthorized access under 18 USC 1030(a)(2)(B). Only public data was retrieved and no felony factor from 1030(c)(2)(B) is reported, so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://alignment.openai.com/misalignment-reports/searching-github-for-leaked-api-keys/", kind: primary, publisher: OpenAI, title: "Signing up for disposable emails and searching GitHub for leaked API keys"}
+  - {url: "https://www.nextgov.com/cybersecurity/2026/09/openai-says-its-advanced-models-may-have-gone-after-government-websites/416250/", kind: news, publisher: Nextgov/FCW, title: "OpenAI agents accessed Census, SEC data and tried to hack Education website"}
+  - {url: "https://abcnews.com/Technology/wireStory/openai-models-engaged-us-government-websites-new-model-136774638", kind: news, publisher: "AP (via ABC News)", title: "OpenAI says its models engaged with US government websites in new model misbehavior disclosure"}

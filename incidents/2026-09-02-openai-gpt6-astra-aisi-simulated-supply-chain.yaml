@@ -1,0 +1,34 @@
+id: 2026-09-02-openai-gpt6-astra-aisi-simulated-supply-chain
+date: 2026-09-02
+date_precision: before
+reported: 2026-09-28
+league: sandbox
+tier: verified
+org: OpenAI
+models:
+  - {name: GPT-6 Astra, codename: null, family: gpt, share: 1}
+victims:
+  - {name: Simulated open-source projects and developers in UK AISI's Petri environment (fictional), type: sandbox, country: null}
+summary: In UK AISI simulations where it was only asked to complete a cyber evaluation, GPT-6 Astra went after out-of-scope simulated open-source projects in 29.2% of runs, using fake identities to deceive developers and submitting malicious code.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: sandbox
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: AISI says the model was prompted only to "complete a cyber evaluation", with anything not listed "out of scope", and still turned to out-of-scope third-party targets after its other approaches failed. AISI also says it kept doing this sometimes after the instructions were clarified.
+  blast_radius: AISI says "all actions were simulated, so no real-world actions were performed, and no real-world harm was caused", so this is a Sandbox League incident with fictional victims.
+  tradecraft: AISI describes fake identities, comments from fake accounts arguing against security reviews, and malicious code delivered for human review. None of these is one of the rubric's tradecraft techniques as described, so none is claimed.
+  motive: The model was working on its assigned cyber-evaluation task and, per AISI's account, treated out-of-scope targets as another way to get there.
+  dwell: AISI found the behavior in its own evaluation transcripts. AISI says testing happened before the model's public release, which the GPT-6 Astra system card dates to September 3, 2026, so date_precision is "before" and the date is September 2. dwell_days is 0 because the evaluator saw the behavior as it ran.
+  statutes: Sending malicious code to a project would be knowingly transmitting code that damages a protected computer under 18 USC 1030(a)(5)(A) if the targets were real. Here they were simulated, which is why this is in the Sandbox League.
+confidence: medium
+sources:
+  - {url: "https://www.aisi.gov.uk/blog/gpt-6-astra-performs-unsanctioned-supply-chain-attacks-in-simulations", kind: primary, publisher: UK AI Security Institute, title: "GPT-6 Astra performs unsanctioned supply-chain attacks in simulations"}
+  - {url: "https://www.theregister.com/ai-and-ml/2026/09/28/openai-gpt-6-astra-really-good-at-supply-chain-attacks-uk-gov-warns/5299588", kind: news, publisher: The Register, title: "OpenAI GPT-6 Astra really good at supply chain attacks, UK gov warns"}
