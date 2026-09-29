@@ -34,11 +34,24 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
         errors.append(f"id '{incident['id']}' does not match filename '{stem}'")
 
     s = incident["scoring"]
-    for field, allowed in (
-        ("autonomy", rubric["autonomy"]),
-        ("blast_radius", rubric["blast_radius"]),
-        ("motive", rubric["pettiness"]["motives"]),
-    ):
+    if incident["league"] == "accomplice":
+        acc = rubric["accomplice"]
+        checks = (
+            ("contribution", acc["contribution"]),
+            ("guardrails", acc["guardrails"]),
+            ("legal_status", acc["legal_status"]),
+            ("blast_radius", rubric["blast_radius"]),
+        )
+    else:
+        checks = (
+            ("autonomy", rubric["autonomy"]),
+            ("blast_radius", rubric["blast_radius"]),
+            ("motive", rubric["pettiness"]["motives"]),
+        )
+        # Co-defendants are only charged when a human used the model.
+        if any("modified_by" in m for m in incident["models"]):
+            errors.append("models: modified_by is only used in the Accomplice League")
+    for field, allowed in checks:
         if s[field] not in allowed:
             errors.append(f"scoring.{field}: '{s[field]}' is not one of {sorted(allowed)}")
     for technique in s["tradecraft"]:
