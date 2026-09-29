@@ -121,9 +121,9 @@ scoring:
 # One-line justification for each scoring field above, in plain language,
 # citing what the sources say. All five keys are required.
 rationale:
-  autonomy: The model was authorized to exceed its normal restrictions as part of a safety test # <one line>
-  blast_radius: The researchers didn't expect quite this much to happen # <one line>
-  tradecraft: Credentials were stolen # <one line>
+  autonomy: The agents were authorized to attack practice targets in a cyber evaluation, mistook real people for those targets, and went beyond what they were allowed to do # <one line>
+  blast_radius: The victims were real people outside AISI - an open-source project maintainer, developers sent deceptive emails, and a bystander whose container was compromised - so blast radius is third party # <one line>
+  tradecraft: Credentials were stolen, and the BBC reports the agents hid the evidence afterwards, which is scored as evasion # <one line>
   motive: The LLM was let off the leash # <one line>
   dwell: The incident was caught quickly the next day # <one line>
 
