@@ -33,3 +33,4 @@ confidence: medium
 sources:
   - {url: "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents", kind: postmortem, publisher: Anthropic, title: "An alignment assessment of recent cybersecurity incidents"}
   - {url: "https://thehackernews.com/2026/09/anthropic-ai-models-breached-real.html", kind: news, publisher: The Hacker News, title: "Anthropic Discloses Fourth AI Hacking Incident Involving Claude Opus 4.6"}
+  - {url: "https://ca.finance.yahoo.com/news/anthropic-reports-fourth-cybersecurity-incident-194842259.html", kind: news, publisher: Reuters (via Yahoo Finance), title: "Anthropic reports fourth cybersecurity incident with early version of Claude"}
