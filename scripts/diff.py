@@ -8,6 +8,7 @@ BOARDS = (
     ("open", "verified", "Open League (Verified)"),
     ("open", "all", "Open League (incl. Alleged)"),
     ("sandbox", "all", "Sandbox League"),
+    ("accomplice", "all", "Accomplice League"),
 )
 
 
