@@ -311,7 +311,7 @@ Human review of past sweeps kept correcting the same things. Get them right firs
 - **No news yet:** if an incident is in scope and otherwise valid but has no news
   coverage, write it anyway with only its primary sources. It's opened as a **draft PR**
   labeled `awaiting-news`. Each sweep, check the incidents in `.agent-out/open/` for new
-  coverage and add it when it appears; a human then marks the PR ready.
+  coverage and add it when it appears; the PR is then marked ready for review automatically.
 - **No identifiable model:** a case where no model or lab can be identified (e.g. run on
   unnamed local models) waits in `agent/known-leads.yaml` until one is named.
 - **Accomplice `contribution`** (what the AI did, not the human): `advised` (explained

@@ -47,6 +47,11 @@ def awaiting_news(errors: list[str]) -> bool:
     return errors == [NEWS_REQUIRED]
 
 
+def becomes_ready(pr: dict, errors: list[str]) -> bool:
+    """A draft that was awaiting news now validates cleanly: hand it to a human."""
+    return bool(pr.get("isDraft")) and not errors
+
+
 def labels_for(incident: dict, errors: list[str]) -> list[str]:
     labels = ["agent"]
     if awaiting_news(errors):
@@ -129,8 +134,8 @@ def main(argv: list[str] | None = None) -> int:
     _run("git", "clean", "-fd", "incidents")
     rubric, validator = load_rubric(), load_validator()
     before = build_scores(load_incidents(ROOT / "incidents"), rubric, "base")
-    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--json", "number,headRefName"))
-    open_heads = {pr["headRefName"]: pr["number"] for pr in open_prs}
+    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--json", "number,headRefName,isDraft"))
+    open_heads = {pr["headRefName"]: pr for pr in open_prs}
 
     failed = False
     for path, text in contents.items():
@@ -157,7 +162,11 @@ def main(argv: list[str] | None = None) -> int:
             _run("git", "commit", "-m", title)
             _run("git", "push", "--force", "origin", f"HEAD:refs/heads/{branch}")
             if branch in open_heads:
-                _run("gh", "pr", "comment", str(open_heads[branch]), "--body", "Agent updated this incident.\n\n" + body)
+                pr = open_heads[branch]
+                _run("gh", "pr", "comment", str(pr["number"]), "--body", "Agent updated this incident.\n\n" + body)
+                if becomes_ready(pr, errors):
+                    _run("gh", "pr", "ready", str(pr["number"]))
+                    _run("gh", "pr", "edit", str(pr["number"]), "--remove-label", "awaiting-news")
             else:
                 label_args = [x for label in labels_for(incident, errors) for x in ("--label", label)]
                 draft = ["--draft"] if awaiting_news(errors) else []

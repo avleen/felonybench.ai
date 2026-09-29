@@ -232,3 +232,33 @@ def test_invalid_incident_gets_needs_review_label(tmp_path, make_incident):
     assert set(labels) == {"agent", "needs-review"}
     body = _arg(create, "--body")
     assert "❌" in body
+
+
+def test_awaiting_news_draft_is_marked_ready_when_news_arrives(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident()  # has a news source, so it now validates cleanly
+    _write_incident(sandbox["work"], incident)
+    branch = f"agent/{incident['id']}"
+    fake_pr_list = json.dumps([{"number": 9, "headRefName": branch, "isDraft": True}])
+
+    result = _run_open_prs(sandbox, fake_pr_list=fake_pr_list)
+    assert result.returncode == 0, result.stderr
+
+    calls = _gh_calls(sandbox)
+    assert len(_calls(calls, "pr", "ready", "9")) == 1
+    assert _calls(calls, "pr", "edit", "9") == [["pr", "edit", "9", "--remove-label", "awaiting-news"]]
+
+
+def test_missing_news_opens_a_draft(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident()
+    incident["sources"] = [s for s in incident["sources"] if s["kind"] != "news"]
+    _write_incident(sandbox["work"], incident)
+
+    result = _run_open_prs(sandbox)
+    assert result.returncode == 0, result.stderr
+
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert len(create) == 1 and "--draft" in create[0]
+    labels = [create[0][i + 1] for i, a in enumerate(create[0]) if a == "--label"]
+    assert labels == ["agent", "awaiting-news"]

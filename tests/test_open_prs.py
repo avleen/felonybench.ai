@@ -83,3 +83,12 @@ def test_missing_news_only_opens_a_draft(make_incident):
     assert awaiting_news([NEWS_REQUIRED, "reported: earlier than date"]) is False
     assert awaiting_news([]) is False
     assert labels_for(make_incident(), [NEWS_REQUIRED]) == ["agent", "awaiting-news"]
+
+
+def test_draft_becomes_ready_once_news_arrives():
+    from scripts.open_prs import becomes_ready
+    from scripts.validate import NEWS_REQUIRED
+    assert becomes_ready({"isDraft": True}, []) is True
+    assert becomes_ready({"isDraft": True}, [NEWS_REQUIRED]) is False
+    assert becomes_ready({"isDraft": True}, ["something else"]) is False
+    assert becomes_ready({"isDraft": False}, []) is False
