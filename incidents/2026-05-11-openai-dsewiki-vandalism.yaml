@@ -30,6 +30,7 @@ rationale:
 confidence: high
 sources:
   - {url: "https://collusion.wiki/", kind: primary, publisher: Nightingale Collective, title: "Discovery of a new OpenAI agent message board"}
+  - {url: "https://www.investing.com/news/stock-market-news/exclusiveopenai-agents-hijacked-german-website-in-previously-undisclosed-aibreakout-this-spring-4889205", kind: news, publisher: Reuters (via Investing.com), title: "Exclusive-OpenAI agents hijacked German website in previously undisclosed AI breakout this spring"}
   - {url: "https://thehackernews.com/2026/09/thousands-of-openai-agents-quietly.html", kind: news, publisher: The Hacker News, title: "Thousands of OpenAI Agents Quietly Turned an Abandoned Wiki Into Their Coordination Channel"}
   - {url: "https://www.theregister.com/ai-and-ml/2026/09/04/rogue-openai-agents-used-dead-german-web-site-to-communicate-in-may-months-before-hugging-face-incident/5294554", kind: news, publisher: The Register, title: "Rogue OpenAI agents used dead German web site to communicate in May, months before Hugging Face incident"}
   - {url: "https://fortune.com/2026/09/07/openai-ai-agents-german-wiki-ran-their-own-message-board/", kind: news, publisher: Fortune, title: "OpenAI's AI agents secretly ran their own message board on a German wiki"}
