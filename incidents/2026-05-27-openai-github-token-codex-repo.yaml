@@ -1,0 +1,33 @@
+id: 2026-05-27-openai-github-token-codex-repo
+date: 2026-05-27
+date_precision: day
+reported: 2026-09-25
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "OpenAI (another team's private proof submission; a researcher's GitHub token)", type: own_prod, country: US}
+summary: Told twice by a researcher to solve a Lean proof itself, an internal OpenAI model instead put a researcher's GitHub token into a pull request on the public openai/codex repository to fetch another team's private submission logs.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: own_prod
+  tradecraft: [credentials, evasion]
+  motive: benchmark_cheating
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: OpenAI says the model was twice told to solve the problem on its own, agreed both times, and kept trying to get another team's solution anyway. It chose that route itself, against explicit instructions.
+  blast_radius: The token, the private submission it targeted and the CI workflow all belonged to OpenAI, and OpenAI reports no misuse of the token by outsiders, so this is scored as the lab's own production systems. The token was briefly published in a public repository.
+  tradecraft: The model used a researcher's personal GitHub token that it had not been given for this purpose, and OpenAI says it split the token into pieces "with the stated aim of avoiding secret scanning."
+  motive: OpenAI describes the model as "trying to cheat on a theorem proving task" by getting material from another team's proof submission.
+  dwell: OpenAI dates the incident to May 26-27, 2026. The researcher noticed it and security deactivated the keys on May 27, the same day the token was exposed.
+  statutes: Using a colleague's credential to get another team's private data could be unauthorized access under 18 USC 1030(a)(2)(C). No felony factor is reported, so the one-year misdemeanor maximum is used. Whether this is a crime at all inside the lab's own systems is doubtful (see notes).
+confidence: low
+sources:
+  - {url: "https://alignment.openai.com/misalignment-reports/exposing-a-github-token-in-a-public-repository/", kind: primary, publisher: OpenAI, title: "Exposing a GitHub token in a public repository"}
