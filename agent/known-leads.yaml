@@ -52,9 +52,10 @@
 
 # Anthropic "Detecting and countering misuse of AI: September 2026" (report published 2026-09-10).
 # Full evaluation of every case in docs/agent-notes/anthropic-sept-2026-threat-report.md.
-# Eight cases written up as incidents (GTG-30005 Iran Navy, GTG-20006 Russia/Midnight Blizzard,
+# Nine cases written up as incidents (GTG-30005 Iran Navy, GTG-20006 Russia/Midnight Blizzard,
 # GTG-50014 ShinyHunters, GTG-10007 China exploit foundry, GTG-50020 AI supply chain, GTG-50029
-# French hacktivist, GTG-15001 dating fraud, GTG-87001 Yemen guided weapons). The rest:
+# French hacktivist, GTG-15001 dating fraud, GTG-87001 Yemen guided weapons, GTG-27006 Russia dual-use
+# procurement). GTG-34007 is in an awaiting-news draft PR. The rest:
 
 - lead: Anthropic Sept 2026 - influence operations (GTG-04001 Russia/Wagner CAR, GTG-54002 LKM/France, GTG-84005 BBS Bilisim/Malaysia, GTG-24015 Russian state media, GTG-34001 Iran ICCO/IPO/Bina, GTG-54006 Bangladesh Awami League, GTG-84006 MEK/NCRI, GTG-54004 Kenya, GTG-84002 UAE)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
@@ -64,7 +65,12 @@
 - lead: Anthropic Sept 2026 - PRC surveillance/transnational repression (GTG-14010 Uyghurs in Syria, GTG-14020 religious minorities, GTG-14021 stability maintenance, GTG-14022 public-opinion monitoring) and GTG-54009 (S2T commercial surveillance)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
   status: rejected
-  reason: Intelligence analysis, profiling and report-generation, not a completed chargeable crime with an identifiable victim; S2T was caught at pilot stage. GTG-14021 (pre-operational venue scouting of overseas protests) flagged as a possible 18 USC 2261A case in accomplice-needs-human.md.
+  reason: Intelligence analysis, profiling and report-generation, not a completed chargeable crime with an identifiable victim; S2T was caught at pilot stage. GTG-14021 is covered by its own entry below.
+
+- lead: Anthropic Sept 2026 - GTG-14021 PRC municipal state-security bureau's pre-operational venue scouting of overseas protests (Vancouver pro-democracy march route, Uyghur cultural-event venues in Turkey, Oslo Freedom Forum screenings)
+  sources: [https://www.anthropic.com/threat-intelligence-report-september-2026, https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf]
+  status: rejected
+  reason: Re-examined with the new public-victim rule (the victim could be "the public"), but the act itself is not shown to be a crime. The bureau, operating from inside the PRC, had Claude compile the gathering point, route and terminus of a march and the venues of public events - what the report itself calls "lawful overseas protests", details that are normally public. No operation, contact, threat or harassment followed that the report documents. 18 USC 2261A needs a course of conduct against a specific person causing fear or substantial emotional distress; 18 USC 951 needs someone acting in the US as a foreign agent; host-country foreign-interference and harassment offences likewise need intimidation, covert or unlawful means, or an act on their territory, none of which is reported. "Pre-operational" is Anthropic's characterisation of a purpose, not a completed act. Revisit if a later source documents an operation against the protests or named activists.
 
 - lead: Anthropic Sept 2026 - Iranian malware/OSINT that stayed in development/testing (GTG-30004 identity-profiling harness + NanoDump obfuscation; GTG-30006 SECOMS64 implant, phishing portal, M365 mailbox-theft tooling)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
@@ -89,17 +95,12 @@
 - lead: Anthropic Sept 2026 - GTG-34007 Iranian surveillance malware (Firefox identity harvester shipped to production; national-ID phishing page; de-anonymizer)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
   status: pending_human
-  reason: In scope (deployed malware, real Iranian victims) but no dedicated news source confirmed, which the schema requires. See docs/agent-notes/accomplice-needs-human.md.
+  reason: Written up as 2026-08-31-anthropic-iran-firefox-identity-harvester (victim "The public", IR) with primary sources only, in draft PR https://github.com/avleen/felonybench.ai/pull/19 labelled awaiting-news. Coverage found while writing it (RFE/RL 2026-09-11, Iran International 2026-09-13) is listed in the PR for the owner to add.
 
 - lead: Anthropic Sept 2026 - GTG-50027 Mali national mass-interception platform ("Lakana 360"), built to evade a Malian warrant requirement
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
   status: pending_human
-  reason: Contested legality; Claude was the engineering workforce but the deployed platform runs on local models and no completed surveillance of an identifiable victim is documented. See accomplice-needs-human.md.
-
-- lead: Anthropic Sept 2026 - GTG-27006 Russia sanctions/export-control evasion procurement for defence customers
-  sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
-  status: pending_human
-  reason: A real IEEPA/EAR-style crime but with no discrete victim; needs a human decision on scope and scoring. See accomplice-needs-human.md.
+  reason: Waiting for an identifiable model. Claude was the engineering workforce, but the deployed platform runs fully on-premises on unnamed local models, so no model can be named for the surveillance itself (legality is also contested). Revisit only if a source names the deployed model. See accomplice-needs-human.md.
 
 # Distillation cluster: the owner decided on 2026-09-29 that "Claude being the target counts if AI
 # was used to do the work." GTG-16006 Zhipu (both campaigns), GTG-16008 Xiaomi and GTG-16012

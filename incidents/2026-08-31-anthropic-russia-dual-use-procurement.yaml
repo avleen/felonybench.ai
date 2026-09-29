@@ -1,0 +1,39 @@
+id: 2026-08-31-anthropic-russia-dual-use-procurement
+date: 2026-08-31
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Russia-based actor, a self-identified procurement manager at a Moscow design bureau (tracked by Anthropic as GTG-27006), procuring dual-use goods likely for Russian government and defense-industry customers
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "The public", type: public, country: "EU"}
+summary: A Moscow procurement manager used Claude to find Chinese and Hong Kong intermediaries, draft quote requests that hid the Russian end users, and plan third-country routing for European-made dual-use goods, in briefings that described it as a way to evade European trade controls.
+statutes:
+  - {code: "50 USC 1705 (IEEPA)", max_years: 20}
+  - {code: "50 USC 4819 (ECRA / EAR)", max_years: 20}
+foreign_laws:
+  - {code: "Council Regulation (EU) No 833/2014 (restrictive measures against Russia: dual-use export ban and anti-circumvention)", country: "EU"}
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: public
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the actor used Claude to find intermediaries in mainland China and Hong Kong, draft quote-request emails that "deliberately obfuscated the intended end users", draft Russian tender specifications, work out an import markup chain routing goods through other countries "to obscure their intended destination", and write briefings to the actor's director; the evasive steps were content Claude wrote for humans to send, so contribution is wrote_content (Claude also ran a browser-automation back office that scraped vendor prices and merged spreadsheets, but that did not itself carry out the diversion).
+  guardrails: Anthropic says each request "seem[ed] individually mundane" and describes only VPN use to get around its geographic access restrictions, not any defeat of Claude's safeguards, so guardrails are scored intact.
+  blast_radius: Export-control and sanctions evasion has no single identifiable victim; the controls the briefings "explicitly described" evading were European, so the victim is the public of the EU and blast radius is public.
+  tradecraft: Concealing the end user and destination is the offense itself, not an added intrusion technique, and none of the rubric's cyber techniques apply.
+  dwell: No incident date is given beyond the December 2025-August 2026 coverage window, so date_precision is before with the window's latest date; dwell is counted from that latest possible date (0 days) and never inflated, and Anthropic detected and banned the account itself.
+  statutes: Transposed to US law, routing controlled dual-use goods to Russian defense end users through third countries while hiding the end user is an export-control violation (ECRA, 50 USC 4819, which also covers attempts and conspiracies), and the payment route through a sanctioned Russian bank and a previously sanctioned Chinese bank is sanctions evasion under IEEPA (50 USC 1705); both carry 20 years. The report does not name the European controls; Regulation 833/2014 is the EU's Russia sanctions regulation covering dual-use exports.
+confidence: medium
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://www.yahoo.com/news/articles/factbox-anthropic-says-claude-used-192508118.html", kind: news, publisher: "Reuters (via Yahoo News)", title: "Factbox-How Anthropic says Claude was used for weapons, spying and cyber operations"}

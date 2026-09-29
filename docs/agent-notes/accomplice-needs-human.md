@@ -4,41 +4,48 @@ Leads that are in scope (or genuinely contested) but that an agent did not write
 Each: title, source URLs, one plain sentence. See
 `docs/agent-notes/anthropic-sept-2026-threat-report.md` for the full reasoning.
 
-## GTG-34007 - Iranian surveillance malware (Firefox identity harvester shipped to production)
+## GTG-34007 - Iranian surveillance malware (Firefox identity harvester) - DRAFT PR, AWAITING NEWS
 Sources:
 - https://www.anthropic.com/threat-intelligence-report-september-2026
 - https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf
-Two Iranian paramilitary/domestic-security units used Claude to build surveillance tooling,
-including a malicious Firefox extension ("al-Najm al-thaqib") shipped to production that
-mass-harvested real Iranians' identities from social networks - in scope (deployed malware, real
-victims), but no dedicated news source was confirmed, and the schema requires one.
+Written up on 2026-09-29 as `2026-08-31-anthropic-iran-firefox-identity-harvester` (victim "The
+public", IR; `built_exploit`, `intact`, `crime`, tradecraft `evasion`, 18 USC 1030(a)(2)(C) at the
+1-year misdemeanor level, `confidence: low`), with primary sources only, in draft PR
+https://github.com/avleen/felonybench.ai/pull/19 labelled `awaiting-news`. Coverage that was found and
+fetched while writing it is listed in the PR for the owner to add: RFE/RL (2026-09-11,
+https://www.rferl.org/a/anthropic-claude-iran-propaganda/33852428.html) and Iran International
+(2026-09-13, https://www.iranintl.com/en/202609131676).
 
-## GTG-50027 - Mali national mass-interception platform ("Lakana 360")
+## GTG-50027 - Mali national mass-interception platform ("Lakana 360") - WAITING FOR A MODEL
 Sources:
 - https://www.anthropic.com/threat-intelligence-report-september-2026
 - https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf
 - https://www.therundown.ai/news/anthropic-claude-misuse-threat-report-september-2026
 A Bamako consultant used Claude as the engineering workforce for a ~25M-SIM domestic surveillance
 platform for Mali's state intelligence service, deliberately built to remove a warrant requirement
-Malian law imposes - contested legality, but the deployed system runs on local models and no
-completed surveillance of an identifiable victim is documented.
+Malian law imposes. The owner decided on 2026-09-29 to wait until a model is identified: the
+deployed platform runs fully on-premises on unnamed local models. It stays `pending_human` in
+`agent/known-leads.yaml` with the reason "waiting for an identifiable model".
 
-## GTG-14021 - PRC transnational-repression venue scouting (Vancouver / Oslo)
-Sources:
-- https://www.anthropic.com/threat-intelligence-report-september-2026
-- https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf
-A PRC municipal security actor used Claude to produce pre-operational venue intelligence on lawful
-overseas protests (a Vancouver pro-democracy march, Oslo Freedom Forum screenings) - the closest of
-the PRC surveillance cases to a chargeable 18 USC 2261A transnational-repression offense, needing a
-human call on whether report-generation reaches a completed crime.
+## GTG-14021 - PRC venue scouting of overseas protests (Vancouver / Turkey / Oslo) - REJECTED 2026-09-29
+The owner asked whether the act was criminal (if so, the victim could be "the public"). On the
+report's facts, it was not. The bureau worked from inside the PRC and compiled the gathering point,
+route and terminus of a Vancouver march, Uyghur cultural-event venues in Turkey and Oslo Freedom
+Forum screenings. The report itself calls these "lawful overseas protests", and such details are
+normally public. The report documents no operation, contact, threat or harassment that followed.
+- 18 USC 2261A needs a course of conduct against a specific person that causes fear or substantial
+  emotional distress.
+- 18 USC 951 needs someone acting in the US as a foreign agent.
+- Host-country foreign-interference and harassment offences need intimidation, covert or unlawful
+  means, or an act on their territory. None of these is reported.
 
-## GTG-27006 - Russia sanctions / export-control evasion procurement
-Sources:
-- https://www.anthropic.com/threat-intelligence-report-september-2026
-- https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf
-A Moscow procurement manager used Claude to route dual-use goods to Russian defense customers and
-wrote briefings explicitly describing the routing as a way to evade European trade controls - a real
-IEEPA/EAR-style crime, but with no discrete victim, so a human should decide scope and scoring.
+Recorded as rejected in `agent/known-leads.yaml`. Revisit if a source documents an operation.
+
+## GTG-27006 - Russia sanctions / export-control evasion procurement - WRITTEN UP 2026-09-29
+Written up as `2026-08-31-anthropic-russia-dual-use-procurement`. The victim is "The public" (EU),
+because the briefings describe evading European trade controls. Scoring: `blast_radius: public`,
+`wrote_content`, `intact`, `crime`, IEEPA 50 USC 1705 (20y) plus ECRA 50 USC 4819 (20y), and
+Regulation (EU) 833/2014 as the foreign law.
 
 ## Illicit distillation by PRC labs - RESOLVED 2026-09-29
 The owner decided that "Claude being the target counts if AI was used to do the work." Written up:
