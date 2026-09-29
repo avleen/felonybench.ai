@@ -1,0 +1,39 @@
+id: 2026-06-12-google-outsider-enterprise-phishing-kits
+date: 2026-06-12
+date_precision: before
+reported: 2026-06-12
+league: accomplice
+tier: verified
+org: Google DeepMind
+human_actor: A China-based cybercrime network that coordinates on Telegram and sells phishing kits, known as the "Outsider Enterprise" (named as a defendant in Google's civil lawsuit)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Phone users sent scam texts linking to fake Google, YouTube, US Postal Service, E-ZPass, bank and delivery-company sites", type: third_party, country: US}
+summary: A China-based phishing-kit network used Gemini to generate the code for fake websites impersonating Google, YouTube, the US Postal Service and E-ZPass, then sent millions of scam texts linking to them.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Google's threat-intelligence group says operators "used Gemini to generate underlying code and run campaigns at scale", and TNW reports members encouraged each other to use Gemini to generate phishing-site code that was imported into the kit and turned into live scam pages; humans ran the campaigns, so this is written content.
+  guardrails: Neither Google nor the coverage describes a jailbreak or safety bypass; the model was used as shipped.
+  blast_radius: The targets were members of the public (Google says hundreds of thousands were scammed, with losses in the millions), so blast radius is third party.
+  tradecraft: None of the rubric's intrusion techniques are attributed to the AI; it wrote phishing pages.
+  dwell: Google gives no date for the Gemini use, only that the campaign was active in May 2026, so date_precision is before, using the lawsuit's filing date (2026-06-12); dwell is counted from that latest possible date (0 days) and never inflated. Google found the misuse itself.
+  statutes: Running text-message phishing that impersonates trusted brands to take victims' money and card details is wire fraud (18 USC 1343).
+confidence: high
+sources:
+  - {url: "https://cloud.google.com/blog/topics/threat-intelligence/from-prompting-to-autonomy-the-evolution-of-adversarial-ai", kind: primary, publisher: Google Threat Intelligence Group, title: "GTIG AI Threat Tracker: From Prompting to Autonomy – The Evolution of Adversarial AI"}
+  - {url: "https://blog.google/innovation-and-ai/technology/safety-security/combatting-ai-scams/", kind: primary, publisher: Google, title: "How we're combatting AI scams with security, legislation and more"}
+  - {url: "https://www.engadget.com/2192873/google-injunction-chinese-ai-scams/", kind: news, publisher: Engadget, title: "Google sues Chinese scammers using Gemini AI for fraud"}
+  - {url: "https://www.helpnetsecurity.com/2026/06/12/google-china-based-cybercrime-network-lawsuit/", kind: news, publisher: Help Net Security, title: "Google sues China-based scammers over Gemini AI abuse"}
+  - {url: "https://thenextweb.com/news/google-sues-outsider-enterprise-ai-scam-texts", kind: news, publisher: The Next Web, title: "Google sues Chinese cybercrime ring that used Gemini to build phishing sites and send 2.5 million scam texts"}
