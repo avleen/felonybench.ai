@@ -74,3 +74,12 @@ def test_body_for_accomplice_incident(make_accomplice, rubric):
     assert "| + Guardrails | 10 |" in body
     assert "Autonomy" not in body and "Pettiness" not in body
     assert "| **Total** | **42** |" in body
+
+
+def test_missing_news_only_opens_a_draft(make_incident):
+    from scripts.open_prs import awaiting_news
+    from scripts.validate import NEWS_REQUIRED
+    assert awaiting_news([NEWS_REQUIRED]) is True
+    assert awaiting_news([NEWS_REQUIRED, "reported: earlier than date"]) is False
+    assert awaiting_news([]) is False
+    assert labels_for(make_incident(), [NEWS_REQUIRED]) == ["agent", "awaiting-news"]

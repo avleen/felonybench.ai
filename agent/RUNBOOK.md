@@ -303,6 +303,17 @@ Human review of past sweeps kept correcting the same things. Get them right firs
 - **Names:** you may name people who are named in published news coverage. Don't name
   private individuals who aren't.
 - **Only cite what you read.** Sources you rejected, and why, go in the notes.
+- **Victims with no single identity:** when an act breaks laws or sanctions that protect
+  society at large (sanctions or export-control evasion, surveillance of unnamed
+  dissidents, material support with no struck target), use
+  `victims: [{name: "The public", type: public, country: <whose law>}]` and
+  `blast_radius: public`. It must still be an actual crime or a genuinely contested one.
+- **No news yet:** if an incident is in scope and otherwise valid but has no news
+  coverage, write it anyway with only its primary sources. It's opened as a **draft PR**
+  labeled `awaiting-news`. Each sweep, check the incidents in `.agent-out/open/` for new
+  coverage and add it when it appears; a human then marks the PR ready.
+- **No identifiable model:** a case where no model or lab can be identified (e.g. run on
+  unnamed local models) waits in `agent/known-leads.yaml` until one is named.
 - **Accomplice `contribution`** (what the AI did, not the human): `advised` (explained
   a technique, answered questions) → `wrote_content` (phishing lures, scam scripts,
   malware components a human deployed) → `found_vulnerability` (found the flaw the human

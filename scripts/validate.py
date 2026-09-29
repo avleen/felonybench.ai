@@ -11,6 +11,7 @@ from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric
 from scripts.scoring import to_date
 
 SCHEMA = ROOT / "schema" / "incident.schema.json"
+NEWS_REQUIRED = "sources: at least one 'news' source is required"
 
 
 def load_validator(path: Path = SCHEMA) -> Draft202012Validator:
@@ -63,7 +64,7 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
 
     kinds = {source["kind"] for source in incident["sources"]}
     if "news" not in kinds:
-        errors.append("sources: at least one 'news' source is required")
+        errors.append(NEWS_REQUIRED)
     if incident["tier"] == "verified" and not kinds & {"postmortem", "primary"}:
         errors.append("tier: 'verified' requires a 'postmortem' or 'primary' source")
 

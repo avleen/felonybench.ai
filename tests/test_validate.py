@@ -156,3 +156,9 @@ def test_modification_only_in_accomplice_league(make_incident, rubric):
     inc = make_incident()
     inc["models"][0]["modification"] = "abliterated"
     assert any("modification" in e for e in _errors(inc, rubric))
+
+
+def test_public_victims_are_allowed(make_accomplice, rubric):
+    inc = make_accomplice(scoring={"blast_radius": "public"})
+    inc["victims"] = [{"name": "The public", "type": "public", "country": "US"}]
+    assert _errors(inc, rubric, stem=ACC) == []

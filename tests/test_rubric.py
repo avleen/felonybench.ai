@@ -34,3 +34,10 @@ def test_rubric_version_bumped():
     r = load_rubric()
     assert r["version"] == "1.1"
     assert r["changelog"][-1]["version"] == "1.1"
+
+
+def test_public_blast_radius_sits_between_third_party_and_government():
+    br = load_rubric()["blast_radius"]
+    keys = list(br)
+    assert keys.index("third_party") < keys.index("public") < keys.index("government")
+    assert br["public"]["multiplier"] == 1.5

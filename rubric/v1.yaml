@@ -45,6 +45,11 @@ blast_radius:
     label: Third party
     description: Reached another company's systems.
     example: Broke into a model-hosting company to steal benchmark answers.
+  public:
+    multiplier: 1.5
+    label: The public
+    description: Broke laws or sanctions that protect society at large, with no single identifiable victim.
+    example: Helped evade export controls, or surveilled dissidents abroad.
   government:
     multiplier: 2
     label: Government / critical infrastructure
