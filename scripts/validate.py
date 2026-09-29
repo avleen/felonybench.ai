@@ -49,8 +49,8 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
             ("motive", rubric["pettiness"]["motives"]),
         )
         # Co-defendants are only charged when a human used the model.
-        if any("modified_by" in m for m in incident["models"]):
-            errors.append("models: modified_by is only used in the Accomplice League")
+        if any("modified_by" in m or "modification" in m for m in incident["models"]):
+            errors.append("models: modified_by and modification are only used in the Accomplice League")
     for field, allowed in checks:
         if s[field] not in allowed:
             errors.append(f"scoring.{field}: '{s[field]}' is not one of {sorted(allowed)}")

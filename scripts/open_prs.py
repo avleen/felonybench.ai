@@ -52,12 +52,24 @@ def labels_for(incident: dict, errors: list[str]) -> list[str]:
 def pr_body(incident: dict, notes: str, breakdown: dict | None, diff_md: str, errors: list[str]) -> str:
     parts = [notes.strip() or incident.get("summary", "")]
     if breakdown:
+        if incident.get("league") == "accomplice":
+            middle = [
+                ("× Contribution", breakdown["contribution"]),
+                ("× Blast Radius", breakdown["blast_radius"]),
+                ("× Legal status", breakdown["legal_status"]),
+                ("+ Tradecraft", breakdown["tradecraft"]),
+                ("+ Guardrails", breakdown["guardrails"]),
+            ]
+        else:
+            middle = [
+                ("× Autonomy", breakdown["autonomy"]),
+                ("× Blast Radius", breakdown["blast_radius"]),
+                ("+ Tradecraft", breakdown["tradecraft"]),
+                ("+ Pettiness", breakdown["pettiness"]),
+            ]
         rows = [
             ("Sentence-Years", breakdown["sentence_years"]),
-            ("× Autonomy", breakdown["autonomy"]),
-            ("× Blast Radius", breakdown["blast_radius"]),
-            ("+ Tradecraft", breakdown["tradecraft"]),
-            ("+ Pettiness", breakdown["pettiness"]),
+            *middle,
             ("+ Dwell", breakdown["dwell"]),
             ("× Recidivism", breakdown["recidivism_multiplier"]),
         ]

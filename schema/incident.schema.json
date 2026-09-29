@@ -25,7 +25,8 @@
           "share": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
           "modified_by": {"type": "string", "minLength": 1},
           "modification": {"type": "string", "minLength": 1}
-        }
+        },
+        "dependentRequired": {"modified_by": ["modification"], "modification": ["modified_by"]}
       }
     },
     "victims": {

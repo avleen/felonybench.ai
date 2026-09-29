@@ -141,3 +141,18 @@ def test_modified_by_only_in_accomplice_league(make_incident, rubric):
     inc = make_incident()
     inc["models"][0]["modified_by"] = "OrcaRouter"
     assert any("modified_by" in e for e in _errors(inc, rubric))
+
+
+def test_modifier_fields_come_together(make_accomplice, rubric):
+    inc = make_accomplice()
+    del inc["models"][0]["modification"]
+    assert any("modification" in e for e in _errors(inc, rubric, stem=ACC))
+    inc = make_accomplice()
+    del inc["models"][0]["modified_by"]
+    assert any("modified_by" in e for e in _errors(inc, rubric, stem=ACC))
+
+
+def test_modification_only_in_accomplice_league(make_incident, rubric):
+    inc = make_incident()
+    inc["models"][0]["modification"] = "abliterated"
+    assert any("modification" in e for e in _errors(inc, rubric))

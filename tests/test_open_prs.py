@@ -65,3 +65,12 @@ def test_run_prints_command_and_stderr_on_failure(capsys, monkeypatch, tmp_path)
     err = capsys.readouterr().err
     assert "git status" in err
     assert "boom: something went wrong" in err
+
+
+def test_body_for_accomplice_incident(make_accomplice, rubric):
+    from scripts.scoring import breakdown
+    body = pr_body(make_accomplice(), "", breakdown(make_accomplice(), rubric), "", [])
+    assert "| × Contribution | 1.5 |" in body
+    assert "| + Guardrails | 10 |" in body
+    assert "Autonomy" not in body and "Pettiness" not in body
+    assert "| **Total** | **42** |" in body
