@@ -20,6 +20,14 @@ export const VIEWS = [
   { key: "orgs", label: "By Org" },
 ];
 
+// The two ways a reader can view the data: without low-confidence reports (the default) or with them.
+// Each carries its own boards, trends and last-incident dates, scored separately.
+export const CONFIDENCE_VIEWS = [
+  { key: "confident", data: (scores as any).confident },
+  { key: "all", data: scores as any },
+];
+export const isLow = (i: any) => !(scores as any).confident.incident_ids.includes(i.id);
+
 export const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 export const blastLabel = (key: string) => rubric.blast_radius[key]?.label ?? key;
 // Every model on any board, once; model pages and OG images are built from this.

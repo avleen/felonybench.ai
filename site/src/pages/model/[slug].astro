@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import IncidentList from "../../components/IncidentList.astro";
-import scores, { fmt, rubric, incidentsFor, allModels, LEAGUES } from "../../lib/data";
+import { fmt, rubric, incidentsFor, allModels, isLow, LEAGUES, CONFIDENCE_VIEWS } from "../../lib/data";
 
 export function getStaticPaths() {
   return allModels().map((model: any) => ({ params: { slug: model.slug }, props: { model } }));
@@ -16,10 +16,22 @@ const modified = model.base_org && model.base_org !== model.org;
 const provenance = modified
   ? `${modifications.length ? `${modifications.join(", ").replace(/^./, (c) => c.toUpperCase())}. ` : ""}Base model by ${model.base_org}.`
   : null;
-const standings = LEAGUES.map((l) => ({ ...l, row: scores.boards[l.key].all.models.find((m: any) => m.slug === model.slug) })).filter((s) => s.row);
-const badges = [...new Set(standings.flatMap((s) => s.row.badges))] as string[];
+// Standings per confidence view: a model can rank differently, or not at all, without its low-confidence reports.
+const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
+  const standings = LEAGUES.map((l) => ({ ...l, row: data.boards[l.key].all.models.find((m: any) => m.slug === model.slug) })).filter((s) => s.row);
+  return { key, standings, badges: [...new Set(standings.flatMap((s) => s.row.badges))] as string[] };
+});
+const onlyLow = incidents.every(isLow);
 ---
 <Layout title={`${model.name} rap sheet`} ogImage={`/og/${model.slug}.png`}>
+  {onlyLow && (
+    <div class="panel low-notice" data-conf="confident">
+      <p class="eyebrow">Low-confidence reports only</p>
+      <p>Every report about {model.name} is low confidence, so it's hidden while you're viewing high- and medium-confidence reports.</p>
+      <button type="button" class="show-low-button" data-show-low>Show low-confidence reports</button>
+    </div>
+  )}
+  <div data-conf={onlyLow ? "all" : undefined}>
   <section class="mugshot panel">
     <div class="placard">
       <div class="muted">{model.org}</div>
@@ -27,22 +39,27 @@ const badges = [...new Set(standings.flatMap((s) => s.row.badges))] as string[];
       {provenance && <div class="muted">{provenance}</div>}
       {aliases.length > 0 && <div class="muted">a.k.a. {aliases.join(", ")}</div>}
     </div>
-    <div>{badges.map((b) => <span class={`badge badge-${b}`} title={rubric.badges[b].description}>{rubric.badges[b].label}</span>)}</div>
+    {views.map((v) => <div data-conf={v.key}>{v.badges.map((b) => <span class={`badge badge-${b}`} title={rubric.badges[b].description}>{rubric.badges[b].label}</span>)}</div>)}
   </section>
 
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>League</th><th class="num">Rank</th><th class="num">FBS</th><th class="num">Sentence-Years</th><th class="num">Incidents</th></tr></thead>
-      <tbody>{standings.map((s) => <tr><td>{s.label}</td><td class="num">#{s.row.rank}</td><td class="num score">{fmt(s.row.score)}</td><td class="num">{fmt(s.row.sentence_years)}</td><td class="num">{s.row.incidents.length}</td></tr>)}</tbody>
-    </table>
-  </div>
+  {views.map((v) => (
+    <div class="table-wrap" data-conf={v.key}>
+      <table>
+        <thead><tr><th>League</th><th class="num">Rank</th><th class="num">FBS</th><th class="num">Sentence-Years</th><th class="num">Incidents</th></tr></thead>
+        <tbody>{v.standings.map((s) => <tr><td>{s.label}</td><td class="num">#{s.row.rank}</td><td class="num score">{fmt(s.row.score)}</td><td class="num">{fmt(s.row.sentence_years)}</td><td class="num">{s.row.incidents.length}</td></tr>)}</tbody>
+      </table>
+    </div>
+  ))}
   <p class="muted">Standings include alleged incidents.</p>
 
   <h2>Record</h2>
   <IncidentList incidents={incidents} />
+  </div>
 </Layout>
 
 <style>
+  .low-notice { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .low-notice p { margin: 0; }
   .mugshot {
     margin: 16px 0 24px;
     background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px);

@@ -212,17 +212,31 @@ def trends(scored: list[dict], league: str, tier: str) -> dict:
     return series
 
 
-def build_scores(incidents: list[dict], rubric: dict, generated_at: str) -> dict:
-    scored = score_all(incidents, rubric)
+# The site hides low-confidence incidents by default. The default view is scored from
+# scratch without them, so a low-confidence report can't touch it even through the
+# recidivism multiplier.
+CONFIDENT = ("high", "medium")
+
+
+def _views(scored: list[dict], rubric: dict) -> dict:
     return {
-        "rubric_version": rubric["version"],
-        "generated_at": generated_at,
-        "rubric": rubric,
-        "incidents": scored,
         "boards": {lg: {t: board(scored, rubric, lg, t) for t in TIERS} for lg in LEAGUES},
         "trends": {lg: {t: trends(scored, lg, t) for t in TIERS} for lg in LEAGUES},
         "last_incident_date": {
             lg: max((str(to_date(i["date"])) for i in scored if i["league"] == lg), default=None)
             for lg in LEAGUES
         },
+    }
+
+
+def build_scores(incidents: list[dict], rubric: dict, generated_at: str) -> dict:
+    scored = score_all(incidents, rubric)
+    confident = score_all([i for i in incidents if i.get("confidence") in CONFIDENT], rubric)
+    return {
+        "rubric_version": rubric["version"],
+        "generated_at": generated_at,
+        "rubric": rubric,
+        "incidents": scored,
+        **_views(scored, rubric),
+        "confident": {"incident_ids": [i["id"] for i in confident], **_views(confident, rubric)},
     }

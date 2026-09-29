@@ -130,3 +130,21 @@ pre.panel { overflow-x: auto; }
   .controls label:has(.short) .long { display: none; }
   .controls .short { display: inline; }
 }
+
+/* Confidence filter. Low-confidence reports are hidden unless the reader opts in (html.show-low).
+   [data-conf] marks a whole alternative rendering for one view; [data-low] marks a single
+   low-confidence item inside a list. */
+html:not(.show-low) [data-conf="all"],
+html.show-low [data-conf="confident"],
+html:not(.show-low) [data-low] { display: none !important; }
+.confidence-bar { border-bottom: 1px solid var(--rule); background: var(--panel-head); }
+.confidence-bar .wrap { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: flex-end; padding-top: 8px; padding-bottom: 8px; font-size: 14px; }
+.confidence-bar .controls { width: auto; }
+.confidence-bar .controls label { padding: 6px 12px; font-size: 13px; }
+.low-tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font: 600 10px var(--mono); letter-spacing: 0.04em; text-transform: uppercase; background: var(--track); color: var(--muted); vertical-align: middle; }
+@media (max-width: 640px) {
+  .confidence-bar .wrap { justify-content: space-between; }
+  .confidence-bar .controls { width: auto; flex: 1; }
+}
+.show-low-button { font: 600 14px var(--sans); padding: 10px 16px; min-height: 44px; border-radius: 8px; border: 1px solid var(--ink); background: var(--panel); color: var(--ink); cursor: pointer; }
+.show-low-button:hover { background: var(--ink); color: var(--paper); }
