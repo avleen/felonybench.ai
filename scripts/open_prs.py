@@ -134,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     _run("git", "clean", "-fd", "incidents")
     rubric, validator = load_rubric(), load_validator()
     before = build_scores(load_incidents(ROOT / "incidents"), rubric, "base")
-    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--json", "number,headRefName,isDraft"))
+    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--json", "number,headRefName,isDraft,labels"))
     open_heads = {pr["headRefName"]: pr for pr in open_prs}
 
     failed = False
@@ -166,10 +166,11 @@ def main(argv: list[str] | None = None) -> int:
                 _run("gh", "pr", "comment", str(pr["number"]), "--body", "Agent updated this incident.\n\n" + body)
                 if becomes_ready(pr, errors):
                     _run("gh", "pr", "ready", str(pr["number"]))
-                    _run("gh", "pr", "edit", str(pr["number"]), "--remove-label", "awaiting-news")
+                    if any(label.get("name") == "awaiting-news" for label in pr.get("labels", [])):
+                        _run("gh", "pr", "edit", str(pr["number"]), "--remove-label", "awaiting-news")
             else:
                 label_args = [x for label in labels_for(incident, errors) for x in ("--label", label)]
-                draft = ["--draft"] if awaiting_news(errors) else []
+                draft = ["--draft"] if errors else []  # agent PRs get no CI check; a draft can't be merged by accident
                 _run("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title, "--body", body, *draft, *label_args)
             print(f"{title} -> {branch}")
         except subprocess.CalledProcessError as e:
