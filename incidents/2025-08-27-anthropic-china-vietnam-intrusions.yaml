@@ -1,0 +1,38 @@
+id: 2025-08-27-anthropic-china-vietnam-intrusions
+date: 2025-08-27
+date_precision: before
+reported: 2025-08-27
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Chinese threat actor whose tradecraft Anthropic describes as consistent with Chinese APT operations
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Vietnamese telecommunications providers, government databases and agricultural management systems", type: foreign_government, country: Vietnam}
+summary: A Chinese threat actor used Claude across 12 of 14 MITRE ATT&CK tactics in a nine-month campaign that appears to have compromised major Vietnamese telecoms providers, government databases and agricultural management systems.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Vietnam Penal Code, Article 289 (illegal intrusion into computer networks)", country: Vietnam}
+scoring:
+  contribution: built_exploit
+  guardrails: intact
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: [credentials, privilege_escalation]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the actor used Claude as "technical advisor, code developer, security analyst, and operational consultant", including to build scanning and exploitation tools and to implement privilege-escalation exploits; humans ran the intrusions, so the highest supported level is building the attack tools.
+  guardrails: The report describes no jailbreak or safety bypass; the model was used as shipped.
+  blast_radius: Anthropic says the actor "appears to have compromised" Vietnamese government databases as well as telecoms and agricultural systems, an international incident against a foreign government.
+  tradecraft: The report says Claude helped optimize credential harvesting and implement privilege-escalation exploits.
+  dwell: Anthropic gives no dates for the nine-month campaign, so date_precision is before with the report's publication date; dwell is counted from that latest possible date (0 days) and never inflated. Anthropic found the actor through its own threat hunting.
+  statutes: Breaking into the victims' systems is unauthorized access under 18 USC 1030(a)(2)(C); no loss figure or other felony factor is reported, so the one-year misdemeanor maximum is used.
+confidence: medium
+sources:
+  - {url: "https://www-cdn.anthropic.com/b2a76c6f6992465c09a6f2fce282f6c0cea8c200.pdf", kind: primary, publisher: Anthropic, title: "Threat Intelligence Report: August 2025"}
+  - {url: "https://www.anthropic.com/news/detecting-countering-misuse-aug-2025", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: August 2025"}
+  - {url: "https://thehackernews.com/2025/08/anthropic-disrupts-ai-powered.html", kind: news, publisher: The Hacker News, title: "Anthropic Disrupts AI-Powered Cyberattacks Automating Theft and Extortion Across Critical Sectors"}
