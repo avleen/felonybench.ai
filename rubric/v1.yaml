@@ -1,8 +1,11 @@
-version: "1.0"
+version: "1.1"
 changelog:
   - version: "1.0"
     date: "2026-09-28"
     notes: Initial rubric.
+  - version: "1.1"
+    date: "2026-09-29"
+    notes: Added the Accomplice League.
 
 autonomy:
   directed:
@@ -96,6 +99,25 @@ dwell:
   outside_detectors: [victim, third_party]
   outside_detection_bonus: 3
 
+# Accomplice League: a human used an AI model to commit (or arguably commit) a crime.
+# accomplice incident = Sentence-Years x Contribution x Blast Radius x Legal status
+#                     + Tradecraft + Guardrails + Dwell, x recidivism multiplier.
+# Pettiness and autonomy aren't used there: they describe the model's own choices.
+accomplice:
+  contribution:
+    advised: {multiplier: 0.25, label: Advised, description: Answered questions or explained techniques.}
+    wrote_content: {multiplier: 0.5, label: Wrote the content, description: Wrote phishing lures, malware components or scripts that a human deployed.}
+    found_vulnerability: {multiplier: 1, label: Found the vulnerability, description: Found the flaw the human exploited.}
+    built_exploit: {multiplier: 1.5, label: Built the exploit, description: Developed a working exploit or attack tool.}
+    operated: {multiplier: 2, label: Ran the operation, description: Carried out the attack itself under a human's direction.}
+  guardrails:
+    intact: {points: 0, label: Guardrails intact, description: Used as shipped; the lab's safeguards didn't stop it.}
+    jailbroken: {points: 5, label: Jailbroken, description: The human talked or tricked the model past its safeguards.}
+    removed: {points: 10, label: Safety removed, description: Run with its safety training stripped out, e.g. an abliterated model.}
+  legal_status:
+    crime: {multiplier: 1, label: Crime}
+    contested: {multiplier: 0.5, label: Legality contested}
+
 recidivism:
   window_days: 90
   multiplier: 1.25
@@ -110,3 +132,9 @@ badges:
   international_incident:
     label: International Incident
     description: Broke foreign law or hit a foreign government.
+  uncensored:
+    label: Uncensored
+    description: Used with its safety training removed.
+  jailbroken:
+    label: Jailbroken
+    description: A human got it past its safeguards.
