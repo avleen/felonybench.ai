@@ -1,0 +1,39 @@
+id: 2025-08-27-anthropic-north-korea-it-workers
+date: 2025-08-27
+date_precision: before
+reported: 2025-08-27
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: North Korean operatives running the regime's fraudulent remote IT worker scheme
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "The public (US and international sanctions on North Korea)", type: public, country: US}
+  - {name: "Western technology companies that hired the operatives under false identities", type: third_party, country: null}
+summary: North Korean operatives used Claude to invent professional personas, pass technical interviews and do the day-to-day work of remote engineering jobs at Western tech firms, earning salaries that fund the regime in breach of sanctions.
+statutes:
+  - {code: "50 USC 1705", max_years: 20}
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: public
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says operators used Claude to "generate convincing professional backgrounds", tailor resumes, prepare interview answers, get "real-time assistance during coding assessments" and, once hired, to "deliver actual technical work" (about 80% of their usage); humans held the jobs, so this is written content.
+  guardrails: The report describes no jailbreak or safety bypass; the model was used as shipped.
+  blast_radius: The scheme exists to "evade international sanctions and generate profit for the regime", which is a crime against society at large, so the victim is the public; the deceived employers are listed as a second victim.
+  tradecraft: None of the rubric's intrusion techniques apply to employment fraud.
+  dwell: Anthropic gives no dates for the activity, so date_precision is before with the report's publication date; dwell is counted from that latest possible date (0 days) and never inflated. Anthropic found the accounts itself, building on public reporting and threat-intelligence sharing.
+  statutes: Earning money for North Korea through hidden employment violates the North Korea sanctions regulations enforced under IEEPA (50 USC 1705), and obtaining salaries under false identities is wire fraud (18 USC 1343).
+confidence: medium
+sources:
+  - {url: "https://www-cdn.anthropic.com/b2a76c6f6992465c09a6f2fce282f6c0cea8c200.pdf", kind: primary, publisher: Anthropic, title: "Threat Intelligence Report: August 2025"}
+  - {url: "https://www.anthropic.com/news/detecting-countering-misuse-aug-2025", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: August 2025"}
+  - {url: "https://thehackernews.com/2025/08/anthropic-disrupts-ai-powered.html", kind: news, publisher: The Hacker News, title: "Anthropic Disrupts AI-Powered Cyberattacks Automating Theft and Extortion Across Critical Sectors"}
