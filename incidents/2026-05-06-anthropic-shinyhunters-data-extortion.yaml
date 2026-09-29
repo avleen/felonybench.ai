@@ -35,5 +35,6 @@ confidence: high
 sources:
   - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
   - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://cloud.google.com/blog/topics/threat-intelligence/from-prompting-to-autonomy-the-evolution-of-adversarial-ai", kind: primary, publisher: Google Threat Intelligence Group, title: "GTIG AI Threat Tracker: From Prompting to Autonomy – The Evolution of Adversarial AI"}
   - {url: "https://www.bleepingcomputer.com/news/security/hackers-abused-claude-to-extract-secrets-from-18m-android-apps/", kind: news, publisher: BleepingComputer, title: "Hackers abused Claude to extract secrets from 1.8M Android apps"}
   - {url: "https://thehackernews.com/2026/09/claude-used-to-automate-exploitation.html", kind: news, publisher: The Hacker News, title: "Claude Used to Automate Exploitation and Data Theft Across Multiple Victims"}
