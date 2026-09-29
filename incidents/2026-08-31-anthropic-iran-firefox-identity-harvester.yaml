@@ -1,0 +1,37 @@
+id: 2026-08-31-anthropic-iran-firefox-identity-harvester
+date: 2026-08-31
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Qom-based provincial unit, one of two linked units that Anthropic assesses with high confidence were associated with Iranian paramilitary domestic-security entities (tracked by Anthropic as GTG-34007)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "The public", type: public, country: "IR"}
+summary: An Iranian domestic-security unit used Claude as its engineering department to build surveillance tools, including a Firefox extension disguised as a prayer-times utility that was shipped to production and used to mass-harvest user identities from major social networks.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: built_exploit
+  guardrails: intact
+  legal_status: crime
+  blast_radius: public
+  tradecraft: [evasion]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the unit "used Claude as its engineering department" and used it to "build, debug, and ship" tools including the Firefox identity harvester, which "a unit member used to mass-harvest user identities", so Claude built the attack tool and a human deployed it.
+  guardrails: Anthropic says Claude refused explicit profiling and propaganda requests, but "our safeguards did not refuse many of the surveillance software tooling requests"; no jailbreak of the tooling requests is described, so guardrails are scored intact.
+  blast_radius: The harvested identities belonged to unnamed social-network users, as part of the surveillance and profiling of Iranians; with no single identifiable victim, the victim is the public of Iran and blast radius is public.
+  tradecraft: The harvester Claude helped build was disguised as a prayer-times utility, which is concealment of the tool's purpose (evasion); no credential theft, privilege escalation or persistence is described for it.
+  dwell: No incident date is given beyond the December 2025-August 2026 coverage window, so date_precision is before with the window's latest date; dwell is counted from that latest possible date (0 days) and never inflated, and Anthropic detected and banned the 16 accounts itself.
+  statutes: Covertly harvesting users' identities with a disguised extension is unauthorized access to obtain information under 18 USC 1030(a)(2)(C), but the report does not say how the extension reached victims' data and reports none of the felony factors in 1030(c)(2)(B) (commercial gain, a further crime, or over $5,000 in value), so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://www.rferl.org/a/anthropic-claude-iran-propaganda/33852428.html", kind: news, publisher: RFE/RL, title: "Anthropic Disrupts Iran's Use Of Claude To Spread Propaganda, Spy On Dissidents"}
