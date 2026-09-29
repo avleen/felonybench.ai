@@ -45,6 +45,7 @@ The owner decided that "Claude being the target counts if AI was used to do the 
 Zhipu (two incidents) and Xiaomi, where the report says Claude did the processing,
 grading or pipeline-writing work. SenseTime was written up and later dropped by the owner (weakest legal theory: the transcripts were outputs users could already see). Rejected: Alibaba, Moonshot, DeepSeek and MiniMax, where the report
 shows Claude only producing the stolen output. See the distillation section of
-`anthropic-sept-2026-threat-report.md`. One call remains open for the owner: whether Claude
+`anthropic-sept-2026-threat-report.md`. The owner then ruled that Claude
 decoding its own thinking signature in Moonshot's and DeepSeek's "cross-session replay" attack
-counts as the AI doing the evasion. If it does, both become incidents.
+counts as the AI doing the evasion, so both are now incidents
+(`2026-07-31-anthropic-moonshot-thinking-signature-replay`, `2026-07-01-anthropic-deepseek-thinking-signature-replay`).

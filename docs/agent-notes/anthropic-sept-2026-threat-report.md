@@ -154,7 +154,7 @@ Rejected under the owner's rule (the report shows no AI system doing the work of
   virtual cards). Alibaba also used Claude for its RL environments, model-development
   infrastructure and architecture research, but the report does not tie that work to the
   distillation crime. Closest call after Moonshot/DeepSeek.
-- **GTG-16002 Moonshot** and **GTG-16001 DeepSeek**: the silent relaying of customers' requests to
+- **GTG-16002 Moonshot** and **GTG-16001 DeepSeek** (later reversed; see below): the silent relaying of customers' requests to
   Claude, the CoT extraction pipelines and the 5,380 fraudulent accounts (Moonshot) are not described
   as AI-built or AI-run. Claude answering the relayed customers, and the "cross-session replay" attack
   (eliciting Claude to convert its thinking signature back into the raw trace), are both Claude
@@ -165,6 +165,20 @@ Rejected under the owner's rule (the report shows no AI system doing the work of
   exposure (Yahoo/The Next Web/Quartz headlines, not fetched).
 - **GTG-16003 MiniMax**: a shell-company proxy network harvesting user exchanges with Anthropic and
   OpenAI models. The report describes no AI doing the work.
+
+**Moonshot and DeepSeek reversed (owner, 2026-09-29):** Claude converting its thinking signature
+back into the raw trace is Claude doing the work of defeating Anthropic's anti-distillation control,
+so both are written up as Accomplice incidents (org Anthropic, own_prod, `contribution: operated`,
+`legal_status: contested`, `tradecraft: [evasion]`, `self_disclosed: true`):
+
+| id | GTG | statutes | score |
+|---|---|---|---|
+| 2026-07-31-anthropic-moonshot-thinking-signature-replay | 16002 | 17 USC 1201(a)(1)(A) (5, via 1204), 1832, 1343 (the report ties 5,380 fraudulent accounts to Moonshot) | 19.5 |
+| 2026-07-01-anthropic-deepseek-thinking-signature-replay | 16001 | 17 USC 1201(a)(1)(A), 1832 (no fraudulent accounts of DeepSeek's own are described, so no 1343) | 9.5 |
+
+Dates: Moonshot's traffic is attributed to "between May and July 2026" (`before`, 2026-07-31);
+DeepSeek's to "14 days in July 2026" (`month`, 2026-07-01). The silent relaying of customers'
+requests is still not counted.
 
 ### Also rejected
 - **GTG-50021** (fraudulent "cheap Claude" reseller, "kl1zy"; silently proxied traffic to another

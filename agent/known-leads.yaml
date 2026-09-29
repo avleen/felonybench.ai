@@ -104,7 +104,7 @@
 
 # Distillation cluster: the owner decided on 2026-09-29 that "Claude being the target counts if AI
 # was used to do the work." GTG-16006 Zhipu (both campaigns) and GTG-16008 Xiaomi are written up in
-# incidents/. The rest are rejected below.
+# incidents/, and GTG-16002 Moonshot and GTG-16001 DeepSeek are handled below. The rest are rejected.
 - lead: Anthropic Sept 2026 - GTG-16005 Alibaba (Qwen / Tongyi Lab) chain-of-thought distillation
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
   status: rejected
@@ -112,8 +112,8 @@
 
 - lead: Anthropic Sept 2026 - GTG-16002 Moonshot and GTG-16001 DeepSeek (silent relaying of customers' requests to Claude; cross-session replay of thinking signatures)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
-  status: rejected
-  reason: Under the owner's rule, the relaying, the extraction pipelines and the fraudulent accounts are not described as AI-run. Claude answering the relayed users, and Claude converting its thinking signature back into the raw trace, are both Claude producing the loot. Closest call in the cluster; revisit if the owner counts the signature decoding as the AI doing the evasion.
+  status: handled
+  reason: Owner's ruling (2026-09-29) - Claude converting its thinking signature back into the raw trace is Claude doing the work of the evasion. Written up as incidents/2026-07-31-anthropic-moonshot-thinking-signature-replay.yaml and incidents/2026-07-01-anthropic-deepseek-thinking-signature-replay.yaml. The silent relaying of customers' requests stays out of scope.
 
 - lead: Anthropic Sept 2026 - GTG-16012 SenseTime distillation pipeline (Claude wrote the pipeline and launched and monitored training runs)
   sources: [https://www.anthropic.com/threat-intelligence-report-september-2026]
