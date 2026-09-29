@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import scores, { fmt, rubric, CORRECTIONS_EMAIL, occurred } from "../../lib/data";
+import scores, { fmt, rubric, CORRECTIONS_EMAIL, occurred, leagueLabel, coDefendants, chargedOrgs, hasCoDefendants } from "../../lib/data";
 
 export function getStaticPaths() {
   return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
@@ -10,16 +10,32 @@ const { incident: i } = Astro.props;
 const b = i.breakdown;
 const s = i.scoring;
 const byKind = (kind: string) => i.sources.filter((src: any) => src.kind === kind);
+const accomplice = i.league === "accomplice";
+const acc = rubric.accomplice;
+const why = (key: string) => i.rationale[key] ? `: ${i.rationale[key]}` : ".";
 const rows = [
   ["Sentence-Years", fmt(b.sentence_years), i.statutes.map((st: any) => st.code).join(", ")],
-  ["× Autonomy", fmt(b.autonomy), `${rubric.autonomy[s.autonomy].label}: ${i.rationale.autonomy}`],
-  ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
-  ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
-  ["+ Pettiness", fmt(b.pettiness), `${rubric.pettiness.motives[s.motive].label}: ${i.rationale.motive}`],
+  ...(accomplice ? [
+    ["× Contribution", fmt(b.contribution), `${acc.contribution[s.contribution].label}${why("contribution")}`],
+    ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
+    ["× Legal status", fmt(b.legal_status), `${acc.legal_status[s.legal_status].label}${why("legal_status")}`],
+    ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
+    ["+ Guardrails", fmt(b.guardrails), `${acc.guardrails[s.guardrails].label}${why("guardrails")}`],
+  ] : [
+    ["× Autonomy", fmt(b.autonomy), `${rubric.autonomy[s.autonomy].label}: ${i.rationale.autonomy}`],
+    ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
+    ["+ Tradecraft", fmt(b.tradecraft), i.rationale.tradecraft],
+    ["+ Pettiness", fmt(b.pettiness), `${rubric.pettiness.motives[s.motive].label}: ${i.rationale.motive}`],
+  ]),
   ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
   ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
 ];
-const formula = `(${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)} + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
+const product = accomplice
+  ? `${fmt(b.sentence_years)} × ${fmt(b.contribution)} × ${fmt(b.blast_radius)} × ${fmt(b.legal_status)} + ${fmt(b.tradecraft)} + ${fmt(b.guardrails)} + ${fmt(b.dwell)}`
+  : `${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)} + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)}`;
+const formula = `(${product})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
+const charged = coDefendants(i);
+const joint = accomplice && hasCoDefendants(i);
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
 ---
 <Layout title={i.summary} description={i.summary}>
@@ -30,7 +46,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
       <p class="tags">
         <span class="stamp">{i.tier}</span>
         {i.badges.map((k: string) => <span class={`badge badge-${k}`}>{rubric.badges[k].label}</span>)}
-        <span class="badge">{i.league === "open" ? "Open League" : "Sandbox League"}</span>
+        <span class="badge">{leagueLabel(i.league)}</span>
       </p>
     </div>
     <div class="inverse scorecard">
@@ -54,7 +70,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
         </table>
       </div>
 
-      <h2>Charges, had a human done it</h2>
+      <h2>{accomplice ? "Charges the human could face" : "Charges, had a human done it"}</h2>
       <ul class="charges">
         {i.statutes.map((st: any) => <li class="panel"><code>{st.code}</code><span class="muted">Up to {st.max_years} years</span></li>)}
         {i.foreign_laws.map((f: any) => <li class="panel"><code>{f.code}</code><span class="muted">{f.country}</span></li>)}
@@ -67,11 +83,16 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
         <dl class="facts">
           <dt>Occurred</dt><dd class="num">{occurred(i)}</dd>
           <dt>Reported</dt><dd class="num">{i.reported}</dd>
-          <dt>Defendant{i.models.length > 1 && "s"}</dt><dd>{i.org}: {i.models.map((m: any, n: number) => <>{n > 0 && ", "}<a href={`/model/${m.slug}/`}>{m.name}</a></>)}</dd>
+          {accomplice && <><dt>Human actor</dt><dd>{i.human_actor}</dd></>}
+          <dt>{accomplice ? (joint ? "Co-defendants" : "Accomplice") : `Defendant${i.models.length > 1 ? "s" : ""}`}</dt><dd>{charged}: {i.models.map((m: any, n: number) => <>{n > 0 && ", "}<a href={`/model/${m.slug}/`}>{m.name}</a></>)}</dd>
           <dt>Victim{i.victims.length > 1 && "s"}</dt><dd>{i.victims.map((v: any) => v.name).join(", ")}</dd>
-          <dt>League</dt><dd>{i.league === "open" ? "Open League" : "Sandbox League"}</dd>
+          <dt>League</dt><dd>{leagueLabel(i.league)}</dd>
         </dl>
       </div>
+
+      {joint && (
+        <p class="joint muted">Charged jointly and severally: {chargedOrgs(i)} are each liable for the full {fmt(b.total)}. <a href="/rubric/#accomplice-league">Why</a></p>
+      )}
 
       <div class="panel sources">
         {sourceGroups.map(([heading, kind]) => byKind(kind).length > 0 && (
@@ -113,6 +134,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
   .facts dt { color: var(--manila-muted); }
   .facts dd { margin: 0; }
   .facts a { color: inherit; }
+  .joint { margin: -4px 0 0; font-size: 14px; line-height: 1.5; }
   .sources { display: flex; flex-direction: column; gap: 20px; }
   .sources section + section { border-top: 1px solid var(--rule-soft); padding-top: 20px; }
   .sources ul { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 14px; }

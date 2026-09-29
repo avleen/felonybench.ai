@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BoardTable from "../components/BoardTable.astro";
-import scores, { LEAGUES, TIERS, VIEWS, fmt, occurred } from "../lib/data";
+import scores, { LEAGUES, TIERS, VIEWS, fmt, occurred, coDefendants } from "../lib/data";
 
 const sota = scores.boards.open.verified.models[0];
 const latest = [...scores.incidents].reverse().slice(0, 5);
@@ -42,7 +42,7 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
         <fieldset>
           <legend class="sr-only">{legend}</legend>
           {options.map((o: any, i: number) => (
-            <label><input type="radio" name={name} value={o.key} checked={i === 0} />{o.label}</label>
+            <label><input type="radio" name={name} value={o.key} checked={i === 0} /><span class="long">{o.label}</span>{o.short && <span class="short">{o.short}</span>}</label>
           ))}
         </fieldset>
       ))}
@@ -51,7 +51,7 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
 
   {LEAGUES.map((l) => TIERS.map((t) => VIEWS.map((v) => (
     <div data-board={`${l.key}-${t.key}-${v.key}`} hidden={!(l.key === "open" && t.key === "verified" && v.key === "models")}>
-      <BoardTable rows={scores.boards[l.key][t.key][v.key]} view={v.key} />
+      <BoardTable rows={scores.boards[l.key][t.key][v.key]} view={v.key} league={l.key} />
     </div>
   ))))}
   <p class="muted small board-note">FBS = FelonyBench Score. <a href="/rubric/">How scores work</a> · * includes alleged incidents</p>
@@ -66,7 +66,7 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
           {latest.map((i: any) => (
             <li>
               <a href={`/incident/${i.id}/`}>
-                <span class="meta"><span class="num muted">{occurred(i)}</span><strong>{i.org}</strong></span>
+                <span class="meta"><span class="num muted">{occurred(i)}</span><strong>{coDefendants(i)}</strong></span>
                 <span class="summary">{i.summary}</span>
                 <span class="num plus">+{fmt(i.breakdown.total)}</span>
               </a>
