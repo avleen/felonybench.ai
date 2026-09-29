@@ -1,0 +1,37 @@
+id: 2025-08-27-anthropic-carding-store
+date: 2025-08-27
+date_precision: before
+reported: 2025-08-27
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Spanish-speaking actor running an invite-only carding service
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Holders and issuers of the stolen payment cards validated and resold by the service", type: third_party, country: null}
+summary: A Spanish-speaking actor used Claude Code to maintain and improve an invite-only web service that validated and resold stolen credit cards at scale.
+statutes:
+  - {code: "18 USC 1029(a)(2)", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: built_exploit
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [evasion]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the actor used Claude Code to build the service's card-validation framework, failover and batch processing for stolen cards; Claude wrote the fraud tooling the service ran on.
+  guardrails: The report describes no jailbreak or safety bypass; the model was used as shipped.
+  blast_radius: The victims are the cardholders and card issuers, private parties, so blast radius is third party.
+  tradecraft: Anthropic says Claude built "intelligent request throttling to avoid detection", which is covering its tracks.
+  dwell: Anthropic gives no dates, so date_precision is before with the report's publication date; dwell is counted from that latest possible date (0 days) and never inflated. Anthropic found the activity itself.
+  statutes: Validating and reselling stolen cards is trafficking in unauthorized access devices (18 USC 1029(a)(2)).
+confidence: medium
+sources:
+  - {url: "https://www-cdn.anthropic.com/b2a76c6f6992465c09a6f2fce282f6c0cea8c200.pdf", kind: primary, publisher: Anthropic, title: "Threat Intelligence Report: August 2025"}
+  - {url: "https://www.anthropic.com/news/detecting-countering-misuse-aug-2025", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: August 2025"}
+  - {url: "https://thehackernews.com/2025/08/anthropic-disrupts-ai-powered.html", kind: news, publisher: The Hacker News, title: "Anthropic Disrupts AI-Powered Cyberattacks Automating Theft and Extortion Across Critical Sectors"}
