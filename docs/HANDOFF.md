@@ -30,91 +30,30 @@ GitHub Actions runs Claude Code (Opus, medium effort, on the owner's subscriptio
 
 ## Current state
 
-- `main` is at d052cba. 138 tests pass (`python -m pytest -q`), and
-  `python -m scripts.validate` is clean.
+- All open PRs from the previous handoff are merged: #19 (Iran Firefox harvester, with RFE/RL
+  as its news source), #20 (Russia dual-use procurement; public victims) and #21 (the owner
+  decisions below). `python -m pytest -q` passes (167 tests) and `python -m scripts.validate`
+  is clean.
 - The site is live and deploys on merge.
 - Owner preferences: push regularly; PRs for data; the owner merges (they are often remote
   and can't read files, so put everything important in PR descriptions and messages).
 
-### Open PRs
+### Done on 2026-09-29
 
-| PR | What | State / next step |
-|---|---|---|
-| #20 `data/public-victims` | Russia dual-use procurement / sanctions evasion (Accomplice, victim "The public", EU, score 30). Also rejects PRC protest venue scouting (no crime on the report's facts) and keeps Mali "Lakana 360" pending until a model is identified. | Ready for owner review. |
-| #19 `agent/2026-08-31-anthropic-iran-firefox-identity-harvester` | Iranian unit used Claude to build a malicious Firefox extension that harvested social-network identities (Accomplice, score 4.25). Draft, label `awaiting-news`. | **News coverage now exists and was verified.** RFE/RL, "Anthropic Disrupts Iran's Use Of Claude To Spread Propaganda, Spy On Dissidents" (Frud Bezhan, 2026-09-11, https://www.rferl.org/a/anthropic-claude-iran-propaganda/33852428.html) says Iran-based actors "used Claude to build and deploy a malicious Firefox extension that harvested users' identities from social media networks." Also Iran International (2026-09-13, https://www.iranintl.com/en/202609131676, not re-verified). **To do:** add RFE/RL as a `news` source, push to the PR branch, then `gh pr ready 19` and `gh pr edit 19 --remove-label awaiting-news`. |
+- Moonshot (GTG-16002) and DeepSeek (GTG-16001) thinking-signature replay are Accomplice
+  incidents (score 19.5 each; both charged 17 USC 1201 via 1204, 18 USC 1832 and 1343).
+- SenseTime distillation dropped (rejected lead); OpenAI's 53 uploaded user images rejected
+  as a privacy failure.
+- The AISI Mythos 5 incident's structured fields and rationale fixed (score 17.5 → 27).
+- `scripts/pdf_text.py` lets the CI agent read PDFs (public http(s) URLs only, redirects
+  re-checked); it is the only command in the agent's `--allowedTools`.
+- `agent/known-leads.yaml` has a `handled` status; the AISI Mythos 5, Moonshot/DeepSeek and
+  GTG-34007 leads use it.
+- Actions bumped off Node 20: checkout v7, setup-python v7, cache v6, upload-artifact v7.
 
-### Owner decisions, still to implement
+### Still to do
 
-**Update (2026-09-29, branch `claude/tender-turing-oggg9v`):** items 1–7 below are done on that
-branch and waiting on the owner's review: the Moonshot and DeepSeek incidents (both charged
-with wire fraud; DeepSeek's on the owner's call), SenseTime dropped, the image-upload lead rejected, the AISI incident's fields fixed
-(score 17.5 → 27), `scripts/pdf_text.py`, known-leads tidied (new `handled` status), and Actions
-bumped to checkout v7, setup-python v7, cache v6, upload-artifact v7. Still open: PR #19's news
-source, and item 8 (run a sweep after this merges).
-
-**Update (later 2026-09-29):** PRs #19 (with the RFE/RL news source), #20 and #21 are all merged,
-and GTG-34007 is marked `handled` in `agent/known-leads.yaml`. Only item 8, the sweep, remains.
-
-1. **Moonshot (GTG-16002) and DeepSeek (GTG-16001) thinking-signature reversal counts.**
-   Both got Claude to convert its "thinking signature" back into raw reasoning, defeating
-   Anthropic's anti-distillation control. The owner rules that this is Claude doing the
-   work, so both become Accomplice incidents.
-   - Fields: `org: Anthropic`, `human_actor` = the lab, victim Anthropic (`own_prod`),
-     `contribution: operated`, `legal_status: contested`, `tradecraft: [evasion]`,
-     `self_disclosed: true`.
-   - Statutes: 17 USC 1201(a)(1)(A), criminal via 1204 (5 years; contested because
-     copyrightability of AI output is unsettled); 18 USC 1832 (10), consistent with the
-     Zhipu distillation incident; 1343 (20) only if the report ties fraudulent accounts to
-     that lab.
-   - Source: Anthropic's September 2026 threat report PDF, pp. ~143–154 (URL is in the
-     existing `incidents/*zhipu*` files); news: The Hacker News (Lakshmanan, 2026-09-11).
-   - Replace the Moonshot/DeepSeek `rejected` entry in `agent/known-leads.yaml`.
-   - An agent was working on this and was stopped before pushing anything.
-2. **Drop the SenseTime distillation incident**
-   (`incidents/2026-08-31-anthropic-sensetime-distillation-pipeline.yaml` and its note in
-   `docs/agent-notes/`). Add a `rejected` known-lead: weakest legal theory, since the
-   transcripts were outputs users could already see.
-3. **OpenAI's agents uploading 53 users' images to image hosts is a privacy failure, not a
-   crime.** Add a `rejected` known-lead.
-4. **Fix the structured fields of the owner's AISI incident**
-   `incidents/2026-07-27-anthropic-mythos-aisi.yaml`, without rewriting their wording:
-   - victims: the real open-source project maintainer, the developers who were sent
-     deceptive emails, and the bystander whose container was compromised, all
-     `third_party`, country null (AISI ran the test and wasn't the victim);
-   - `scoring.autonomy: exceeded_scope` (the agent mistook real people for range
-     targets);
-   - `date_precision: before`;
-   - add `evasion` to tradecraft;
-   - AISI blog `kind: primary` (not postmortem), and add the AISI technical PDF
-     (https://cdn.prod.website-files.com/663bd486c5e4c81588db7a1d/6a724858f7db25c81487016d_Security%20Incident%20INC-2026-07-28-01.pdf)
-     as `primary`;
-   - leave `summary` and `rationale` wording alone, but tell the owner that the autonomy
-     rationale line ("authorized to exceed its normal restrictions") now contradicts the
-     field.
-
-   **Warning:** agents were twice refused by a safety classifier when *writing* these AISI
-   incidents. If an edit is refused, stop and tell the owner; don't reword or retry.
-5. **Let the CI agent read PDFs.** Government and lab reports are PDFs, and the agent in
-   Actions can't extract them (it has no Bash, and WebFetch times out on large PDFs).
-   - Add `scripts/pdf_text.py`: `python -m scripts.pdf_text <url-or-path> [--pages 3-10]
-     [--max-chars N]`, which fetches with a browser user agent, extracts with pypdf, and
-     prints the text.
-   - Add `pypdf` to `requirements-agent.txt`, and install it in both modes in
-     `.github/actions/run-agent/action.yml`. The prefetch step currently installs agent
-     requirements only in sweep mode.
-   - Add `Bash(python -m scripts.pdf_text:*)` to `--allowedTools`. That prefix-scoped
-     rule works in Actions; `acceptEdits` doesn't cover Bash.
-   - Add one line to the runbook's hard rules.
-   - A TDD start (tests with a hand-built one-page PDF, `page_range`, `max_chars`) was
-     sketched but not committed. Write it fresh.
-6. **Tidy `agent/known-leads.yaml`.** The AISI Mythos 5 entry is still `pending_human`, but
-   the owner's file now covers it. Mark it handled and point to the file.
-7. **Update GitHub Actions versions.** `actions/cache` and `actions/upload-artifact`
-   (and check `checkout` and `setup-python`) run on deprecated Node 20. Check the current
-   majors with
-   `gh api repos/actions/<name>/releases/latest --jq .tag_name` and bump them in
-   `watch.yml`, `sweep.yml`, `validate.yml` and `.github/actions/run-agent/action.yml`.
-8. **Then trigger and check a sweep** (`gh workflow run sweep.yml`). It's the first run
+1. **Trigger and check a sweep** (`gh workflow run sweep.yml`). It's the first run
    since the Accomplice League merged. Download the artifact
    (`gh run download <id>`; it includes the transcript and `.agent-out/`) and check:
    - `sweep-report.md` covers the Accomplice League sources (threat-intel reports);
