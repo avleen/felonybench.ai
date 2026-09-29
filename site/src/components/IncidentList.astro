@@ -1,5 +1,5 @@
 ---
-import { fmt, occurred, leagueLabel, isLow } from "../lib/data";
+import { fmt, occurred, leagueLabel, isLow, scoreVariants } from "../lib/data";
 const { incidents } = Astro.props;
 ---
 <div class="table-wrap">
@@ -12,7 +12,7 @@ const { incidents } = Astro.props;
           <td class="what"><a href={`/incident/${i.id}/`}>{i.summary}</a>{isLow(i) && <span class="low-tag">Low confidence</span>}</td>
           <td class="nowrap">{leagueLabel(i.league)}</td>
           <td>{i.tier}</td>
-          <td class="num score">{fmt(i.breakdown.total)}</td>
+          <td class="num score">{scoreVariants(i).map((v) => <span data-conf={v.key}>{fmt(v.i.breakdown.total)}</span>)}</td>
         </tr>
       ))}
     </tbody>

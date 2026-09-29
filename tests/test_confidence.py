@@ -45,3 +45,15 @@ def test_confident_trends_and_last_incident_date(make_incident, rubric):
 def test_confident_view_lists_the_ids_it_counts(make_incident, rubric):
     scores = build_scores(_pair(make_incident), rubric, "now")
     assert scores["confident"]["incident_ids"] == ["high"]
+
+
+def test_confident_view_carries_each_incidents_rescored_breakdown_and_badges(make_incident, rubric):
+    scores = build_scores(_pair(make_incident), rubric, "now")
+    full = {i["id"]: i for i in scores["incidents"]}
+    rescored = scores["confident"]["scored"]
+    assert set(rescored) == {"high"}
+    assert full["high"]["breakdown"]["recidivist"] is True
+    assert rescored["high"]["breakdown"]["recidivist"] is False
+    assert rescored["high"]["breakdown"]["total"] < full["high"]["breakdown"]["total"]
+    assert "repeat_offender" in full["high"]["badges"]
+    assert "repeat_offender" not in rescored["high"]["badges"]

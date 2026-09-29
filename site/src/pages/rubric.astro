@@ -1,11 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import scores, { rubric, fmt, chargedOrgs } from "../lib/data";
+import scores, { rubric, fmt, chargedOrgs, isLow, inView } from "../lib/data";
 
-// The highest-scoring incident in a league, verified first: each league's formula gets its own worked example.
-const exampleFor = (league: string) =>
-  [...scores.incidents].filter((i: any) => i.league === league)
-    .sort((a: any, b: any) => (a.tier === "verified" ? 0 : 1) - (b.tier === "verified" ? 0 : 1) || b.breakdown.total - a.breakdown.total)[0] ?? null;
+// The highest-scoring incident in a league, not low confidence and verified first (so it shows in the
+// default view), scored as the default view scores it: each league's formula gets its own worked example.
+const rank = (i: any) => (isLow(i) ? 2 : 0) + (i.tier === "verified" ? 0 : 1);
+const exampleFor = (league: string) => {
+  const best = [...scores.incidents].filter((i: any) => i.league === league)
+    .sort((a: any, b: any) => rank(a) - rank(b) || b.breakdown.total - a.breakdown.total)[0];
+  return best ? inView(best, "confident") : null;
+};
 const example = exampleFor("open");
 const accExample = exampleFor("accomplice");
 const acc = rubric.accomplice;
