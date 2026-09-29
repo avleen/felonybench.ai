@@ -1,0 +1,37 @@
+id: 2026-02-25-openai-date-bait-romance-scam
+date: 2026-02-25
+date_precision: before
+reported: 2026-02-25
+league: accomplice
+tier: verified
+org: OpenAI
+human_actor: A scam network very likely based in Cambodia that OpenAI says aligns with public reporting on Chinese-led criminal scam operations (OpenAI's Operation "Date Bait")
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Indonesian men targeted through a fake dating agency", type: third_party, country: Indonesia}
+summary: A Cambodia-based scam centre used ChatGPT and OpenAI's API to run a fake dating agency for Indonesian men, writing the ads, the flirting and the escalating demands for payment.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws:
+  - {code: "Indonesian Criminal Code (KUHP), fraud (penipuan)", country: Indonesia}
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: OpenAI says the network used ChatGPT to write the dating-service ads and to "generate and translate emotionally manipulative messages pressuring targets" into escalating payments, and blended human operators with "API-powered automation" for its chatbot receptionist; humans ran the scam, so this is scored as writing the content.
+  guardrails: OpenAI's report describes no jailbreak or safety bypass; the model was used as shipped.
+  blast_radius: The targets were members of the public in Indonesia, reached through paid social media ads and Telegram; OpenAI quotes a letter to a victim demanding Rp 20,500,000.
+  tradecraft: None of the rubric's intrusion techniques apply to a romance and task scam.
+  dwell: OpenAI does not say when the operation began, so dwell is counted from the report date (0 days) and never inflated; OpenAI found and banned the accounts itself.
+confidence: medium
+sources:
+  - {url: "https://cdn.openai.com/pdf/df438d70-e3fe-4a6c-a403-ff632def8f79/disrupting-malicious-uses-of-ai.pdf", kind: primary, publisher: OpenAI, title: "Disrupting malicious uses of our models: an update, February 2026"}
+  - {url: "https://openai.com/index/disrupting-malicious-ai-uses/", kind: primary, publisher: OpenAI, title: "Disrupting malicious uses of AI"}
+  - {url: "https://www.helpnetsecurity.com/2026/02/26/openai-malicious-chatgpt-use-report/", kind: news, publisher: Help Net Security, title: "Fraudsters integrate ChatGPT into global scam campaigns"}

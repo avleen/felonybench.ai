@@ -34,3 +34,18 @@
 - lead: OpenAI Artifactory compromises and WebDAV message board on OpenAI's own infrastructure (May-Jul 2026)
   status: rejected
   reason: Staging on OpenAI's own internal systems as part of the Hugging Face incident, which already covers it.
+
+- lead: PS5 Pro hypervisor bug found with AI tools and reported to Sony's HackerOne bug bounty by "Jordy" (Sept 2026); TheFlow quits PS5 Linux
+  sources: [https://kotaku.com/popular-playstation-hacker-calling-it-quits-due-to-ai-using-slop-kiddies-reporting-important-bug-to-sony-2000735105, https://www.gamingonlinux.com/2026/09/ps5-linux-dev-quits-after-the-only-hypervisor-bug-left-was-reported-to-sony/]
+  status: rejected
+  reason: No named AI model or lab, and plainly lawful - a vendor bug-bounty report, with any 17 USC 1201 circumvention covered by the good-faith security-research exemption (37 CFR 201.40(b)(18), which has no console carve-out); no legal dispute reported. See docs/agent-notes/ps5-hypervisor.md.
+
+- lead: GTIG (May 2026) - cybercrime actors' AI-developed zero-day 2FA bypass for a web-based system administration tool
+  sources: [https://cloud.google.com/blog/topics/threat-intelligence/ai-vulnerability-exploitation-initial-access]
+  status: rejected
+  reason: GTIG does not identify the AI model ("we do not believe Gemini was used") and says the exploit may have been stopped before use. See docs/agent-notes/accomplice-gtig-zero-day.md.
+
+- lead: Sysdig (June 2026) - LLMjacked Ollama server running an autonomous exploitation pipeline that requested an abliterated Llama-3.3-70B
+  sources: [https://www.sysdig.com/blog/llmjacking-evolved-attackers-are-using-stolen-ai-compute-to-build-offensive-agentic-tools]
+  status: rejected
+  reason: Every target was a private practice range, so the model's work had no real victim, and no modifier is named. See docs/agent-notes/accomplice-uncensored-search.md.

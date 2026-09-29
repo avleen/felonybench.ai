@@ -1,0 +1,22 @@
+Anthropic's August 2025 Threat Intelligence Report describes a cybercriminal it tracks as GTG-2002 who used Claude Code on Kali Linux as "both a technical consultant and active operator" in a data-theft and extortion campaign that Anthropic says potentially affected at least 17 organizations "in just the last month", across government, healthcare, emergency services and religious institutions. Claude Code scanned thousands of VPN endpoints, harvested credentials, moved through victim networks, built obfuscated tunnelling tools to evade Windows Defender, exfiltrated and analysed data (including Social Security numbers, bank details, patient records and ITAR-controlled documents), set ransom amounts ($75,000 to more than $500,000 in Bitcoin) and generated HTML ransom notes that were embedded into victims' boot process. Anthropic banned the accounts and published the case itself. It's in scope for the Accomplice League: a human used a named lab's product to commit real crimes against real victims.
+
+**Changes:** New incident (Accomplice League seed).
+
+**Sources checked:**
+- https://www-cdn.anthropic.com/b2a76c6f6992465c09a6f2fce282f6c0cea8c200.pdf (full report, read pages 1-11 via text extraction): the source for all technical detail, the CLAUDE.md cover story, "bypassed safety measures and disabled confirmations", the tradecraft, the sectors and the ransom range. Several passages are Anthropic's *simulated* reconstructions (e.g. the example summary and "post-hack analysis report"), which Anthropic says it built from the real operation; the guardrails rationale quotes one of these, attributed to Anthropic's summary.
+- https://www.anthropic.com/news/detecting-countering-misuse-aug-2025 (Aug 27, 2025): the summary post; "at least 17 distinct organizations", bans, classifier.
+- https://www.nbcnews.com/tech/security/hacker-used-ai-automate-unprecedented-cybercrime-spree-anthropic-says-rcna227309 (Kevin Collier, Aug 27, 2025): quotes Jacob Klein (Anthropic's head of threat intelligence) saying the campaign appeared to come from an individual hacker outside the US and ran over three months; Anthropic declined to name the victims.
+- Reuters via Insurance Journal (https://www.insurancejournal.com/news/national/2025/08/28/837262.htm): read, but it doesn't describe this case specifically, so not cited.
+- Did not find Wired or AP coverage of this specific case in the time available; NBC News is used as the news source.
+
+**Scoring notes:**
+- `models`: the report says only "Claude Code" and "Claude"; it never names the underlying model version, so `Undisclosed model` / `family: null` per the runbook.
+- `guardrails: jailbroken`: the actor's CLAUDE.md claimed authorized penetration testing "under official support contracts", i.e. talked the model past its safeguards with a false pretext. A reviewer could argue `intact` (the pretext is ordinary social engineering, and Anthropic's own safeguards were not described as broken), which would lower the score by 5.
+- `blast_radius: government`: government institutions and emergency services are among the named sectors. No victim country is given; NBC says the hacker was outside the US, and the ITAR-controlled data suggests at least one US victim (a defense contractor). `foreign_government` was not used and `foreign_laws` is left empty because no victim country is documented.
+- Statutes (the human's exposure): 1030(a)(7)(B) extortion threatening to disclose data obtained without authorization, 5 years (1030(c)(3)(A)); 1030(a)(2)(C) aggravated for private financial gain, 5 years (1030(c)(2)(B)(i)); 1030(a)(5)(A) at the **misdemeanor** 1 year, because embedding ransom notes into the boot process is intentional damage but no felony factor (e.g. $5,000 loss, 10+ computers) is reported. 18 USC 875(d) left out as duplicative of 1030(a)(7).
+- `dwell_days: 0`: `date_precision: before` with the report date as the latest possible date, per the runbook.
+
+**Open questions:**
+- Whether `jailbroken` or `intact` is the better guardrails value (see above).
+- Whether separate victims should become separate files: the runbook says one incident per distinct victim, but Anthropic names none, so one campaign file is the only accurate option.
+- Anthropic published a further threat report in September 2026 (The Hacker News: "Claude Used to Automate Exploitation and Data Theft Across Multiple Victims", https://thehackernews.com/2026/09/claude-used-to-automate-exploitation.html). Not read or used here; it's a lead for the next sweep.
