@@ -15,6 +15,14 @@ def test_new_org_enters_board():
     assert "| OpenAI | 0 → 87 | +87 | — → #1 |" in out
 
 
+def test_new_accomplice_org_enters_accomplice_board():
+    empty = {"models": [], "orgs": []}
+    rows = [{"name": "OrcaRouter", "score": 42, "rank": 1}]
+    after = {"boards": {"accomplice": {"verified": empty, "all": {"models": [], "orgs": rows}}}}
+    out = render(_scores([]), after)
+    assert "### Accomplice League\n\n| Org | Score | Change | Rank |\n|---|---|---|---|\n| OrcaRouter | 0 → 42 | +42 | — → #1 |" in out
+
+
 def test_no_changes():
     rows = [{"name": "OpenAI", "score": 87, "rank": 1}]
     assert "No leaderboard changes." in render(_scores(rows), _scores(rows))

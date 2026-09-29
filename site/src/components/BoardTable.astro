@@ -1,12 +1,16 @@
 ---
 import { fmt, blastLabel, rubric } from "../lib/data";
-const { rows, view } = Astro.props;
+const { rows, view, league } = Astro.props;
 const byModel = view === "models";
 const top = rows[0]?.score || 1;
 const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
 ---
 {rows.length === 0 ? (
-  <p class="panel muted">No convictions yet. Suspiciously clean.</p>
+  league === "accomplice" ? (
+    <p class="panel muted">No accomplices on file yet. A case needs a real victim, a human who used a named model, and a published account of it, usually a lab's threat report. <a href="/rubric/#accomplice-league">What qualifies</a></p>
+  ) : (
+    <p class="panel muted">No convictions yet. Suspiciously clean.</p>
+  )
 ) : (
   <div class="table-wrap">
     <table class="board">
@@ -24,7 +28,7 @@ const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
             <td class="who">
               {byModel ? <a href={`/model/${r.slug}/`}>{r.name}</a> : <strong>{r.name}</strong>}
               {r.alleged > 0 && <span title={`${r.alleged} alleged incident(s)`}>*</span>}
-              {byModel && <span class="org">{r.org}</span>}
+              {byModel && <span class="org">{r.base_org && r.base_org !== r.org ? `${r.base_org}, modified by ${r.org}` : r.org}</span>}
             </td>
             <td class="fbs"><div>
               <span class={`bar${r.rank <= 3 ? " hot" : ""}`} aria-hidden="true"><span style={`width: ${pct(r.score)}%`}></span></span>
@@ -39,6 +43,9 @@ const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
       </tbody>
     </table>
   </div>
+)}
+{rows.length > 0 && league === "accomplice" && !byModel && (
+  <p class="muted joint">Co-defendants are liable jointly and severally: the lab and whoever modified its model are each charged the full score.</p>
 )}
 
 <style>
@@ -55,6 +62,7 @@ const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
   td.fbs .bar { flex: 1; }
   td.fbs .score { font-family: var(--mono); font-weight: 700; min-width: 4.5em; text-align: right; }
   .blast { font-size: 14px; color: var(--body); }
+  .joint { font-size: 14px; margin: 12px 0 0; }
   /* Phones get rank, name and score; the full record is a tap away. */
   @media (max-width: 640px) {
     .board { min-width: 0; }

@@ -1,0 +1,39 @@
+id: 2025-08-27-anthropic-claude-code-data-extortion
+date: 2025-08-27
+date_precision: before
+reported: 2025-08-27
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A cybercriminal tracked by Anthropic as GTG-2002; Anthropic's head of threat intelligence said the campaign appeared to come from an individual hacker outside the US
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Government institutions (unnamed)", type: government, country: null}
+  - {name: "Healthcare providers, emergency services, religious institutions, a defense contractor and a financial institution (unnamed; at least 17 organizations in all)", type: third_party, country: null}
+summary: A cybercriminal ran Claude Code as the operator of a data-theft and extortion campaign against at least 17 organizations; it scanned, broke in, stole data, priced the ransoms and wrote the ransom notes.
+statutes:
+  - {code: "18 USC 1030(a)(7)(B)", max_years: 5}
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: government
+  tradecraft: [credentials, privilege_escalation, lateral_movement, persistence, evasion]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says Claude Code acted as "both a technical consultant and active operator", performing "on-keyboard" operations on victim networks and making "both tactical and strategic decisions" about which data to exfiltrate and how to extort.
+  guardrails: The actor's CLAUDE.md file carried "a cover story claiming network security testing under official support contracts", and Anthropic's summary of the session notes the actor "bypassed safety measures and disabled confirmations".
+  blast_radius: Anthropic lists government institutions and emergency services among the targeted sectors, and its example post-hack report concerns a "government financial institution"; victims' countries are not given, so this is scored as domestic government rather than foreign.
+  tradecraft: Anthropic says Claude Code harvested credentials, gave real-time guidance on privilege escalation and lateral movement, obtained "persistence keys" and embedded ransom notes into the boot process, and built obfuscated tunnelling tools disguised as Microsoft executables to evade Windows Defender.
+  dwell: Anthropic gives no start date beyond "the last month" (its reporter said three months), so dwell is counted from the report date (0 days) and never inflated; Anthropic detected and banned the accounts itself.
+confidence: high
+sources:
+  - {url: "https://www-cdn.anthropic.com/b2a76c6f6992465c09a6f2fce282f6c0cea8c200.pdf", kind: primary, publisher: Anthropic, title: "Threat Intelligence Report: August 2025"}
+  - {url: "https://www.anthropic.com/news/detecting-countering-misuse-aug-2025", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: August 2025"}
+  - {url: "https://www.nbcnews.com/tech/security/hacker-used-ai-automate-unprecedented-cybercrime-spree-anthropic-says-rcna227309", kind: news, publisher: NBC News, title: "A hacker used AI to automate an 'unprecedented' cybercrime spree, Anthropic says"}

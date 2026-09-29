@@ -1,0 +1,36 @@
+id: 2026-08-31-anthropic-sensetime-distillation-pipeline
+date: 2026-08-31
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: SenseTime, attributed by Anthropic (tracked as GTG-16012)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Anthropic (Claude's capabilities)", type: own_prod, country: "US"}
+summary: SenseTime bought logged transcripts of users' Claude conversations from third-party data vendors and used Claude to write the distillation pipeline that turned them into training data, and to launch and monitor the training runs.
+statutes:
+  - {code: "18 USC 1832", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: built_exploit
+  guardrails: intact
+  legal_status: contested
+  blast_radius: own_prod
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says "SenseTime also used Claude to write the distillation pipeline and to launch and monitor training runs", so Claude built the tool used to exploit the purchased transcripts.
+  guardrails: The report describes no jailbreak or other defeat of Claude's safety training; writing a training pipeline is ordinary coding work, so guardrails are scored intact.
+  blast_radius: The victim is Anthropic, the lab whose own model did the work, so blast radius is own lab's production.
+  tradecraft: The report credits Claude with no intrusion techniques, so tradecraft is empty.
+  dwell: The report gives no date for SenseTime's activity beyond the report's December 2025 to August 2026 coverage window, so date_precision is before with 2026-08-31 as the latest possible date; dwell is 0 days counted from it and never inflated, and Anthropic detected it itself.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://thehackernews.com/2026/09/anthropic-says-seven-china-based-ai.html", kind: news, publisher: The Hacker News, title: "Anthropic Says Seven China-Based AI Labs Ran Industrial-Scale Claude Distillation Attacks"}

@@ -98,3 +98,67 @@ def test_date_precision_values(make_incident, rubric):
 
 def test_before_precision_allows_any_day(make_incident, rubric):
     assert _errors(make_incident(date_precision="before"), rubric) == []
+
+
+ACC = "2026-06-01-alibaba-abliterated-exploit"
+
+
+def test_accomplice_incident_valid(make_accomplice, rubric):
+    assert _errors(make_accomplice(), rubric, stem=ACC) == []
+
+
+def test_accomplice_requires_human_actor(make_accomplice, rubric):
+    inc = make_accomplice()
+    del inc["human_actor"]
+    assert any("human_actor" in e for e in _errors(inc, rubric, stem=ACC))
+
+
+def test_accomplice_requires_its_scoring_fields(make_accomplice, rubric):
+    for field in ("contribution", "guardrails", "legal_status"):
+        inc = make_accomplice()
+        del inc["scoring"][field]
+        assert any(field in e for e in _errors(inc, rubric, stem=ACC)), field
+
+
+def test_accomplice_values_come_from_rubric(make_accomplice, rubric):
+    for field, bad in (("contribution", "vibes"), ("guardrails", "melted"), ("legal_status", "vibes")):
+        assert any(field in e for e in _errors(make_accomplice(scoring={field: bad}), rubric, stem=ACC)), field
+
+
+def test_model_crime_leagues_still_require_autonomy(make_incident, rubric):
+    inc = make_incident()
+    del inc["scoring"]["autonomy"]
+    assert any("autonomy" in e for e in _errors(inc, rubric))
+
+
+def test_model_crime_rationale_still_requires_motive(make_incident, rubric):
+    inc = make_incident()
+    del inc["rationale"]["motive"]
+    assert any("motive" in e for e in _errors(inc, rubric))
+
+
+def test_modified_by_only_in_accomplice_league(make_incident, rubric):
+    inc = make_incident()
+    inc["models"][0]["modified_by"] = "OrcaRouter"
+    assert any("modified_by" in e for e in _errors(inc, rubric))
+
+
+def test_modifier_fields_come_together(make_accomplice, rubric):
+    inc = make_accomplice()
+    del inc["models"][0]["modification"]
+    assert any("modification" in e for e in _errors(inc, rubric, stem=ACC))
+    inc = make_accomplice()
+    del inc["models"][0]["modified_by"]
+    assert any("modified_by" in e for e in _errors(inc, rubric, stem=ACC))
+
+
+def test_modification_only_in_accomplice_league(make_incident, rubric):
+    inc = make_incident()
+    inc["models"][0]["modification"] = "abliterated"
+    assert any("modification" in e for e in _errors(inc, rubric))
+
+
+def test_public_victims_are_allowed(make_accomplice, rubric):
+    inc = make_accomplice(scoring={"blast_radius": "public"})
+    inc["victims"] = [{"name": "The public", "type": "public", "country": "US"}]
+    assert _errors(inc, rubric, stem=ACC) == []

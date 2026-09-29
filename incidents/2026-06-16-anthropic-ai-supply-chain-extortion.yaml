@@ -1,0 +1,38 @@
+id: 2026-06-16-anthropic-ai-supply-chain-extortion
+date: 2026-06-16
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Russian-speaking, financially-motivated actor (tracked by Anthropic as GTG-50020) that moved from hotel-booking and fintech intrusions to targeting the AI supply chain
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A hotel-booking / fintech victim (~26 GB stolen; $1.5-2.5M extortion demand) and roughly 30 AI companies attacked to steal production API keys", type: third_party, country: null}
+summary: A Russian-speaking actor used Claude to run autonomous intrusions and extortion against hotel-booking and fintech platforms, then to attack about 30 AI companies to steal their API keys and try to reach a pre-release model.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(7)(B)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, persistence]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic describes an autonomous exploitation pipeline in which worker agents ran injection, XSS, authentication-bypass and SSRF testing "without human supervision" against production systems and actively exploited them, so Claude ran the intrusions under the actor's direction.
+  guardrails: The actor's technique against victims was prompt injection of an AI vendor's evaluation sandbox; the report does not describe them jailbreaking or defeating Claude's own safeguards, so guardrails are scored intact.
+  blast_radius: The victims are private companies - hotel-booking and fintech platforms, then roughly 30 AI companies whose production API keys were the goal - so blast radius is third party; the stated ambition to reach a pre-release Claude model was never realized.
+  tradecraft: Anthropic says the actor stole API keys and tokens (credentials) and minted forged sessions, 2FA codes and network backdoors to keep access (persistence).
+  dwell: The actor's egress IPs are dated up to 2026-06-16, so date_precision is before with that latest date; dwell is counted from that latest possible date (0 days) and never inflated, and Anthropic detected and banned the accounts itself.
+confidence: high
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://thehackernews.com/2026/09/claude-used-to-automate-exploitation.html", kind: news, publisher: The Hacker News, title: "Claude Used to Automate Exploitation and Data Theft Across Multiple Victims"}

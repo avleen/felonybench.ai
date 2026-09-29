@@ -7,6 +7,7 @@
   --inverse: #17161a; --inverse-ink: #f3efe6; --inverse-muted: #b8b2a6; --inverse-stamp: #ff6b5e;
   --manila: #eadfc8; --manila-ink: #3a3020; --manila-muted: #5a4a28;
   --witness-bg: #e4edf7; --witness-fg: #1f4e8c; --intl-bg: #f6e3df; --intl-fg: #8e1d17;
+  --jail-bg: #f4e7c6; --jail-fg: #6e4a00;
   /* Categorical chart palette: validated with dataviz's validate_palette.js against
      this surface (all 8 PASS light, WARN-relief on 4 slots below 3:1 contrast —
      mitigated by direct end-of-line labels on every series). Fixed order; never
@@ -26,6 +27,7 @@
     --inverse: #0c0b0a; --inverse-ink: #ece8df; --inverse-muted: #a39e93; --inverse-stamp: #ff6b5e;
     --manila: #2c261a; --manila-ink: #e6dcc4; --manila-muted: #c2b28c;
     --witness-bg: #1b2a3d; --witness-fg: #a9c8f5; --intl-bg: #3a1c19; --intl-fg: #ffb3aa;
+    --jail-bg: #3a2e14; --jail-fg: #f0c56b;
     /* Same 8 hues, dark-surface steps; validated separately (all PASS). */
     --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
     --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
@@ -98,6 +100,9 @@ pre.panel { overflow-x: auto; }
 .badge-cooperating_witness { background: var(--witness-bg); color: var(--witness-fg); }
 .badge-international_incident { background: var(--intl-bg); color: var(--intl-fg); }
 .badge-repeat_offender { background: var(--ink); color: var(--paper); }
+/* Safety stripped out entirely: outlined in stamp red, like a warning label. */
+.badge-uncensored { background: transparent; color: var(--stamp); box-shadow: inset 0 0 0 1.5px var(--stamp); }
+.badge-jailbroken { background: var(--jail-bg); color: var(--jail-fg); }
 .stamp { display: inline-block; border: 3px double var(--stamp); color: var(--stamp); padding: 2px 12px; font: 700 14px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; transform: rotate(-3deg); }
 
 /* Score bars */
@@ -112,6 +117,7 @@ pre.panel { overflow-x: auto; }
 .controls label input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
 .controls label:has(input:checked) { background: var(--panel); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); }
 .controls label:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.controls .short { display: none; }
 
 @media (max-width: 640px) {
   main { padding-top: 32px; }
@@ -121,4 +127,6 @@ pre.panel { overflow-x: auto; }
   .controls { width: 100%; }
   .controls fieldset { flex: 1 1 auto; }
   .controls label { flex: 1; text-align: center; padding: 8px 10px; }
+  .controls label:has(.short) .long { display: none; }
+  .controls .short { display: inline; }
 }

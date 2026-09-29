@@ -1,0 +1,37 @@
+id: 2026-06-01-anthropic-zhipu-cot-distillation-cleaner
+date: 2026-06-01
+date_precision: month
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Zhipu (branded outside China as Z.ai), the maker of the GLM models, attributed by Anthropic with high confidence (tracked as GTG-16006)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Anthropic (Claude's chain-of-thought reasoning traces)", type: own_prod, country: "US"}
+summary: Zhipu ran a chain-of-thought extraction pipeline against Claude through 273 fraudulent accounts, and used Claude itself to clean, normalize and grade the harvested reasoning traces for training its GLM models.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+  - {code: "18 USC 1832", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: contested
+  blast_radius: own_prod
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says Zhipu replayed captured Claude reasoning traces "back through Claude to clean them for training", counting 770,609 exchanges through the CoT-extraction cleaner in ten days, and used Claude to judge outputs and clean and normalize the harvested transcripts, so Claude ran the processing stage of the operation.
+  guardrails: The report describes fraudulent-account rotation to evade model restrictions, not any defeat of Claude's safety training; cleaning and grading text is ordinary use, so guardrails are scored intact.
+  blast_radius: The victim is Anthropic, the lab whose own model did the work, so blast radius is own lab's production.
+  tradecraft: The account rotation that evaded Anthropic's restrictions was done by Zhipu, not by Claude, and the report credits Claude with no intrusion techniques, so tradecraft is empty.
+  dwell: The report dates the cleaner traffic only to "a 10-day period in June" 2026, so date_precision is month with the 1st as the date; dwell is counted conservatively as 0 days from the latest possible date and never inflated, and Anthropic detected it itself.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://thehackernews.com/2026/09/anthropic-says-seven-china-based-ai.html", kind: news, publisher: The Hacker News, title: "Anthropic Says Seven China-Based AI Labs Ran Industrial-Scale Claude Distillation Attacks"}

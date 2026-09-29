@@ -1,0 +1,38 @@
+id: 2026-02-25-openai-false-witness-recovery-scam
+date: 2026-02-25
+date_precision: before
+reported: 2026-02-25
+league: accomplice
+tier: verified
+org: OpenAI
+human_actor: A scam network very likely based in Cambodia that posed as law firms offering to recover scam victims' money (OpenAI's Operation "False Witness")
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Fraud victims targeted with a fake recovery service", type: third_party, country: null}
+  - {name: "Real attorneys whose identities were impersonated", type: third_party, country: null}
+summary: A Cambodia-based scam network used ChatGPT to pose as fake law firms, real attorneys and the FBI's IC3, demanding upfront fees from people who had already been scammed to "recover" their money.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+  - {code: "18 USC 912", max_years: 3}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: OpenAI says the scammers used ChatGPT to write fake law-firm content, cold outreach and replies to targets "in the style of a lawyer", and to create fake attorney registration records and a fake New York State Bar Association card; humans ran the scam.
+  guardrails: OpenAI's report describes no jailbreak or safety bypass; the model was used as shipped.
+  blast_radius: The targets were members of the public who had already lost money to scams, plus real attorneys whose identities were used; OpenAI says messages drafted with ChatGPT told targets to send cryptocurrency fees.
+  tradecraft: None of the rubric's intrusion techniques apply to an impersonation scam.
+  dwell: OpenAI does not say when the operation began, so dwell is counted from the report date (0 days) and never inflated; OpenAI found and banned the accounts, though it notes the FBI had already issued public alerts about this kind of scam.
+confidence: medium
+sources:
+  - {url: "https://cdn.openai.com/pdf/df438d70-e3fe-4a6c-a403-ff632def8f79/disrupting-malicious-uses-of-ai.pdf", kind: primary, publisher: OpenAI, title: "Disrupting malicious uses of our models: an update, February 2026"}
+  - {url: "https://www.ic3.gov/PSA/2025/PSA250813", kind: primary, publisher: FBI Internet Crime Complaint Center, title: "Fictitious Law Firms Targeting Cryptocurrency Scam Victims Combine Multiple Exploitation Tactics While Offering to Recover Funds"}
+  - {url: "https://www.helpnetsecurity.com/2026/02/26/openai-malicious-chatgpt-use-report/", kind: news, publisher: Help Net Security, title: "Fraudsters integrate ChatGPT into global scam campaigns"}

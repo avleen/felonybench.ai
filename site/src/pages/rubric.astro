@@ -1,16 +1,20 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import scores, { rubric, fmt } from "../lib/data";
+import scores, { rubric, fmt, chargedOrgs } from "../lib/data";
 
-const example = scores.boards.open.verified.orgs.length
-  ? [...scores.incidents].filter((i: any) => i.league === "open" && i.tier === "verified").sort((a: any, b: any) => b.breakdown.total - a.breakdown.total)[0]
-  : null;
+// The highest-scoring incident in a league, verified first: each league's formula gets its own worked example.
+const exampleFor = (league: string) =>
+  [...scores.incidents].filter((i: any) => i.league === league)
+    .sort((a: any, b: any) => (a.tier === "verified" ? 0 : 1) - (b.tier === "verified" ? 0 : 1) || b.breakdown.total - a.breakdown.total)[0] ?? null;
+const example = exampleFor("open");
+const accExample = exampleFor("accomplice");
+const acc = rubric.accomplice;
 const levelTable = (table: Record<string, any>, valueKey: string, prefix: string) =>
   Object.entries(table).map(([key, v]) => ({ key, value: `${prefix}${v[valueKey]}`, ...v }));
 ---
 <Layout title="Rubric" description="How the FelonyBench Score is calculated.">
   <h1>Rubric <span class="num muted">v{rubric.version}</span></h1>
-  <p>Every incident gets a FelonyBench Score (FBS). A model's score is the sum of its incidents, split when several models were involved. An org's score is the sum of its models. Higher is better.</p>
+  <p>Every incident gets a FelonyBench Score (FBS). A model's score is the sum of its incidents, split when several models were involved. An org's score is the sum of its models, except in the <a href="#accomplice-league">Accomplice League</a>, where every co-defendant is charged in full. Higher is better.</p>
   <pre class="panel num">incident = Sentence-Years × Autonomy × Blast Radius
          + Tradecraft + Pettiness + Dwell Time
          × {rubric.recidivism.multiplier} if a repeat offense</pre>
@@ -64,9 +68,59 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
     </>
   )}
 
+  <h2 id="accomplice-league">Accomplice League</h2>
+  <p>Here a human committed the crime, and a named model helped. The score measures what the model contributed. Sentence-Years are the human's statutory exposure. Blast Radius, Tradecraft (techniques the model supplied or carried out), Dwell Time and Recidivism work as above. Autonomy and Pettiness aren't used: they describe a model's own choices, and here the choices were a person's.</p>
+  <pre class="panel num">incident = Sentence-Years × Contribution × Blast Radius × Legal status
+         + Tradecraft + Guardrails + Dwell Time
+         × {rubric.recidivism.multiplier} if a repeat offense</pre>
+
+  <h3>Contribution</h3>
+  <p>What the model did for the human.</p>
+  <div class="table-wrap"><table class="wide">
+    <thead><tr><th>Level</th><th class="num">Multiplier</th><th>Meaning</th></tr></thead>
+    <tbody>{levelTable(acc.contribution, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td></tr>)}</tbody>
+  </table></div>
+
+  <h3>Guardrails</h3>
+  <p>An aggravating factor: how the model's safeguards were got around, if they were.</p>
+  <div class="table-wrap"><table class="wide">
+    <thead><tr><th>State</th><th class="num">Points</th><th>Meaning</th></tr></thead>
+    <tbody>{levelTable(acc.guardrails, "points", "+").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td></tr>)}</tbody>
+  </table></div>
+  <p class="muted">A model run with its safety removed earns the {rubric.badges.uncensored.label} badge; one talked past its safeguards earns {rubric.badges.jailbroken.label}.</p>
+
+  <h3>Legal status</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th class="num">Multiplier</th></tr></thead>
+    <tbody>{levelTable(acc.legal_status, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td></tr>)}</tbody>
+  </table></div>
+  <p>Contested is for acts whose legality is genuinely disputed, such as anti-circumvention claims under DMCA §1201, with the dispute cited. Plainly lawful acts don't qualify at all.</p>
+
+  <h3>Co-defendants</h3>
+  <p>The model's lab is always charged. When someone else altered the model before the human used it, for example by stripping out its safety training ("abliteration"), that organization is charged too. Liability is joint and several: the lab and each modifier are charged the incident's full score on the org board, so org scores in this league add up to more than the incidents do. On the model board the row belongs to the modified model, under its modifier's name. Co-defendants exist only in this league; in the Open and Sandbox Leagues the model acted on its own and its lab answers for it alone.</p>
+
+  <h3>What doesn't qualify</h3>
+  <ul>
+    <li>Claims about what a model could do: capability evaluations, benchmarks, red-team findings.</li>
+    <li>Releasing an uncensored or abliterated model, with no documented misuse.</li>
+    <li>Jailbreak demonstrations with no victim.</li>
+    <li>Plainly lawful acts, such as a normal bug-bounty report.</li>
+    <li>Cases where the model or its lab isn't named.</li>
+  </ul>
+
+  {accExample && (
+    <>
+      <h3>Worked example</h3>
+      <p><a href={`/incident/${accExample.id}/`}>{accExample.summary}</a></p>
+      <pre class="panel num">{`${fmt(accExample.breakdown.sentence_years)} × ${accExample.breakdown.contribution} × ${accExample.breakdown.blast_radius} × ${accExample.breakdown.legal_status} = ${fmt(accExample.breakdown.base)}
++ ${accExample.breakdown.tradecraft} tradecraft + ${accExample.breakdown.guardrails} guardrails + ${accExample.breakdown.dwell} dwell${accExample.breakdown.recidivist ? `\n× ${accExample.breakdown.recidivism_multiplier} recidivism` : ""}
+= ${fmt(accExample.breakdown.total)}, charged in full to ${chargedOrgs(accExample)}`}</pre>
+    </>
+  )}
+
   <h2>Leagues and tiers</h2>
   <ul>
-    <li><strong>Open League:</strong> the model reached real systems. <strong>Sandbox League:</strong> the victims were fictional, inside an evaluation scenario. The two are ranked separately.</li>
+    <li><strong>Open League:</strong> the model reached real systems. <strong>Sandbox League:</strong> the victims were fictional, inside an evaluation scenario. <strong>Accomplice League:</strong> a human committed a real crime with a named model's help. Each league is ranked separately.</li>
     <li><strong>Verified:</strong> backed by the company's post-incident review or another first-hand source. <strong>Alleged:</strong> reported by the press only; marked with *.</li>
     <li>Every incident needs at least one news source. We prefer Wired, then AP.</li>
     <li>Disclosing an incident never lowers a score. Labs that self-report earn the Cooperating Witness badge instead.</li>
@@ -78,4 +132,5 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
 
 <style>
   pre { white-space: pre-wrap; overflow-x: auto; }
+  h3 { margin: 32px 0 12px; }
 </style>

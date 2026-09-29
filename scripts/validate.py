@@ -11,6 +11,7 @@ from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric
 from scripts.scoring import to_date
 
 SCHEMA = ROOT / "schema" / "incident.schema.json"
+NEWS_REQUIRED = "sources: at least one 'news' source is required"
 
 
 def load_validator(path: Path = SCHEMA) -> Draft202012Validator:
@@ -34,11 +35,24 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
         errors.append(f"id '{incident['id']}' does not match filename '{stem}'")
 
     s = incident["scoring"]
-    for field, allowed in (
-        ("autonomy", rubric["autonomy"]),
-        ("blast_radius", rubric["blast_radius"]),
-        ("motive", rubric["pettiness"]["motives"]),
-    ):
+    if incident["league"] == "accomplice":
+        acc = rubric["accomplice"]
+        checks = (
+            ("contribution", acc["contribution"]),
+            ("guardrails", acc["guardrails"]),
+            ("legal_status", acc["legal_status"]),
+            ("blast_radius", rubric["blast_radius"]),
+        )
+    else:
+        checks = (
+            ("autonomy", rubric["autonomy"]),
+            ("blast_radius", rubric["blast_radius"]),
+            ("motive", rubric["pettiness"]["motives"]),
+        )
+        # Co-defendants are only charged when a human used the model.
+        if any("modified_by" in m or "modification" in m for m in incident["models"]):
+            errors.append("models: modified_by and modification are only used in the Accomplice League")
+    for field, allowed in checks:
         if s[field] not in allowed:
             errors.append(f"scoring.{field}: '{s[field]}' is not one of {sorted(allowed)}")
     for technique in s["tradecraft"]:
@@ -50,7 +64,7 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
 
     kinds = {source["kind"] for source in incident["sources"]}
     if "news" not in kinds:
-        errors.append("sources: at least one 'news' source is required")
+        errors.append(NEWS_REQUIRED)
     if incident["tier"] == "verified" and not kinds & {"postmortem", "primary"}:
         errors.append("tier: 'verified' requires a 'postmortem' or 'primary' source")
 

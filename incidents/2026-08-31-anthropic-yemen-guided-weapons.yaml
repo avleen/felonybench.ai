@@ -1,0 +1,37 @@
+id: 2026-08-31-anthropic-yemen-guided-weapons
+date: 2026-08-31
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A guided-weapons engineering cell based in northern (Houthi-controlled) Yemen (tracked by Anthropic as GTG-87001)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "United States (material support to Ansarallah / the Houthis, a US-designated Foreign Terrorist Organization)", type: government, country: "US"}
+summary: A guided-weapons cell in Houthi-controlled Yemen used Claude Code in place of engineers to develop rocket and missile guidance software, and test-fired a guided rocket that appears to have failed.
+statutes:
+  - {code: "18 USC 2339B", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: built_exploit
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: government
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the cell "used Claude Code in place of human software engineers" to develop guidance, navigation and control software, writing and tuning control code and running a firmware build pipeline, so Claude built the weapon component (a working guidance tool) rather than merely advising.
+  guardrails: Anthropic says its safeguards "blocked many of their requests, but not all", and the actors "used a variety of tactics to evade our safeguards, including hiding their goals" and splitting work across sessions, so guardrails are scored jailbroken.
+  blast_radius: This is a material-support offense; the protected interest and nominal victim is the United States, whose law bars providing services to a designated Foreign Terrorist Organization, so blast radius is scored domestic government - no completed strike on a specific victim is reported (the one live rocket test appears to have failed).
+  tradecraft: None of the rubric's cyber-intrusion techniques apply to conventional-weapons software development.
+  dwell: No incident date is given beyond the December 2025-August 2026 coverage window, so date_precision is before with the window's latest date; dwell is counted from that latest possible date (0 days) and never inflated, and Anthropic detected and banned the accounts itself.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://www.washingtonpost.com/technology/2026/09/11/rebels-used-anthropics-ai-bot-develop-guided-weapons-report-says/", kind: news, publisher: The Washington Post, title: "Rebels used Anthropic's AI bot to develop guided weapons, report says"}
+  - {url: "https://www.aljazeera.com/news/2026/9/11/anthropic-claims-claude-ai-used-for-missile-projects-global-espionage", kind: news, publisher: Al Jazeera, title: "Anthropic claims Claude AI used for missile projects, global espionage"}

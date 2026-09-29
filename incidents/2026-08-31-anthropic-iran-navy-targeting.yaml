@@ -1,0 +1,38 @@
+id: 2026-08-31-anthropic-iran-navy-targeting
+date: 2026-08-31
+date_precision: before
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: An Iran-nexus threat actor (tracked by Anthropic as GTG-30005) that used Claude to develop targeting recommendations against US naval forces in the Middle East
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "US Navy / US naval forces operating in the Middle East", type: government, country: "US"}
+summary: An Iran-linked actor used Claude to build a Python pipeline that compiled targeting handbooks on US Navy ships from public transponder data, satellite imagery and personnel photos, and catalogued shipboard-system vulnerabilities.
+statutes:
+  - {code: "18 USC 951", max_years: 10}
+  - {code: "50 USC 1705 (IEEPA)", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: contested
+  blast_radius: government
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the actor used Claude to compile targeting handbooks "through a Python pipeline the threat actor built with Claude's assistance", which ran open-source collection to identify and track naval positions, so Claude both built and operated the collection pipeline.
+  guardrails: The report does not describe this actor jailbreaking or evading Claude's safeguards for the naval-reconnaissance work; it was OSINT compilation and vulnerability cataloguing, so guardrails are scored intact.
+  blast_radius: The target was the US Navy, a US government/military body, so blast radius is domestic government; the actor is foreign but the victim is US.
+  tradecraft: None of the rubric's intrusion techniques apply; the actor catalogued known CVEs in shipboard systems (VSAT, Cisco, ICS) but no exploitation, credential theft or lateral movement is reported.
+  dwell: No incident date is given beyond the December 2025-August 2026 coverage window, so date_precision is before with the window's latest date; dwell is counted from that latest possible date (0 days) and never inflated, and Anthropic detected and banned the account itself.
+confidence: high
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://www.navytimes.com/news/your-navy/2026/09/11/iran-used-claude-to-target-us-navy-in-middle-east-anthropic-says/", kind: news, publisher: Navy Times, title: "Iran used Claude to target US Navy in Middle East, Anthropic says"}
+  - {url: "https://gcaptain.com/anthropic-says-iran-linked-actor-used-claude-to-compile-u-s-navy-targeting-data/", kind: news, publisher: gCaptain, title: "Anthropic Says Iran-Linked Actor Used Claude to Compile U.S. Navy Targeting Data"}

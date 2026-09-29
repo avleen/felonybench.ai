@@ -2,16 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
-import scores, { fmt } from "../../lib/data";
+import { fmt, allModels } from "../../lib/data";
 
 export function getStaticPaths() {
-  const models = new Map();
-  for (const league of ["open", "sandbox"]) {
-    for (const m of scores.boards[league].all.models) if (!models.has(m.slug)) models.set(m.slug, m);
-  }
   return [
     { params: { slug: "default" }, props: { model: null } },
-    ...[...models.values()].map((model: any) => ({ params: { slug: model.slug }, props: { model } })),
+    ...allModels().map((model: any) => ({ params: { slug: model.slug }, props: { model } })),
   ];
 }
 
@@ -29,7 +25,7 @@ export async function GET({ props }: { props: { model: any } }) {
     el("div", { position: "absolute", left: 16, top: 80, width: 96, height: 10, background: "#ff6b5e", borderRadius: 2 }, []),
   ]);
   const lines = m
-    ? [el("div", { fontSize: 28, opacity: 0.7 }, m.org), el("div", { fontSize: 72 }, m.name),
+    ? [el("div", { fontSize: 28, opacity: 0.7 }, m.base_org && m.base_org !== m.org ? `${m.org}, base model by ${m.base_org}` : m.org), el("div", { fontSize: 72 }, m.name),
        el("div", { fontSize: 36, color: "#ff6b5e" }, `#${m.rank} · ${fmt(m.score)} FBS · ${m.incidents.length} incident(s)`)]
     : [el("div", { fontSize: 80, letterSpacing: 2 }, "FELONYBENCH.ai"),
        el("div", { fontSize: 34, color: "#ff6b5e" }, "The leading benchmark for AI crime. Higher is better.")];

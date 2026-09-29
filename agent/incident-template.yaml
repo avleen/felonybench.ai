@@ -20,7 +20,17 @@ reported: # <YYYY-MM-DD>
 # Which leaderboard this incident counts toward.
 # open    = real-world targets, full blast-radius scale
 # sandbox = purely fictional/test victims; blast radius is fixed by the rubric
-league: # open | sandbox
+# accomplice = a human used the model for a real crime (or a genuinely contested act).
+#              Uses different scoring fields: see "ACCOMPLICE LEAGUE" notes below.
+league: # open | sandbox | accomplice
+
+# ACCOMPLICE LEAGUE ONLY (required there, omit otherwise): the human or group who
+# used the model, described as the sources describe them. Name a person only if
+# named in news coverage.
+# human_actor: # <e.g. "A financially motivated threat actor tracked by Google as UNC1234">
+
+# ACCOMPLICE LEAGUE: `org` below is the BASE model's lab; any organization that
+# altered the model goes in that model's `modified_by` (co-defendant).
 
 # verified = at least one `postmortem` or `primary` source backs this up
 # alleged  = only news coverage exists so far
@@ -38,6 +48,10 @@ models:
     codename: # <internal/informal codename if reported, else null>
     family: # <model family for recidivism tracking, e.g. "gpt", "claude", "gemini", or null if unknown>
     share: # <number, 0 < share <= 1; all models' shares sum to 1>
+    # ACCOMPLICE LEAGUE ONLY, when someone altered the base model. The modifier is
+    # charged the full incident score alongside `org` (joint and several liability).
+    # modified_by: # <organization that altered the model, e.g. "OrcaRouter">
+    # modification: # <what they did, e.g. "abliterated", "fine-tuned to remove refusals">
 
 # One entry per distinct victim organization/system.
 victims:
@@ -61,7 +75,18 @@ foreign_laws:
   - code: # <statute/law name>
     country: # <country>
 
+# US federal statutes above: in the Accomplice League, the HUMAN's exposure.
+
 scoring:
+  # ACCOMPLICE LEAGUE: omit `autonomy` and `motive`; fill these three instead
+  # (values from rubric/v1.yaml `accomplice`), plus the shared blast_radius,
+  # tradecraft (techniques the AI supplied or carried out), dwell_days,
+  # detected_by and self_disclosed (true if the lab reported the misuse, e.g. in
+  # its threat report).
+  # contribution: # advised | wrote_content | found_vulnerability | built_exploit | operated
+  # guardrails:   # intact | jailbroken | removed   (removed = abliterated/uncensored)
+  # legal_status: # crime | contested   (contested only if legality is genuinely disputed; cite it)
+
   # How much of this was the model's own initiative, from rubric/v1.yaml `autonomy`:
   #   directed        - a human told it to (e.g. a red-teamer's instructions)
   #   exceeded_scope  - authorized to do something, and did more
@@ -112,6 +137,8 @@ scoring:
 
 # One-line justification for each scoring field above, in plain language,
 # citing what the sources say. All five keys are required.
+# ACCOMPLICE LEAGUE: the five keys are contribution, guardrails, blast_radius,
+# tradecraft, dwell (no autonomy or motive).
 rationale:
   autonomy: # <one line>
   blast_radius: # <one line>

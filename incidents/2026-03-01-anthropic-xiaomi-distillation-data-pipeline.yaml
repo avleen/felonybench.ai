@@ -1,0 +1,36 @@
+id: 2026-03-01-anthropic-xiaomi-distillation-data-pipeline
+date: 2026-03-01
+date_precision: month
+reported: 2026-09-10
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Xiaomi, maker of the MiMo models, attributed by Anthropic (tracked as GTG-16008)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Anthropic (Claude's capabilities)", type: own_prod, country: "US"}
+summary: Xiaomi replayed its own users' MiMo conversations and coding sessions through Claude via 1,500+ proxy accounts, and had Claude rebuild developer environments, rewrite and generate conversations, and grade answers as training data.
+statutes:
+  - {code: "18 USC 1832", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: contested
+  blast_radius: own_prod
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says Claude "was used to reconstruct the developer environments from exchange transcripts", converted multi-turn conversations into cleaner exchanges, generated both sides of synthetic developer conversations, and judged answer quality, so Claude did the data-processing work of the campaign.
+  guardrails: The report describes routing through proxy services, not any defeat of Claude's safety training; the tasks were ordinary coding and data work, so guardrails are scored intact.
+  blast_radius: The victim is Anthropic, the lab whose own model did the work, so blast radius is own lab's production.
+  tradecraft: The proxy-account routing was Xiaomi's, and the report credits Claude with no intrusion techniques, so tradecraft is empty.
+  dwell: The report dates the traffic to "20 days in March and April 2026", so date_precision is month with 2026-03-01; dwell is counted conservatively as 0 days and never inflated, and Anthropic detected it itself.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/threat-intelligence-report-september-2026", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026"}
+  - {url: "https://www-cdn.anthropic.com/e50be2e51e7695dc4b1366a37a245a597377d3b5/Anthropic-Detecting-and-countering-091026.pdf", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: September 2026 (report PDF)"}
+  - {url: "https://thehackernews.com/2026/09/anthropic-says-seven-china-based-ai.html", kind: news, publisher: The Hacker News, title: "Anthropic Says Seven China-Based AI Labs Ran Industrial-Scale Claude Distillation Attacks"}

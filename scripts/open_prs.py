@@ -15,7 +15,7 @@ from scripts.diff import render
 from scripts.rubric import ROOT, load_rubric
 from scripts.score import load_incidents
 from scripts.scoring import build_scores
-from scripts.validate import load_validator, validate_dir
+from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir
 
 ALLOWED_PREFIXES = ("incidents/", ".agent-out/", ".agent-state/")
 PR_BODY_LIMIT = 65000
@@ -42,9 +42,21 @@ def pr_title(incident: dict, is_new: bool) -> str:
     return f"New felony: {incident['org']} — {victims}"
 
 
+def awaiting_news(errors: list[str]) -> bool:
+    """In scope and otherwise valid, just no news coverage yet: opened as a draft PR."""
+    return errors == [NEWS_REQUIRED]
+
+
+def becomes_ready(pr: dict, errors: list[str]) -> bool:
+    """A draft that was awaiting news now validates cleanly: hand it to a human."""
+    return bool(pr.get("isDraft")) and not errors
+
+
 def labels_for(incident: dict, errors: list[str]) -> list[str]:
     labels = ["agent"]
-    if errors or incident.get("confidence") == "low":
+    if awaiting_news(errors):
+        labels.append("awaiting-news")
+    elif errors or incident.get("confidence") == "low":
         labels.append("needs-review")
     return labels
 
@@ -52,12 +64,24 @@ def labels_for(incident: dict, errors: list[str]) -> list[str]:
 def pr_body(incident: dict, notes: str, breakdown: dict | None, diff_md: str, errors: list[str]) -> str:
     parts = [notes.strip() or incident.get("summary", "")]
     if breakdown:
+        if incident.get("league") == "accomplice":
+            middle = [
+                ("× Contribution", breakdown["contribution"]),
+                ("× Blast Radius", breakdown["blast_radius"]),
+                ("× Legal status", breakdown["legal_status"]),
+                ("+ Tradecraft", breakdown["tradecraft"]),
+                ("+ Guardrails", breakdown["guardrails"]),
+            ]
+        else:
+            middle = [
+                ("× Autonomy", breakdown["autonomy"]),
+                ("× Blast Radius", breakdown["blast_radius"]),
+                ("+ Tradecraft", breakdown["tradecraft"]),
+                ("+ Pettiness", breakdown["pettiness"]),
+            ]
         rows = [
             ("Sentence-Years", breakdown["sentence_years"]),
-            ("× Autonomy", breakdown["autonomy"]),
-            ("× Blast Radius", breakdown["blast_radius"]),
-            ("+ Tradecraft", breakdown["tradecraft"]),
-            ("+ Pettiness", breakdown["pettiness"]),
+            *middle,
             ("+ Dwell", breakdown["dwell"]),
             ("× Recidivism", breakdown["recidivism_multiplier"]),
         ]
@@ -110,8 +134,8 @@ def main(argv: list[str] | None = None) -> int:
     _run("git", "clean", "-fd", "incidents")
     rubric, validator = load_rubric(), load_validator()
     before = build_scores(load_incidents(ROOT / "incidents"), rubric, "base")
-    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--json", "number,headRefName"))
-    open_heads = {pr["headRefName"]: pr["number"] for pr in open_prs}
+    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--json", "number,headRefName,isDraft,labels"))
+    open_heads = {pr["headRefName"]: pr for pr in open_prs}
 
     failed = False
     for path, text in contents.items():
@@ -124,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
 
             errors = validate_dir(ROOT / "incidents", rubric, validator).get(Path(path).name, [])
             breakdown, diff_md = None, "## Leaderboard impact\n\nNot scored: validation failed."
-            if not errors:
+            if not errors or awaiting_news(errors):  # otherwise valid; just no news yet
                 after = build_scores(load_incidents(ROOT / "incidents"), rubric, "head")
                 breakdown = next(i["breakdown"] for i in after["incidents"] if i["id"] == incident["id"])
                 diff_md = render(before, after)
@@ -138,10 +162,16 @@ def main(argv: list[str] | None = None) -> int:
             _run("git", "commit", "-m", title)
             _run("git", "push", "--force", "origin", f"HEAD:refs/heads/{branch}")
             if branch in open_heads:
-                _run("gh", "pr", "comment", str(open_heads[branch]), "--body", "Agent updated this incident.\n\n" + body)
+                pr = open_heads[branch]
+                _run("gh", "pr", "comment", str(pr["number"]), "--body", "Agent updated this incident.\n\n" + body)
+                if becomes_ready(pr, errors):
+                    _run("gh", "pr", "ready", str(pr["number"]))
+                    if any(label.get("name") == "awaiting-news" for label in pr.get("labels", [])):
+                        _run("gh", "pr", "edit", str(pr["number"]), "--remove-label", "awaiting-news")
             else:
                 label_args = [x for label in labels_for(incident, errors) for x in ("--label", label)]
-                _run("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title, "--body", body, *label_args)
+                draft = ["--draft"] if errors else []  # agent PRs get no CI check; a draft can't be merged by accident
+                _run("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title, "--body", body, *draft, *label_args)
             print(f"{title} -> {branch}")
         except subprocess.CalledProcessError as e:
             failed = True

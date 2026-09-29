@@ -170,13 +170,22 @@ standard GitHub-hosted runner minutes are free.
    the AI Incident Database, and Google News RSS queries per incident shape (crypto
    mining, consumer actions, phishing/sockpuppets, "went rogue", "unsanctioned",
    incident reports, third-party evaluations) and for sites without feeds
-   (aisi.gov.uk, openai.com, other safety institutes and evaluators).
+   (aisi.gov.uk, openai.com, other safety institutes and evaluators). For the
+   Accomplice League: threat-intelligence feeds (Google Threat Intelligence blog,
+   Microsoft Threat Intelligence, Unit 42, Check Point Research, ESET, CrowdStrike,
+   Recorded Future), Google News queries for OpenAI's, Anthropic's and GTIG's
+   AI-misuse reports (their pages have no RSS), and queries for AI-generated
+   malware and exploits, threat actors using named models, uncensored/abliterated
+   models in attacks, and WormGPT-style tools.
 2. Keeps unseen items that mention a **lab/model/evaluator name AND a trigger word**
    (sandbox, unauthorized, credentials, breach, exploit, post-incident, plus mining,
    cryptocurrency, tunnel, phishing, sockpuppet, pull request, Dependabot, cancelled,
-   unsanctioned, misuse, incident report, …). Evaluators and safety institutes
+   unsanctioned, misuse, incident report, threat actor, malware, ransomware,
+   cybercriminal, extortion, hacker, espionage, state-sponsored, …). Evaluators and safety institutes
    (Irregular, METR, AISI, Apollo Research, Palisade Research) count as names, so
-   their reports match without a lab name. Seen-URL state lives in the Actions cache.
+   their reports match without a lab name; so do WormGPT, GhostGPT and FraudGPT.
+   "Uncensored" and "abliterated" are not triggers: a model release isn't an
+   incident. Seen-URL state lives in the Actions cache.
 3. No hits → exit. Hits → write `candidates.json` and run Claude Code in
    **triage mode** on Opus at medium effort (60 turns / 30 min).
 
@@ -197,7 +206,8 @@ standard GitHub-hosted runner minutes are free.
   evaluations; system cards; government AI safety institutes (UK AISI blog and
   its PDFs, US CAISI, others); evaluator orgs; arXiv and lab technical reports;
   regional and non-English news; security press; incident trackers; HN/Reddit as
-  leads only. This came from a comparison with felonybench.com/.org that showed
+  leads only; and (for the Accomplice League) labs' and security vendors'
+  threat-intelligence reports, where each case is a candidate incident. This came from a comparison with felonybench.com/.org that showed
   the sweep missing an AISI incident report, an OpenAI third-party-evals post, an
   ABC Australia consumer-harm story and a research paper (Alibaba ROME).
 - A per-lab coverage checklist (OpenAI, Anthropic, Google DeepMind, Meta, xAI,

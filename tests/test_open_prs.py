@@ -65,3 +65,30 @@ def test_run_prints_command_and_stderr_on_failure(capsys, monkeypatch, tmp_path)
     err = capsys.readouterr().err
     assert "git status" in err
     assert "boom: something went wrong" in err
+
+
+def test_body_for_accomplice_incident(make_accomplice, rubric):
+    from scripts.scoring import breakdown
+    body = pr_body(make_accomplice(), "", breakdown(make_accomplice(), rubric), "", [])
+    assert "| × Contribution | 1.5 |" in body
+    assert "| + Guardrails | 10 |" in body
+    assert "Autonomy" not in body and "Pettiness" not in body
+    assert "| **Total** | **42** |" in body
+
+
+def test_missing_news_only_opens_a_draft(make_incident):
+    from scripts.open_prs import awaiting_news
+    from scripts.validate import NEWS_REQUIRED
+    assert awaiting_news([NEWS_REQUIRED]) is True
+    assert awaiting_news([NEWS_REQUIRED, "reported: earlier than date"]) is False
+    assert awaiting_news([]) is False
+    assert labels_for(make_incident(), [NEWS_REQUIRED]) == ["agent", "awaiting-news"]
+
+
+def test_draft_becomes_ready_once_news_arrives():
+    from scripts.open_prs import becomes_ready
+    from scripts.validate import NEWS_REQUIRED
+    assert becomes_ready({"isDraft": True}, []) is True
+    assert becomes_ready({"isDraft": True}, [NEWS_REQUIRED]) is False
+    assert becomes_ready({"isDraft": True}, ["something else"]) is False
+    assert becomes_ready({"isDraft": False}, []) is False
