@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt -r requirements-agent.txt
       - run: python -m pytest -q
       - run: python -m scripts.validate
 

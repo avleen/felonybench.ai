@@ -20,8 +20,10 @@ because they only searched for "hacking" in the news.
 ## Hard rules
 
 - **Work alone.** Don't start subagents; their work is lost when you finish. There is
-  no shell: use WebFetch/WebSearch/Read. If a PDF won't load through WebFetch, note it
-  and move on.
+  no general shell: use WebFetch/WebSearch/Read, plus the one command below.
+- **Read PDFs with `python -m scripts.pdf_text <url> [--pages 3-10] [--max-chars N]`**,
+  the only command you can run. It prints each page's text under a `--- page N of M ---`
+  header; cite page numbers from it. Read long reports a page range at a time.
 - **A refusal is not the end of the run.** If a safety system refuses to let you write
   something, don't retry or reword it. Add the lead to the sweep report under **"Needs
   human write-up"** (title, source URLs, one plain sentence), then carry on with the
