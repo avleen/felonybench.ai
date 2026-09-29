@@ -8,7 +8,10 @@ the page.
 """
 import argparse
 import io
+import ipaddress
+import socket
 import sys
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -33,10 +36,42 @@ def parse_pages(spec: str) -> tuple[int, int]:
     return start, end
 
 
-def load(source: str, opener=urllib.request.urlopen) -> bytes:
-    """Read a local file, or fetch a URL."""
+def positive_int(value: str) -> int:
+    n = int(value)
+    if n < 1:
+        raise argparse.ArgumentTypeError(f"must be a positive integer, got {value}")
+    return n
+
+
+# The agent picks URLs from web pages, and this runs on a CI runner, so it only fetches
+# public addresses (no loopback, private networks or cloud metadata), including after
+# every redirect.
+def check_url(url: str, resolve=socket.getaddrinfo) -> None:
+    parts = urllib.parse.urlsplit(url)
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        raise ValueError(f"only http(s) URLs can be fetched: {url}")
+    port = parts.port or (443 if parts.scheme == "https" else 80)
+    for *_, sockaddr in resolve(parts.hostname, port, proto=socket.IPPROTO_TCP):
+        ip = ipaddress.ip_address(sockaddr[0])
+        if not ip.is_global or ip.is_multicast:
+            raise ValueError(f"refusing to fetch {url}: {parts.hostname} resolves to non-public address {ip}")
+
+
+class PublicOnlyRedirects(urllib.request.HTTPRedirectHandler):
+    def __init__(self, resolve=socket.getaddrinfo):
+        self.resolve = resolve
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        check_url(newurl, self.resolve)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def load(source: str, opener=None, resolve=socket.getaddrinfo) -> bytes:
+    """Read a local file, or fetch a public http(s) URL."""
     if not source.startswith(("http://", "https://")):
         return Path(source).read_bytes()
+    check_url(source, resolve)
+    opener = opener or urllib.request.build_opener(PublicOnlyRedirects(resolve)).open
     req = urllib.request.Request(source, headers={"User-Agent": BROWSER_UA})
     with opener(req, timeout=120) as resp:
         return resp.read()
@@ -60,7 +95,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("source", help="PDF URL or local path")
     ap.add_argument("--pages", type=parse_pages, help="page range, e.g. 3-10 or 5 (1-based)")
-    ap.add_argument("--max-chars", type=int, default=DEFAULT_MAX_CHARS,
+    ap.add_argument("--max-chars", type=positive_int, default=DEFAULT_MAX_CHARS,
                     help=f"truncate output after this many characters (default {DEFAULT_MAX_CHARS})")
     args = ap.parse_args(argv)
     try:

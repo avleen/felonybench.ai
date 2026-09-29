@@ -43,7 +43,7 @@ IEEPA/EAR-style crime, but with no discrete victim, so a human should decide sco
 ## Illicit distillation by PRC labs - RESOLVED 2026-09-29
 The owner decided that "Claude being the target counts if AI was used to do the work." Written up:
 Zhipu (two incidents) and Xiaomi, where the report says Claude did the processing,
-grading or pipeline-writing work. SenseTime was written up and later dropped by the owner (weakest legal theory: the transcripts were outputs users could already see). Rejected: Alibaba, Moonshot, DeepSeek and MiniMax, where the report
+grading or pipeline-writing work. SenseTime was written up and later dropped by the owner (weakest legal theory: the transcripts were outputs users could already see). Initially rejected: Alibaba, Moonshot, DeepSeek and MiniMax (Alibaba and MiniMax still are), where the report
 shows Claude only producing the stolen output. See the distillation section of
 `anthropic-sept-2026-threat-report.md`. The owner then ruled that Claude
 decoding its own thinking signature in Moonshot's and DeepSeek's "cross-session replay" attack
