@@ -16,7 +16,7 @@ statutes:
 foreign_laws:
   - {code: "Indonesian Criminal Code (KUHP), fraud (penipuan)", country: Indonesia}
 scoring:
-  contribution: wrote_content
+  contribution: operated
   guardrails: intact
   legal_status: crime
   blast_radius: third_party
@@ -25,7 +25,7 @@ scoring:
   detected_by: lab
   self_disclosed: true
 rationale:
-  contribution: OpenAI says the network used ChatGPT to write the dating-service ads and to "generate and translate emotionally manipulative messages pressuring targets" into escalating payments, and blended human operators with "API-powered automation" for its chatbot receptionist; humans ran the scam, so this is scored as writing the content.
+  contribution: OpenAI says the network used ChatGPT to write the dating-service ads and to "generate and translate emotionally manipulative messages pressuring targets" into escalating payments, and blended human operators with "API-powered automation" for its chatbot receptionist; because the model itself talked to victims through that chatbot, this is scored as running the operation under the scammers' direction.
   guardrails: OpenAI's report describes no jailbreak or safety bypass; the model was used as shipped.
   blast_radius: The targets were members of the public in Indonesia, reached through paid social media ads and Telegram; OpenAI quotes a letter to a victim demanding Rp 20,500,000.
   tradecraft: None of the rubric's intrusion techniques apply to a romance and task scam.
