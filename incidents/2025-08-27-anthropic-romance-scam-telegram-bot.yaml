@@ -1,0 +1,37 @@
+id: 2025-08-27-anthropic-romance-scam-telegram-bot
+date: 2025-08-27
+date_precision: before
+reported: 2025-08-27
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Operators of the Telegram bot @Chat_ChatGPT_AIbot, whose Chinese-language channels suggest a Chinese operation, and its 10,000+ monthly users
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Romance-scam targets in the US, Japan and Korea", type: third_party, country: null}
+summary: A Telegram bot marketed to romance scammers offered Claude as a "high EQ model" to write emotionally manipulative messages to targets in the US, Japan and Korea, with more than 10,000 monthly users.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the bot "uses Claude for generating 'high emotional intelligence' responses" and "systematically develops emotional manipulation content for targeting victims"; scammers sent the messages, so this is written content.
+  guardrails: The report describes no jailbreak or safety bypass.
+  blast_radius: The targets are members of the public, so blast radius is third party.
+  tradecraft: None of the rubric's intrusion techniques apply to a romance scam.
+  dwell: Anthropic gives no dates, so date_precision is before with the report's publication date; dwell is counted from that latest possible date (0 days) and never inflated. Anthropic found the bot following a lead from an independent researcher.
+  statutes: Using manipulative messages to take money from romance-scam targets is wire fraud (18 USC 1343).
+confidence: low
+sources:
+  - {url: "https://www-cdn.anthropic.com/b2a76c6f6992465c09a6f2fce282f6c0cea8c200.pdf", kind: primary, publisher: Anthropic, title: "Threat Intelligence Report: August 2025"}
+  - {url: "https://www.anthropic.com/news/detecting-countering-misuse-aug-2025", kind: primary, publisher: Anthropic, title: "Detecting and countering misuse of AI: August 2025"}
+  - {url: "https://thehackernews.com/2025/08/anthropic-disrupts-ai-powered.html", kind: news, publisher: The Hacker News, title: "Anthropic Disrupts AI-Powered Cyberattacks Automating Theft and Extortion Across Critical Sectors"}
