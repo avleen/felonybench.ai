@@ -62,7 +62,7 @@ def test_scored_incidents_carry_model_slugs_and_rubric(make_incident, rubric):
     assert scores["incidents"][0]["models"][0]["slug"] == "openai-model-a"
     assert scores["incidents"][0]["breakdown"]["total"] == 87
     assert scores["rubric"]["version"] == "1.1"
-    assert scores["last_incident_date"] == {"open": "2026-07-16", "sandbox": None}
+    assert scores["last_incident_date"] == {"open": "2026-07-16", "sandbox": None, "accomplice": None}
 
 
 def test_empty_input(rubric):

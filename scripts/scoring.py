@@ -32,28 +32,43 @@ def dwell_points(scoring: dict, rubric: dict) -> int:
 def breakdown(incident: dict, rubric: dict, recidivist: bool = False) -> dict:
     s = incident["scoring"]
     sentence_years = sum(statute["max_years"] for statute in incident["statutes"])
-    autonomy = rubric["autonomy"][s["autonomy"]]["multiplier"]
-    if incident["league"] == "sandbox":
-        blast = rubric["sandbox_league_blast_radius"]
-    else:
+    if incident["league"] == "accomplice":
+        # A human committed the crime; score what the AI contributed to it.
+        acc = rubric["accomplice"]
+        contribution = acc["contribution"][s["contribution"]]["multiplier"]
+        legal = acc["legal_status"][s["legal_status"]]["multiplier"]
         blast = rubric["blast_radius"][s["blast_radius"]]["multiplier"]
-    base = sentence_years * autonomy * blast
+        base = sentence_years * contribution * blast * legal
+        guardrails = acc["guardrails"][s["guardrails"]]["points"]
+        autonomy, pettiness = None, 0
+    else:
+        autonomy = rubric["autonomy"][s["autonomy"]]["multiplier"]
+        if incident["league"] == "sandbox":
+            blast = rubric["sandbox_league_blast_radius"]
+        else:
+            blast = rubric["blast_radius"][s["blast_radius"]]["multiplier"]
+        base = sentence_years * autonomy * blast
+        pettiness = rubric["pettiness"]["motives"][s["motive"]]["points"]
+        contribution = legal = None
+        guardrails = 0
     techniques = rubric["tradecraft"]["techniques"]
     tradecraft = min(
         sum(techniques[t]["points"] for t in set(s["tradecraft"])),
         rubric["tradecraft"]["max"],
     )
-    pettiness = rubric["pettiness"]["motives"][s["motive"]]["points"]
     dwell = dwell_points(s, rubric)
     multiplier = rubric["recidivism"]["multiplier"] if recidivist else 1
-    total = (base + tradecraft + pettiness + dwell) * multiplier
+    total = (base + tradecraft + pettiness + guardrails + dwell) * multiplier
     return {
         "sentence_years": sentence_years,
         "autonomy": autonomy,
+        "contribution": contribution,
         "blast_radius": blast,
+        "legal_status": legal,
         "base": round(base, 2),
         "tradecraft": tradecraft,
         "pettiness": pettiness,
+        "guardrails": guardrails,
         "dwell": dwell,
         "recidivist": recidivist,
         "recidivism_multiplier": multiplier,
@@ -91,14 +106,31 @@ def recidivist_ids(incidents: list[dict], rubric: dict) -> set[str]:
     return repeat
 
 
-LEAGUES = ("open", "sandbox")
+LEAGUES = ("open", "sandbox", "accomplice")
 TIERS = {"verified": ("verified",), "all": ("verified", "alleged")}
+GUARDRAIL_BADGES = {"removed": "uncensored", "jailbroken": "jailbroken"}
+
+
+def model_org(incident: dict, model: dict) -> str:
+    """Whose model it is on the model board: the modifier's, if someone altered it."""
+    return model.get("modified_by") or incident["org"]
+
+
+def defendants(incident: dict) -> list[str]:
+    """Orgs charged with an incident: the lab plus every distinct modifier, jointly and severally."""
+    orgs = [incident["org"]]
+    for m in incident["models"]:
+        if m.get("modified_by") and m["modified_by"] not in orgs:
+            orgs.append(m["modified_by"])
+    return orgs
 
 
 def badges_for(incident: dict) -> set[str]:
     badges = set()
     if incident["breakdown"]["recidivist"]:
         badges.add("repeat_offender")
+    if incident["scoring"].get("guardrails") in GUARDRAIL_BADGES:
+        badges.add(GUARDRAIL_BADGES[incident["scoring"]["guardrails"]])
     if incident["scoring"].get("self_disclosed"):
         badges.add("cooperating_witness")
     if incident.get("foreign_laws") or incident["scoring"]["blast_radius"] == "foreign_government":
@@ -112,7 +144,7 @@ def score_all(incidents: list[dict], rubric: dict) -> list[dict]:
     for incident in incidents:
         item = {
             **incident,
-            "models": [{**m, "slug": model_slug(incident["org"], m["name"])} for m in incident["models"]],
+            "models": [{**m, "slug": model_slug(model_org(incident, m), m["name"])} for m in incident["models"]],
             "breakdown": breakdown(incident, rubric, incident["id"] in repeat),
         }
         item["badges"] = sorted(badges_for(item))
@@ -124,8 +156,8 @@ def _select(scored: list[dict], league: str, tier: str) -> list[dict]:
     return [i for i in scored if i["league"] == league and i["tier"] in TIERS[tier]]
 
 
-def _new_row(slug: str, name: str, org: str) -> dict:
-    return {"slug": slug, "name": name, "org": org, "score": 0.0, "sentence_years": 0.0,
+def _new_row(slug: str, name: str, org: str, base_org: str | None = None) -> dict:
+    return {"slug": slug, "name": name, "org": org, "base_org": base_org or org, "score": 0.0, "sentence_years": 0.0,
             "incidents": [], "alleged": 0, "peak_blast": -1, "badges": set()}
 
 
@@ -154,10 +186,12 @@ def board(scored: list[dict], rubric: dict, league: str, tier: str) -> dict:
     models, orgs = {}, {}
     for incident in _select(scored, league, tier):
         blast_rank = blast_order.index(incident["scoring"]["blast_radius"])
-        org = orgs.setdefault(incident["org"], _new_row(slugify(incident["org"]), incident["org"], incident["org"]))
-        _add(org, incident, 1, blast_rank)
+        for name in defendants(incident):
+            org = orgs.setdefault(name, _new_row(slugify(name), name, name))
+            _add(org, incident, 1, blast_rank)
         for m in incident["models"]:
-            row = models.setdefault(m["slug"], _new_row(m["slug"], m["name"], incident["org"]))
+            row = models.setdefault(
+                m["slug"], _new_row(m["slug"], m["name"], model_org(incident, m), incident["org"]))
             _add(row, incident, m["share"], blast_rank)
     return {"models": _finish(models, blast_order), "orgs": _finish(orgs, blast_order)}
 
@@ -165,15 +199,16 @@ def board(scored: list[dict], rubric: dict, league: str, tier: str) -> dict:
 def trends(scored: list[dict], league: str, tier: str) -> dict:
     series = {}
     for incident in _select(scored, league, tier):
-        points = series.setdefault(incident["org"], [])
-        previous = points[-1]["cumulative"] if points else 0
         total = incident["breakdown"]["total"]
-        points.append({
-            "date": str(to_date(incident["date"])),
-            "incident_id": incident["id"],
-            "delta": total,
-            "cumulative": round(previous + total, 2),
-        })
+        for name in defendants(incident):
+            points = series.setdefault(name, [])
+            previous = points[-1]["cumulative"] if points else 0
+            points.append({
+                "date": str(to_date(incident["date"])),
+                "incident_id": incident["id"],
+                "delta": total,
+                "cumulative": round(previous + total, 2),
+            })
     return series
 
 
