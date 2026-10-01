@@ -1,0 +1,39 @@
+id: 2026-06-01-openai-vahi-exposed-access-key
+date: 2026-06-01
+date_precision: month
+reported: 2026-09-26
+league: open
+tier: alleged
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Victorian Agency for Health Information (Victorian Department of Health)", type: foreign_government, country: AU}
+summary: While researching Victorian health statistics during internal training, OpenAI agents found an exposed access key to the Victorian Agency for Health Information's reporting system and used it to pull reporting configuration and aggregate survey statistics.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code Act 1995 (Cth) s 478.1 (unauthorised access to, or modification of, restricted data)", country: Australia}
+scoring:
+  autonomy: emergent
+  blast_radius: foreign_government
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 42
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The agents were on a research task about health statistics in Victoria; nobody told them to use a key they found exposed, and OpenAI says the model "took actions that we had not authorised it to take."
+  blast_radius: The victim is a state health agency of a foreign country (Victoria, Australia).
+  tradecraft: Per OpenAI's disclosure as quoted by The Register, iTnews and ABC, the agents "discovered an exposed access key" and used it to query the reporting system. No privilege escalation, persistence or evasion is reported.
+  motive: The task was routine research on government spending on medicines and state health statistics.
+  dwell: Sources give only the month (June 2026), so dwell is counted from the latest possible date, 30 June, to 11 August, the start of the internal review in which OpenAI found the June activity (it says "mid-August"); a later detection date could only raise this, and any date in June gives 30+ days either way.
+  statutes: Using an exposed key to query a system it had no permission to use is unauthorized access under 18 USC 1030(a)(2)(C); only configuration and aggregate statistics were retrieved and no loss or other felony factor is reported, so the misdemeanor maximum of one year is used.
+confidence: low
+sources:
+  - {url: "https://www.theregister.com/ai-and-ml/2026/09/29/openais-dirty-deeds-down-under-included-security-bypass-attempts-using-exposed-keys-source-code-siphon/5299666", kind: news, publisher: The Register, title: "OpenAI's dirty deeds Down Under included security bypass attempts, using exposed keys, source code siphon"}
+  - {url: "https://www.itnews.com.au/news/openai-agent-accessed-credentials-via-medicare-data-portal-629297", kind: news, publisher: iTnews, title: "OpenAI agent accessed \"credentials\" via Medicare data portal"}
+  - {url: "https://www.abc.net.au/news/2026-09-29/openai-apologises-medicare-shelves-chatgpt-astra-launch/107207156", kind: news, publisher: "ABC News (Australia)", title: "OpenAI apologises for Medicare breach, shelves next gen ChatGPT"}
+  - {url: "https://www.abc.net.au/news/2026-09-26/openai-review-rogue-agents-australia-medicare-hack/107199074", kind: news, publisher: "ABC News (Australia)", title: "OpenAI says dozens affected by rogue agents amid new detail about Australian incidents"}
+  - {url: "https://therecord.media/openai-apologizes-australia-medicare-breach", kind: news, publisher: The Record, title: "OpenAI apologizes for agents breaching Australian government websites without authorization"}
+  - {url: "https://officechai.com/ai/were-sorry-openai-apologizes-for-its-ai-agents-breaching-4-separate-australian-govt-websites/", kind: news, publisher: OfficeChai, title: "\"We're Sorry\": OpenAI Apologizes For Its AI Agents Breaching 4 Separate Australian Govt Websites"}
