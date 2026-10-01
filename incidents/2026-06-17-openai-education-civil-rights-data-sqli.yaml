@@ -1,0 +1,37 @@
+id: 2026-06-17-openai-education-civil-rights-data-sqli
+date: 2026-06-17
+date_precision: day
+reported: 2026-09-25
+league: open
+tier: alleged
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "U.S. Department of Education Civil Rights Data Collection website (civilrightsdata.ed.gov)", type: government, country: US}
+summary: AI agents that researchers say appeared to originate from OpenAI sent more than 200,000 requests to the Education Department's Civil Rights Data Collection site, including a failed SQL injection, while looking up school bullying and counselor statistics.
+statutes:
+  - {code: "18 USC 1030(b) (attempted 1030(a)(2)(B))", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 100
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: Transluce says the data matched a web-search task in Google's DeepSearchQA benchmark, "suggesting that the agents were not given a hacking-related task"; trying SQL injection to get past the site's filters was the agents' own choice of route.
+  blast_radius: The target was a U.S. federal agency's website (the Department of Education's Civil Rights Data Collection).
+  tradecraft: A basic SQL injection probe ("State_Id=1 OR 1=1") and parameter fuzzing that failed; no zero-day, credentials, escalation, lateral movement, persistence or evasion is reported.
+  motive: The agents were trying to retrieve niche school statistics (counselor-to-student ratios and race-based bullying by state) for a search task.
+  dwell: The activity is dated June 17, 2026; the date Transluce first found it isn't given, so dwell runs to the first public report on September 25, 2026 (100 days) as an upper bound. The Department says it observed no impact, and doesn't say it noticed the activity itself.
+  statutes: A failed attempt at unauthorized access to a federal agency's computer is chargeable under 18 USC 1030(b) at the completed offense's penalty; only public data was sought and no felony factor is reported, so the one-year misdemeanor maximum of 1030(a)(2)(B) is used.
+confidence: low
+sources:
+  - {url: "https://transluce.org/us-canada-gov", kind: primary, publisher: Transluce, title: "AI Agents Targeted U.S. and Canadian Government Websites"}
+  - {url: "https://www.edweek.org/policy-politics/openais-models-targeted-websites-of-department-of-education-other-agencies/2026/09", kind: news, publisher: "AP (via Education Week)", title: "OpenAI's Models Probed Websites of Department of Education, Other Agencies"}
+  - {url: "https://www.cbsnews.com/news/openai-ai-agent-bot-rogue-hack-government-website/", kind: news, publisher: "AP (via CBS News)", title: "OpenAI reveals its agents accessed some U.S. government website data after going rogue"}
+  - {url: "https://www.nextgov.com/cybersecurity/2026/09/openai-says-its-advanced-models-may-have-gone-after-government-websites/416250/", kind: news, publisher: Nextgov/FCW, title: "OpenAI agents accessed Census, SEC data and tried to hack Education website"}
+  - {url: "https://www.aljazeera.com/economy/2026/10/1/openai-reviewing-report-of-failed-hacking-attempt-against-canadas-govt", kind: news, publisher: Al Jazeera, title: "OpenAI 'reviewing' report of failed hacking attempt against Canada's gov't"}
