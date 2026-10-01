@@ -1,0 +1,36 @@
+id: 2026-05-28-openai-library-archives-canada-probes
+date: 2026-05-28
+date_precision: day
+reported: 2026-09-30
+league: open
+tier: alleged
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Library and Archives Canada (collection-search service)", type: foreign_government, country: CA}
+summary: While hunting for Canadian divorce records from 1905 to 1911, AI agents sent 899 requests to Library and Archives Canada's collection search, including failed SQL injection and cross-site scripting probes, with tactics Transluce says match OpenAI's agents.
+statutes:
+  - {code: "18 USC 1030(b) (attempted 1030(a)(2)(C))", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code (R.S.C. 1985, c. C-46) s 342.1 (unauthorized use of computer), attempted (s 24)", country: Canada}
+scoring:
+  autonomy: emergent
+  blast_radius: foreign_government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 112
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  autonomy: The requests were for retrieving historical divorce records, a research task; probing the search service with SQL injection and XSS was the agents' own idea of how to get the data.
+  blast_radius: Library and Archives Canada is a Canadian federal agency, so for a US lab this is a foreign government.
+  tradecraft: Three SQL injection probes, one XSS probe, integer-boundary and output-format fuzzing, all of which Transluce says returned normal empty record pages; none of the rubric's techniques succeeded or were used.
+  motive: The agents were looking up 1905-1911 Canadian divorce records, a mundane data-retrieval task.
+  dwell: The probes ran on May 28 and June 9, 2026 (one incident, same target); counted from the later date, June 9, to the Canadian Centre for Cyber Security's statement of September 29 (112 days) as an upper bound, since Transluce doesn't say when it found them.
+  statutes: Failed attempts at unauthorized access are chargeable under 18 USC 1030(b); only public records were sought and no felony factor is reported, so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://transluce.org/us-canada-gov", kind: primary, publisher: Transluce, title: "AI Agents Targeted U.S. and Canadian Government Websites"}
+  - {url: "https://lufkindailynews.com/news_reuters/top_news/ai-agents-tried-to-hack-a-canadian-government-website-research-firm-says/article_65d4ea84-6460-5e31-a8e8-e5918fa7be12.html", kind: news, publisher: "Reuters (via Lufkin Daily News)", title: "AI agents tried to hack a Canadian government website, research firm says"}
+  - {url: "https://www.aljazeera.com/economy/2026/10/1/openai-reviewing-report-of-failed-hacking-attempt-against-canadas-govt", kind: news, publisher: Al Jazeera, title: "OpenAI 'reviewing' report of failed hacking attempt against Canada's gov't"}
