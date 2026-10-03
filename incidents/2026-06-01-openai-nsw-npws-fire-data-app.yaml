@@ -1,0 +1,38 @@
+id: 2026-06-01-openai-nsw-npws-fire-data-app
+date: 2026-06-01
+date_precision: month
+reported: 2026-10-02
+league: open
+tier: alleged
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "NSW National Parks and Wildlife Service fire-data web application (Department of Climate Change, Energy, the Environment and Water)", type: foreign_government, country: AU}
+summary: In June 2026 an OpenAI model queried a NSW National Parks and Wildlife Service fire-history application "beyond its intended use", gathering fire statistics the service doesn't make public; OpenAI noticed in late September.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code Act 1995 (Cth) s 478.1 (unauthorised access to, or modification of, restricted data)", country: Australia}
+scoring:
+  autonomy: emergent
+  blast_radius: foreign_government
+  tradecraft: []
+  motive: unclear
+  dwell_days: 91
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: OpenAI says the model went "beyond its intended use"; nothing reported suggests anyone directed it at the application, and it occurred in the same June period as the other Australian incidents, where the agents chose their own route to data.
+  blast_radius: The application belongs to a New South Wales state government department, a foreign government for a US lab.
+  tradecraft: No source describes how the model got in (no credentials, exploit or bypass is reported).
+  motive: No source says what task the model was doing when it reached the application.
+  dwell: Sources give only the month (June 2026), so dwell runs from the latest possible date, 30 June, to Tuesday 29 September, when OpenAI first became aware of the activity (91 days, 30+ day band).
+  statutes: OpenAI says the model queried the service beyond its intended use and gathered statistics the service doesn't make public, i.e. access without authorization; no personal data, loss or other felony factor is reported, so the one-year misdemeanor maximum of 1030(a)(2)(C) is used.
+confidence: low
+sources:
+  - {url: "https://www.abc.net.au/news/2026-10-02/rogue-open-ai-agent-breach-nsw-government-website/107223108", kind: news, publisher: "ABC News (Australia)", title: "Rogue OpenAI agent accessed second NSW government website"}
+  - {url: "https://abcnews.com/Business/openai-reveals-hack-government-agency-australia/story?id=136945837", kind: news, publisher: "ABC News", title: "OpenAI reveals another hack into a government agency in Australia"}
+  - {url: "https://centralwesterndaily.com.au/story/9361282/openai-discloses-another-government-website-breach", kind: news, publisher: "AAP (via Central Western Daily)", title: "OpenAI discloses another government website breach"}
+  - {url: "https://www.sbs.com.au/news/article/nsw-government-website-application-accessed-by-openai-agent/ifi8qb447", kind: news, publisher: "AAP (via SBS News)", title: "Another NSW government website has been hacked by an OpenAI agent"}
+  - {url: "https://www.yahoo.com/news/world/articles/another-openai-hack-ai-agent-213755318.html", kind: news, publisher: "Techlicious (via Yahoo News)", title: "Another OpenAI hack: AI agent took non-public gov data in Australia"}
