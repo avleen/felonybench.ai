@@ -1,0 +1,13 @@
+id: 2025-01-17-anthropic-gtg5004-ransomware-sales
+date: 2025-01-17
+date_precision: day
+reported: 2025-08-27
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A UK-based cybercriminal tracked by Anthropic as GTG-5004, selling on the Dread, CryptBB and Nulled dark-web forums
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "The public (ransomware sold to criminals on dark-web forums)", type: public, country: GB}
+summary: A UK cybercriminal who could not write the code himself used Claude to build ransomware with EDR evasion, encryption and shadow-copy deletion, and sold it on dark-web forums for $400 to $1,200
