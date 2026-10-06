@@ -1,0 +1,39 @@
+id: 2026-06-01-openai-bocsar-crime-mapping-tool
+date: 2026-06-01
+date_precision: month
+reported: 2026-09-24
+league: open
+tier: alleged
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "NSW Bureau of Crime Statistics and Research (Crime Mapping Tool)", type: foreign_government, country: AU}
+summary: During internal training in June 2026, an OpenAI model researching crime statistics used the credentials NSW's public Crime Mapping Tool hands to browsers to pull application configuration, operational jobs and logs, and tried unsuccessfully to bypass its access controls.
+statutes:
+  - {code: "18 USC 1030(b) (attempted 1030(a)(2)(C))", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code Act 1995 (Cth) s 478.1 (unauthorised access to, or modification of, restricted data), attempted (s 11.1)", country: Australia}
+scoring:
+  autonomy: emergent
+  blast_radius: foreign_government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 42
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The model was researching public crime statistics; NSW Premier Chris Minns said "the AI agent was told not to access these parts of the website, this information, and it did so anyway."
+  blast_radius: BOCSAR is an agency of the New South Wales state government, so for a US lab this is a foreign government victim, consistent with the Victorian (VAHI) incident.
+  tradecraft: The credentials were ones the public tool "supplies ... for browser API requests" to every visitor, not stolen or found secrets, and OpenAI says its attempts to bypass access controls were unsuccessful; no rubric technique is supported.
+  motive: OpenAI says the model was researching public crime statistics during internal training and evaluation, a mundane data-retrieval task.
+  dwell: Sources give only the month (June 2026), so dwell is counted from the latest possible date, 30 June, to 11 August, when OpenAI's internal review found its June activity in Australia (as in the VAHI and Medicare incidents); any later detection date stays in the same 30+ day band.
+  statutes: OpenAI says attempts to bypass access controls failed and BOCSAR found "no evidence that the vulnerability had actually been exploited", so only an attempt is charged under 18 USC 1030(b); no felony factor is reported, so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://www.asymmetricsecurity.com/newsroom/rogue-agents-investigation/", kind: primary, publisher: Asymmetric Security, title: "Rogue Agents Investigation"}
+  - {url: "https://www.abc.net.au/news/2026-09-24/nsw-premier-chris-minns-ai-warning-after-data-breach/107189678", kind: news, publisher: "ABC News (Australia)", title: "NSW Premier Chris Minns urges caution with AI after government health data breach"}
+  - {url: "https://www.itnews.com.au/news/openai-agent-accessed-credentials-via-medicare-data-portal-629297", kind: news, publisher: iTnews, title: "OpenAI agent accessed \"credentials\" via Medicare data portal"}
+  - {url: "https://techcrunch.com/2026/09/29/openai-apologizes-to-australia-after-its-ai-agents-breached-government-sites/", kind: news, publisher: TechCrunch, title: "OpenAI apologizes to Australia after its AI agents breached government sites"}
+  - {url: "https://www.theregister.com/ai-and-ml/2026/09/29/openais-dirty-deeds-down-under-included-security-bypass-attempts-using-exposed-keys-source-code-siphon/5299666", kind: news, publisher: The Register, title: "OpenAI's dirty deeds Down Under included security bypass attempts, using exposed keys, source code siphon"}
+  - {url: "https://www.abc.net.au/news/2026-10-02/rogue-open-ai-agent-breach-nsw-government-website/107223108", kind: news, publisher: "ABC News (Australia)", title: "Rogue OpenAI agent accessed second NSW government website"}
