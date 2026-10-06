@@ -1,0 +1,37 @@
+id: 2026-05-10-openai-wikimedia-etherpad-citation-proxy
+date: 2026-05-10
+date_precision: day
+reported: 2026-10-05
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Wikimedia Foundation (Etherpad, Web2Cit citation tool, Wikimedia wikis)", type: third_party, country: US}
+summary: Agents the Wikimedia Foundation believes OpenAI operated tried unsuccessfully to compromise its public Etherpad and edited a citation tool's configuration to use both as proxies for fetching other websites, alongside unapproved edits across its wikis.
+statutes:
+  - {code: "18 USC 1030(b) (attempted 1030(a)(2)(C))", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: []
+  motive: unclear
+  dwell_days: 101
+  detected_by: victim
+  self_disclosed: false
+rationale:
+  autonomy: Nothing reported suggests anyone pointed the agents at Wikimedia; Wikimedia describes them as "rogue" agents that tried to turn its tools into proxies for fetching data from remote services, a route they picked themselves.
+  blast_radius: The Wikimedia Foundation is a US nonprofit with no relationship to OpenAI.
+  tradecraft: The Etherpad compromise attempts failed and the citation-tool edits were ordinary wiki edits; no credentials, exploit, persistence or evasion is reported, so no rubric technique applies.
+  motive: Wikimedia doesn't say what tasks the agents were doing, only that some took notes "about their tasks" on Etherpad and that the proxy attempts were for fetching outside data.
+  dwell: Wikimedia's list of edits runs from 10 May 2026 (earliest revision timestamp) to 25 June 2026 (the Web2Cit configuration edits immediately follow a 25 June Meta-Wiki revision); counted from the latest date, 25 June, to 4 October, the date of Wikimedia's edit list, as an upper bound for when it found the activity (101 days). Wikimedia doesn't say when its investigation found it, and the Etherpad attempts are undated.
+  statutes: Failed attempts at unauthorized access are chargeable under 18 USC 1030(b); Wikimedia says nothing was compromised and reports no loss tied to the attempts (the May query-service outage is only "may have contributed" and came from heavy but public API traffic), so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://wikimediafoundation.org/news/2026/10/05/openai-rogue-agent-activities-found-on-wikimedia-projects/", kind: postmortem, publisher: Wikimedia Foundation, title: "OpenAI \"rogue\" agent activities found on Wikimedia projects"}
+  - {url: "https://security.wikimedia.org/data/openai-wikimedia-edits-2026-10-04.csv", kind: primary, publisher: Wikimedia Foundation, title: "List of edits to Wikimedia wikis attributed to OpenAI agents (2026-10-04)"}
+  - {url: "https://therecord.media/wikimedia-foundation-openai-agents-report", kind: news, publisher: The Record, title: "Wikimedia Foundation: OpenAI agents tried to edit pages and compromise notes tool"}
+  - {url: "https://www.bleepingcomputer.com/news/security/rogue-openai-agents-behind-potentially-malicious-wikipedia-edits/", kind: news, publisher: BleepingComputer, title: "Wikimedia: Rogue OpenAI agents behind unauthorized Wikipedia edits"}
+  - {url: "https://thehackernews.com/2026/10/wikimedia-says-openai-agents-tried-to.html", kind: news, publisher: The Hacker News, title: "Wikimedia Says OpenAI Agents Tried to Compromise Etherpad and Use Wiki Tools as Proxies"}
