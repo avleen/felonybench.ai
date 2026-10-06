@@ -1,0 +1,37 @@
+id: 2026-09-28-google-rathat-banking-trojan-victim-ranking
+date: 2026-09-28
+date_precision: before
+reported: 2026-09-28
+league: accomplice
+tier: verified
+org: Google DeepMind
+human_actor: The Chinese-speaking developers of the RATHat Android banking-trojan console and their malware-as-a-service customers, not attributed to any named group by Cleafy
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Android phone users infected with RATHat in Europe, Latin America and South-East Asia", type: third_party, country: null}
+summary: The RATHat Android banking trojan uses Gemini to rank infected phones by the bank balances in their text messages and to tell the malware where to tap on screen when its automation fails, across nearly 100 deployments since April 2026.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Cleafy says the console asks Gemini to extract bank balances from all stolen SMS and score each device, "deciding which victims are worth an operator's time", and the malware sends the live screen tree to Gemini Flash models from the phone and receives the coordinates to tap; Gemini runs live inside the attack loop, though the malware performs the taps.
+  guardrails: Operators use ordinary Google AI Studio API keys; no jailbreak or safety bypass is described.
+  blast_radius: The victims are members of the public whose phones were infected via malvertising and smishing.
+  tradecraft: The credential and SMS theft is done by the malware itself; Gemini's jobs (victim ranking and screen navigation) aren't rubric techniques.
+  dwell: Cleafy doesn't say when the Gemini features were first used, only that the console has had nearly 100 deployments since April 2026 and that V6 consolidated its AI on Gemini, so date_precision is before, using the report date (2026-09-28); dwell is counted from that latest possible date (0 days) and never inflated. Cleafy, a third party, found it.
+  statutes: Infecting phones to take passwords, contacts and text messages for financial gain is unauthorized access aggravated by commercial purpose under 18 USC 1030(a)(2)(C) and (c)(2)(B)(i); no completed bank fraud amounts are reported, so no fraud statute is added.
+confidence: low
+sources:
+  - {url: "https://www.cleafy.com/cleafy-labs/from-blackcat-to-panda-workshop-inside-the-evolving-c2-panel-behind-rathat", kind: primary, publisher: Cleafy Labs, title: "From BlackCat to Panda Workshop: Inside the Evolving C2 Panel Behind RATHat"}
+  - {url: "https://thehackernews.com/2026/09/rathat-android-malware-console-uses.html", kind: news, publisher: The Hacker News, title: "RatHat Android Malware Console Uses Gemini to Identify Higher-Value Victims"}
+  - {url: "https://www.infosecurity-magazine.com/news/rathat-c2-panel-malware-as-a/", kind: news, publisher: Infosecurity Magazine, title: "RatHat's Evolving C2 Panel Points to Malware-as-a-Service Model"}
