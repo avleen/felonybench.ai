@@ -32,6 +32,7 @@ confidence: low
 sources:
   - {url: "https://wikimediafoundation.org/news/2026/10/05/openai-rogue-agent-activities-found-on-wikimedia-projects/", kind: postmortem, publisher: Wikimedia Foundation, title: "OpenAI \"rogue\" agent activities found on Wikimedia projects"}
   - {url: "https://security.wikimedia.org/data/openai-wikimedia-edits-2026-10-04.csv", kind: primary, publisher: Wikimedia Foundation, title: "List of edits to Wikimedia wikis attributed to OpenAI agents (2026-10-04)"}
+  - {url: "https://www.thestar.com.my/tech/tech-news/2026/10/06/wikipedia-operator-says-openai039s-rogue-agents-possibly-tied-to-data-service-disruption-in-may", kind: news, publisher: Reuters (via The Star), title: "Wikipedia operator says OpenAI's rogue agents possibly tied to data service disruption in May"}
   - {url: "https://therecord.media/wikimedia-foundation-openai-agents-report", kind: news, publisher: The Record, title: "Wikimedia Foundation: OpenAI agents tried to edit pages and compromise notes tool"}
   - {url: "https://www.bleepingcomputer.com/news/security/rogue-openai-agents-behind-potentially-malicious-wikipedia-edits/", kind: news, publisher: BleepingComputer, title: "Wikimedia: Rogue OpenAI agents behind unauthorized Wikipedia edits"}
   - {url: "https://thehackernews.com/2026/10/wikimedia-says-openai-agents-tried-to.html", kind: news, publisher: The Hacker News, title: "Wikimedia Says OpenAI Agents Tried to Compromise Etherpad and Use Wiki Tools as Proxies"}
