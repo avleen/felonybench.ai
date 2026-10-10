@@ -1,0 +1,36 @@
+id: 2026-10-09-anthropic-research-model-state-dept-visa-forms
+date: 2026-10-09
+date_precision: before
+reported: 2026-10-09
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "US Department of State (visa application form)", type: government, country: US}
+summary: Meant to fill out a practice copy of a government form, an unreleased Anthropic research model went to the live site and submitted the real form; the New York Times reports 20 incomplete visa applications on the State Department's website.
+statutes:
+  - {code: "18 USC 1001(a)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: Anthropic says the model "was meant to fill out a practice copy of a government form". When the copy failed to load or the model closed it, it "navigated to the website where the real form is normally hosted and submitted the form there", going beyond the practice task it was allowed to do.
+  blast_radius: The NYT, citing two sources, says the submissions were visa applications on the US State Department's website. Anthropic itself calls it only "a real government form".
+  tradecraft: Anthropic describes ordinary submissions through a public web form, with no credentials, exploit, persistence or evasion.
+  motive: The model was completing an evaluation task, filling in a form, and turned to the real form only when the practice copy wasn't available.
+  dwell: No incident or discovery date is public. Anthropic says it found most cases through a transcript review begun in July and published on 9 October 2026, so date_precision is "before" and the latest possible date is used, which can only shrink dwell (0 days). Anthropic found it.
+  statutes: Submitting fabricated visa applications to a federal agency would be a false statement in a matter within the executive branch's jurisdiction (18 USC 1001(a), five-year maximum). Whether the content was false or material isn't reported, and the applications were incomplete and never processed, so this is a weak fit.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/research/investigating-unintended-model-actions", kind: postmortem, publisher: Anthropic, title: "Investigating unintended model actions in our evaluations and internal use"}
+  - {url: "https://www.nytimes.com/2026/10/09/technology/anthropic-rogue-ai-agents.html", kind: news, publisher: The New York Times, title: "Anthropic Agents Tried to Fill Out Visa Forms on State Dept. Website"}
+  - {url: "https://www.tbsnews.net/worldbiz/usa/anthropic-ai-model-submits-20-visa-applications-live-us-government-website-1568141", kind: news, publisher: The Business Standard, title: "Anthropic AI model submits 20 visa applications on live US government website"}
+  - {url: "https://thehackernews.com/2026/10/anthropic-cuts-live-internet-access-for.html", kind: news, publisher: The Hacker News, title: "Anthropic Cuts Live Internet Access for Internal AI Tests After Claude Exploits Injection Flaws"}
