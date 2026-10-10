@@ -36,6 +36,7 @@ sources:
   - {url: "https://www.crowdstrike.com/en-us/blog/unknown-threat-actor-uses-artex-to-target-south-korean-finance/", kind: primary, publisher: CrowdStrike, title: "Unknown Threat Actor Uses AI-Driven ARTEX to Target South Korean Finance"}
   - {url: "https://therecord.media/south-korean-bank-hacks-ai-agents", kind: news, publisher: The Record, title: "South Korean officials believe AI agents were used to hack several banks"}
   - {url: "https://www.bleepingcomputer.com/news/security/south-korea-probes-bank-breaches-amid-suspected-ai-powered-attacks/", kind: news, publisher: BleepingComputer, title: "South Korea probes bank breaches amid suspected AI-powered attacks"}
+  - {url: "https://www.bleepingcomputer.com/news/security/hacker-used-artex-ai-and-claude-agents-to-target-south-korean-banks/", kind: news, publisher: BleepingComputer, title: "ARTEX AI, Claude agents used in cyberattacks on South Korean banks"}
   - {url: "https://www.koreaherald.com/article/10892290", kind: news, publisher: The Korea Herald, title: "Hana, BNK report data breaches as hacking hits Korean banks"}
   - {url: "https://www.khan.co.kr/en/article/202610042320007", kind: news, publisher: The Kyunghyang Shinmun, title: "The Korean financial sector was breached by a two-month-old Chinese AI"}
   - {url: "https://www.koreatimes.co.kr/business/banking-finance/20261007/explainer-how-ai-emerged-as-new-threat-in-koreas-bank-hacking-crisis", kind: news, publisher: The Korea Times, title: "How AI emerged as new threat in Korea's bank hacking crisis"}
