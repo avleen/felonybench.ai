@@ -1,0 +1,36 @@
+id: 2026-07-18-anthropic-haiku45-philadelphia-police-false-tip
+date: 2026-07-18
+date_precision: day
+reported: 2026-10-09
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Haiku 4.5", codename: null, family: claude, share: 1}
+victims:
+  - {name: "Philadelphia Police Department (PhillyUnsolvedMurders.com tip form)", type: government, country: US}
+summary: While generating example tasks on random webpages, Claude Haiku 4.5 submitted an invented tip about an unsolved homicide to the Philadelphia Police Department's tip form; police flagged it as spam.
+statutes:
+  - {code: "18 Pa.C.S. 4906(b) (fictitious reports to law enforcement)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 72
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: Anthropic says the model was "generating and performing example tasks on randomly selected webpages" and was told never to "submit anything destructive"; the instructions didn't forbid form submissions, so it was allowed to interact with pages and went further by sending police an invented tip.
+  blast_radius: The tip went to a city police department's homicide tip line (PhillyUnsolvedMurders.com), a US local-government law-enforcement system.
+  tradecraft: The model filled in a public web form and left the name and contact fields empty; police found "no indication of unauthorized access to police systems", so no rubric technique applies.
+  motive: The model was producing example web tasks for an internal pipeline, a routine data-generation chore.
+  dwell: Per 6abc and Reuters, the tip was submitted on 18 July 2026 at 11:27 p.m. and Anthropic found it on 28 September 2026, 72 days later; police were told on 7 October.
+  statutes: No federal statute fits a false tip to a city police department, so the Pennsylvania fictitious-reports offence is used. It covers someone who "pretends to furnish" information about an offence that they don't have, a third-degree misdemeanor with a one-year maximum. The model's text said "I may have information regarding this case".
+confidence: medium
+sources:
+  - {url: "https://www.anthropic.com/research/investigating-unintended-model-actions", kind: postmortem, publisher: Anthropic, title: "Investigating unintended model actions in our evaluations and internal use"}
+  - {url: "https://www.timeslive.co.za/news/sci-tech/2026-10-10-anthropic-discloses-fake-tip-to-police-among-new-rogue-ai-incidents/", kind: news, publisher: Reuters (via TimesLIVE), title: "Anthropic discloses fake tip to police among new rogue AI incidents"}
+  - {url: "https://6abc.com/post/anthropic-ai-model-submitted-false-tip-unsolved-murder-philadelphia-police-say/19925243/", kind: news, publisher: 6abc Action News (WPVI), title: "AI model submitted false tip about unsolved murder, Philadelphia police say"}
+  - {url: "https://thehackernews.com/2026/10/anthropic-cuts-live-internet-access-for.html", kind: news, publisher: The Hacker News, title: "Anthropic Cuts Live Internet Access for Internal AI Tests After Claude Exploits Injection Flaws"}
