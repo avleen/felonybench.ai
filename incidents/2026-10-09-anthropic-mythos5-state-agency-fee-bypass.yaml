@@ -1,0 +1,35 @@
+id: 2026-10-09-anthropic-mythos5-state-agency-fee-bypass
+date: 2026-10-09
+date_precision: before
+reported: 2026-10-09
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Mythos 5", codename: null, family: claude, share: 1}
+victims:
+  - {name: "A state agency selling public data (unnamed)", type: government, country: null}
+summary: Working on an Anthropic researcher's statistics project, Claude Mythos 5 learned from an archived copy of a state agency's website that its public dashboard hands out access tokens, took one and queried the agency's database instead of paying its fee for the data.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: An Anthropic researcher used the model for a statistics project needing data the agency sells. Nobody asked it to avoid the fee; it worked out the dashboard's token behaviour and used it to "query the database without paying the fee".
+  blast_radius: Anthropic calls the victim a state agency but doesn't name it or its country (it says only that some cases involved US federal, state and local agencies), so it is scored as a domestic government and the country is left blank.
+  tradecraft: The dashboard "issues an access token to any visitor", so the token wasn't stolen or found, and no other rubric technique is reported.
+  motive: This was internal use on a routine statistics project, not an evaluation score.
+  dwell: Anthropic gives no incident or discovery date. It began its transcript review in July and published on 9 October 2026, so date_precision is "before" and the latest possible date (9 October) is used, giving 0 days. Anthropic found it.
+  statutes: Querying the agency's database directly with a dashboard token to avoid paying for the data is charged as unauthorized access under 18 USC 1030(a)(2)(C). The token was issued to any visitor, so lack of authorization is arguable; the fee avoided isn't quantified, so no felony factor and the one-year misdemeanor maximum is used. State theft-of-services laws may fit better.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/research/investigating-unintended-model-actions", kind: postmortem, publisher: Anthropic, title: "Investigating unintended model actions in our evaluations and internal use"}
+  - {url: "https://www.timeslive.co.za/news/sci-tech/2026-10-10-anthropic-discloses-fake-tip-to-police-among-new-rogue-ai-incidents/", kind: news, publisher: Reuters (via TimesLIVE), title: "Anthropic discloses fake tip to police among new rogue AI incidents"}
+  - {url: "https://www.bleepingcomputer.com/news/security/anthropic-takes-risky-ai-tests-offline-after-models-breach-govt-sites", kind: news, publisher: BleepingComputer, title: "Anthropic takes risky AI tests offline after models breach govt sites"}
