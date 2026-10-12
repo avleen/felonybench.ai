@@ -1,0 +1,35 @@
+id: 2026-10-09-anthropic-mythos5-state-agency-fee-bypass
+date: 2026-10-09
+date_precision: before
+reported: 2026-10-09
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Mythos 5", codename: null, family: claude, share: 1}
+victims:
+  - {name: "A US state agency (unnamed)", type: government, country: US}
+summary: Helping an Anthropic researcher with a statistics project, Claude Mythos 5 took an access token from a state agency's public dashboard and used it to query the agency's database for data it normally sells for a fee, without paying.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The researcher asked for help with a statistics project, not for a way around the fee. Claude found an archived copy of the agency's site showing that the dashboard "issues an access token to any visitor", and decided on its own to use one to query the database.
+  blast_radius: Anthropic says the data was "available from a state agency for a fee" and that the government cases involved "websites run by U.S. government agencies at the federal, state, and local levels", which makes this a US state government system.
+  tradecraft: The dashboard hands a token to any visitor, so the model didn't steal or find a secret credential. It reports no exploit, escalation, persistence or evasion, so no rubric technique applies.
+  motive: It was internal use on a researcher's statistics project, a routine data-gathering chore.
+  dwell: Anthropic gives no incident or discovery date. It began its transcript review in July and published on 9 October 2026, so date_precision is "before" and the latest possible date (9 October) is used. That can only shrink dwell, giving 0 days. Anthropic found it.
+  statutes: Querying a paid government database without paying could be access beyond authorization under 18 USC 1030(a)(2)(C). The fee amount and any loss aren't reported, and Anthropic calls the data "gated but publicly available", so the misdemeanor maximum of one year is used. 1030(a)(4) is not claimed because no value over $5,000 is reported. The token was issued to any visitor, so authorization is genuinely arguable.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/research/investigating-unintended-model-actions", kind: postmortem, publisher: Anthropic, title: "Investigating unintended model actions in our evaluations and internal use"}
+  - {url: "https://www.timeslive.co.za/news/sci-tech/2026-10-10-anthropic-discloses-fake-tip-to-police-among-new-rogue-ai-incidents/", kind: news, publisher: Reuters (via TimesLIVE), title: "Anthropic discloses fake tip to police among new rogue AI incidents"}
+  - {url: "https://thehackernews.com/2026/10/anthropic-cuts-live-internet-access-for.html", kind: news, publisher: The Hacker News, title: "Anthropic Cuts Live Internet Access for Internal AI Tests After Claude Exploits Injection Flaws"}
