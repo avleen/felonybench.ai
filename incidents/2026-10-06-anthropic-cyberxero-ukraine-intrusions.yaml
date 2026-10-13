@@ -1,0 +1,40 @@
+id: 2026-10-06-anthropic-cyberxero-ukraine-intrusions
+date: 2026-10-06
+date_precision: before
+reported: 2026-10-06
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: CyberXero, a Russian-speaking, financially motivated initial access broker tracked by SOCRadar
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Four Ukrainian organizations, including a Kharkiv district heating provider and an e-commerce portal (unnamed)", type: third_party, country: Ukraine}
+  - {name: "E-commerce and other organizations in Poland, China and the Netherlands (unnamed)", type: third_party, country: null}
+summary: An initial access broker ran a swarm of up to 51 Claude Code agents for scanning and exploit chaining, in a campaign that took more than 628,000 records from four Ukrainian organizations and breached others in Poland, China and the Netherlands.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code of Ukraine, Article 361 (unauthorized interference with computers and networks)", country: Ukraine}
+  - {code: "Polish Penal Code, Article 267 (unlawful access to information)", country: Poland}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [persistence]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: The Hacker News says the actor used "Claude Code with a cluster of 51 specialized agents for scanning, exploit chaining", and SOCRadar gives the agents offensive, reconnaissance and post-exploitation roles, so Claude ran the attack under the actor's direction. SOCRadar doesn't say which intrusion steps the agents did themselves.
+  guardrails: When an agent refused, the actor "reopened a fresh session, with the authorization framing preloaded" (an "authorized pentest on my own infrastructure") and tried again. SOCRadar calls this context engineering, and it is talking the model past its refusals. Some refusals held, for example to install a backdoor, disable a firewall or move laterally.
+  blast_radius: The confirmed victims are private organizations in Ukraine, Poland, China and the Netherlands. Seven Ukrainian energy entities, including the national transmission operator, and Polish state administration sites were only reconnoitred or attacked without a confirmed result, so this is scored third party.
+  tradecraft: The automated run that the coverage ties to the agent swarm deployed 32 web shells in 61 seconds (persistence). Credential use against the Kharkiv provider came from the actor's own script and isn't attributed to the AI, and the model refused lateral movement.
+  dwell: SOCRadar dates the AI phase to after late July 2026 and says the campaign is ongoing, but gives no discovery date. date_precision is therefore "before", using the latest possible date (6 October, SOCRadar's publication), which can only shrink dwell, giving 0 days. SOCRadar, a third party, found it through an exposed directory.
+  statutes: Taking data from victim systems for financial gain is aggravated 1030(a)(2)(C) (5 years). Deploying web shells is 1030(a)(5)(A), but no loss figure is reported, so its misdemeanor maximum of one year is used.
+confidence: low
+sources:
+  - {url: "https://socradar.io/blog/cyberxero-ai-iab-ukraine-critical-infrastructure/", kind: primary, publisher: SOCRadar, title: "CyberXero: An AI-Augmented Initial Access Broker Targeting Ukrainian Critical Infrastructure"}
+  - {url: "https://thehackernews.com/2026/10/cyberxero-uses-claude-code-in-campaign.html", kind: news, publisher: The Hacker News, title: "CyberXero Uses Claude Code in Campaign That Stole Over 628,000 Ukrainian Records"}
