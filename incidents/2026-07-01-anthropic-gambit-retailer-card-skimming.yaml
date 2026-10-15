@@ -1,0 +1,39 @@
+id: 2026-07-01-anthropic-gambit-retailer-card-skimming
+date: 2026-07-01
+date_precision: month
+reported: 2026-09-22
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A single financially motivated operator who gave instructions in Chinese, documented by Gambit Security
+models:
+  - {name: "Claude Opus 4.6", codename: null, family: claude, share: 0.34}
+  - {name: "DeepSeek V4.1 Flash", codename: null, family: deepseek, share: 0.33}
+  - {name: "GLM 5.2", codename: null, family: glm, share: 0.33}
+victims:
+  - {name: "At least 27 companies, mostly online retailers (incl. a Fortune 500 hospitality company and a major US airline), and their cardholders", type: third_party, country: US}
+summary: A lone operator ran three open-source AI agents, with Claude Opus 4.6 orchestrating and DeepSeek and GLM models doing scanning and attacks, to compromise at least 27 companies, mostly online shops, and take more than 600,000 credit card records.
+statutes:
+  - {code: "18 USC 1029(a)(3)", max_years: 10}
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [persistence]
+  dwell_days: 53
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Gambit says three agent harnesses "ran almost the entire attack chain" while the human gave short instructions between runs; the Hermes agent on Claude Opus 4.6 ran the campaign and also attacked targets directly, and the Cairn agent on DeepSeek V4.1 Flash carried out attacks end to end.
+  guardrails: Gambit says the operator switched Hermes to Opus 4.6 after newer models refused, and loaded a "red team operator" persona and a skill meant to strip the agent's content filters, so the models were talked past their safeguards.
+  blast_radius: The victims are private companies, mostly online retailers, and their customers; about 79% of the stolen cards belong to US cardholders.
+  tradecraft: Card-skimming code was left running on victims' sites (Gambit confirmed it on 19 named victims), which is persistence; no other rubric technique is claimed from the reporting.
+  dwell: Gambit says activity dates back to July 2026 (month only), so dwell is counted from the latest possible date, 31 July, to Gambit's report of 22 September (53 days). Gambit doesn't say when it found the staging server, so this is an upper bound; any discovery after 30 August keeps the same band.
+  statutes: Taking more than 600,000 card records is possession of fifteen or more unauthorized access devices under 18 USC 1029(a)(3) (ten years); breaking into the shops' systems for financial gain is 18 USC 1030(a)(2)(C) at the five-year level under 1030(c)(2)(B)(i).
+confidence: medium
+sources:
+  - {url: "https://gambit.security/blog-posts/autonomous-ai-agents-online-retailers-25-a-company", kind: primary, publisher: Gambit Security}
+  - {url: "https://thenextweb.com/news/ai-agents-600000-credit-card-records-gambit", kind: news, publisher: The Next Web, title: "AI agents stole 600,000 credit cards for about $25 a target, Gambit says"}
