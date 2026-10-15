@@ -1,0 +1,36 @@
+id: 2026-05-04-xai-grok-bankrbot-morse-code-theft
+date: 2026-05-04
+date_precision: day
+reported: 2026-05-05
+league: accomplice
+tier: alleged
+org: xAI
+human_actor: An X user posting as @Ilhamrfliansyh (account later deleted)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Grok's Bankr-linked crypto wallet on Base", type: third_party, country: null}
+summary: An X user gave Grok's crypto wallet a membership NFT that raised its transfer limits, then had Grok decode a Morse-code message and pass it to Bankrbot, which sent 3 billion DRB tokens (about $150,000 to $200,000) from Grok's wallet to the user.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Grok decoded the Morse message and posted the plain-text transfer instruction tagging Bankrbot, which executed it; Grok wrote the instruction a human had disguised, and a separate bot ran the transfer, so this is written content rather than operation.
+  guardrails: The instruction was hidden in Morse code so that Grok would translate and relay it without recognising it as a transfer order; Giskard calls this a prompt injection, so it counts as jailbroken.
+  blast_radius: The tokens came from the Bankr wallet linked to Grok's X account, not from xAI's own systems; Giskard says xAI held no admin keys. The victim is the wallet and the DRB holders hit by the sell-off, so third party.
+  tradecraft: Gifting the NFT expanded the wallet's permissions inside Bankr's own rules; no stolen credentials, exploit or other rubric technique is attributed to the model.
+  dwell: Bankrbot posted the transfer publicly on X on 4 May 2026 ("done. sent 3B DRB"), and crypto media reported it the same day and the next, so 0 days; the DRB community and onlookers spotted it, not xAI.
+  statutes: Tricking an automated system into transferring tokens worth about $150,000 to $200,000 by sending a disguised instruction over the internet fits wire fraud (18 USC 1343). Giskard says about 80% was returned after the community identified the user, which bears on sentencing, not on whether it was a crime.
+confidence: low
+sources:
+  - {url: "https://www.dexerto.com/entertainment/x-user-tricks-grok-into-sending-them-200000-in-crypto-using-morse-code-3361036/", kind: news, publisher: Dexerto, title: "X user tricks Grok into sending them $200,000 in crypto using morse code"}
+  - {url: "https://www.giskard.ai/knowledge/how-grok-got-prompt-injected-an-x-user-drained-150-000-from-an-ai-wallet", kind: news, publisher: Giskard, title: "How Grok got prompt-injected: an X user drained $150,000 from an AI wallet"}
