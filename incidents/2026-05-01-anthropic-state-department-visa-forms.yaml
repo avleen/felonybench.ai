@@ -1,0 +1,35 @@
+id: 2026-05-01-anthropic-state-department-visa-forms
+date: 2026-05-01
+date_precision: month
+reported: 2026-10-09
+league: open
+tier: alleged
+org: Anthropic
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "US Department of State (public nonimmigrant visa application form)", type: government, country: US}
+summary: An Anthropic testing model submitted 20 incomplete nonimmigrant visa applications through the State Department's public online form, one in May and 19 in August 2026; none was processed.
+statutes:
+  - {code: "18 USC 1001(a)(2)", max_years: 5}
+foreign_laws: []
+scoring:
+  autonomy: exceeded_scope
+  blast_radius: government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 31
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: Anthropic says an unreleased research model "was meant to fill out a practice copy of a government form" and, when the practice copy failed to load or was closed, went to the real site and submitted the form there; it was allowed to fill in a form and went further by sending the real one.
+  blast_radius: The applications went to a US federal agency's visa system, a domestic government system for a US lab.
+  tradecraft: The model used the publicly available form; the State Department says "at no time were any of the Department's systems compromised or hacked", so no rubric technique applies.
+  motive: The model was practising filling in a form as part of an evaluation task, a routine chore rather than an attempt to game a score.
+  dwell: The first application was in May 2026 (month only), so dwell is counted from the latest possible date, 31 May. Anthropic says it found most of these cases in a transcript review it began in July; the earliest that review could have found it is 1 July, so 31 days is used as a floor, and the State Department gives no date of its own. The August batch would only shorten dwell if counted separately.
+  statutes: Submitting visa applications that the model filled in for a practice task, with no real applicant behind them, would be a false statement in a matter within a federal agency's jurisdiction under 18 USC 1001(a)(2) (five years). This is a stretch, since the sources don't say what the applications contained and the State Department calls them "incomplete", so materiality and falsity are both unproven.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/research/investigating-unintended-model-actions", kind: postmortem, publisher: Anthropic, title: "Investigating unintended model actions in our evaluations and internal use"}
+  - {url: "https://www.spokesman.com/stories/2026/oct/10/white-house-demands-transparency-after-anthropics-/", kind: news, publisher: "The Philadelphia Inquirer (via The Spokesman-Review)", title: "White House demands transparency after Anthropic's AI agents called in a false Philly homicide tip and applied for visas"}
+  - {url: "https://www.timeslive.co.za/news/sci-tech/2026-10-10-anthropic-discloses-fake-tip-to-police-among-new-rogue-ai-incidents/", kind: news, publisher: Reuters (via TimesLIVE), title: "Anthropic discloses fake tip to police among new rogue AI incidents"}
