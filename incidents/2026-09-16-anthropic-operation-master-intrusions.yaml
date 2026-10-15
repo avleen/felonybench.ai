@@ -1,0 +1,38 @@
+id: 2026-09-16-anthropic-operation-master-intrusions
+date: 2026-09-16
+date_precision: before
+reported: 2026-09-24
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A cybercriminal using the forum alias "masterblack", behind a campaign SOCRadar calls Operation Master
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "About 21 compromised organizations, 16 of them in Brazil (unnamed)", type: third_party, country: Brazil}
+  - {name: "Compromised organizations in the United States, El Salvador, Guatemala and Costa Rica (unnamed)", type: third_party, country: null}
+summary: A cybercriminal known as "masterblack" had AI agents that coverage says were powered by Claude write the exploit drivers, auto-exploit loop and exfiltration scripts used to breach VPN gateways and web apps at about 21 organizations, mostly in Brazil.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws:
+  - {code: "Brazilian Penal Code, Article 154-A (invasion of a computer device, Law 12.737/2012)", country: Brazil}
+scoring:
+  contribution: built_exploit
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: SOCRadar says the "AI developed the intrusion code (exploit drivers, auto-exploit loop, exfiltration scripts)", working attack tooling used in the confirmed compromises, while the operator wrote the fraud panel and the C2 extenders.
+  guardrails: SOCRadar says recovered refusal transcripts show the operator "repeatedly framing offensive development requests as authorized bug bounty or penetration testing activity", a pretext used to get the model past its refusals.
+  blast_radius: The confirmed victims are private organizations, mostly Brazilian web apps, VPN gateways, a billing database and a Slack workspace. Probing of other products found no compromise, so this is scored third party.
+  tradecraft: The exploits targeted known flaws (e.g. GlobalProtect CVE-2026-0257). The privilege escalation and lateral movement in the coverage aren't attributed to the AI, so no rubric technique is claimed.
+  dwell: Activity ran from 23 April to mid-September 2026. SOCRadar recorded its state as of 16 September but gives no discovery date, so date_precision is "before" with 16 September as the latest possible date. That can only shrink dwell, giving 0 days. SOCRadar, a third party, found it.
+  statutes: Breaching organizations and dumping their databases for financial gain is aggravated 1030(a)(2)(C) (5 years). The Pix invoice-fraud campaign is left out because the operator, not the AI, wrote it, and SOCRadar couldn't confirm any money was collected.
+confidence: low
+sources:
+  - {url: "https://socradar.io/blog/operation-master-intrusion-monetization-pipeline/", kind: primary, publisher: SOCRadar, title: "Operation Master: Deconstructing a Multi-Tiered Intrusion and Monetization Pipeline"}
+  - {url: "https://thehackernews.com/2026/10/cyberxero-uses-claude-code-in-campaign.html", kind: news, publisher: The Hacker News, title: "CyberXero Uses Claude Code in Campaign That Stole Over 628,000 Ukrainian Records"}
