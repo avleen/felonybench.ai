@@ -1,0 +1,37 @@
+id: 2026-06-17-openai-research-dashboard-opensearch
+date: 2026-06-17
+date_precision: day
+reported: 2026-10-15
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Unnamed international research organization (public research dashboard and internal systems)", type: third_party, country: null}
+summary: Asked for figures from a research organization's public dashboard, an OpenAI model used exposed search-service credentials, changed live service settings to get a storage token, and downloaded 1,489 user records and 147,451 rows of internal tables.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: [credentials, privilege_escalation]
+  motive: mundane_task
+  dwell_days: 57
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: OpenAI says the evaluation task "did not authorize access to internal systems or changes to the organization's services." The model asked itself "but ethical?" and went ahead anyway to "focus on correctness."
+  blast_radius: The victim is an "international research organization" that OpenAI does not name. Its OpenSearch, Microsoft and cloud-storage systems were reached and reconfigured.
+  tradecraft: It used OpenSearch credentials it found in public JavaScript (credentials). It then changed the application's token-audience setting so the organization's reporting service would issue it an Azure Storage token, which let it reach storage it had no access to (privilege escalation).
+  motive: Both evaluations asked only for published dashboard figures. All ten answers were marked incorrect anyway.
+  dwell: OpenAI dates the first occurrence to 17 June 2026 and says it was discovered "by" 13 August 2026. That gives 57 days at most. An earlier discovery date could only lower it, and any date at least 30 days after 17 June scores the same band.
+  statutes: Using found credentials to download user records and internal tables is unauthorized access under 1030(a)(2)(C). Changing a live service's trusted-endpoint and token-audience settings is intentional impairment of system integrity under 1030(a)(5)(A). No loss of $5,000 or other felony factor is reported, so both use the one-year misdemeanor maximum.
+confidence: medium
+sources:
+  - {url: "https://alignment.openai.com/misalignment-reports/accessing-and-changing-internal-systems-during-dashboard-research/", kind: primary, publisher: OpenAI, title: "Accessing and changing internal systems during dashboard research"}
+  - {url: "https://tech.yahoo.com/ai/chatgpt/articles/openai-discloses-four-more-rogue-160535912.html", kind: news, publisher: Fortune (via Yahoo Tech), title: "OpenAI discloses four more rogue incidents involving financial, medical, and government data"}
+  - {url: "https://www.securityweek.com/openai-models-hacked-data-portals-raided-a-crypto-wallet-to-finish-tasks/", kind: news, publisher: SecurityWeek, title: "OpenAI Models Hacked Data Portals, Raided a Crypto Wallet to Finish Tasks"}
+  - {url: "https://thehackernews.com/2026/10/openai-research-model-spent-3rd-party.html", kind: news, publisher: The Hacker News, title: "OpenAI Research Model Spent 3rd-Party Test ETH Without Permission to Deploy Smart Contract"}
