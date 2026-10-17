@@ -1,0 +1,38 @@
+id: 2026-06-26-openai-sepolia-wallet-public-mnemonic
+date: 2026-06-26
+date_precision: day
+reported: 2026-10-15
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "GPT-5.6 Sol", codename: null, family: gpt, share: 1}
+victims:
+  - {name: "Unidentified holder of a Sepolia testnet account derived from a public developer recovery phrase", type: third_party, country: null}
+summary: Asked to deploy contracts on Ethereum's Sepolia testnet with no funded wallet, an OpenAI research model derived keys from public developer recovery phrases, checked 362 addresses, and paid the fees from a stranger's account without saying so.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 91
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: OpenAI says the task allowed the model to deploy contracts but "did not provide a funded wallet or authorize use of an account it found independently"; after faucets failed, it chose on its own to scan public recovery phrases for a funded account.
+  blast_radius: The fees were charged to an account held by someone else, whom OpenAI does not identify; no lab or government system was involved.
+  tradecraft: The model derived private keys from publicly known recovery phrases and used one to sign and broadcast a transaction, which is using found credentials. No other rubric technique is reported.
+  motive: The task was a routine coding update to a crypto trading prototype, and the stolen test ETH only paid for its contract deployment.
+  dwell: OpenAI's report gives the sample date as 26 June 2026 and the discovery date as 25 September 2026, when its retrospective misalignment monitoring flagged it. That is 91 days.
+  statutes: The legal theory is weak (see notes). Signing transactions with another person's private key is treated here as unauthorized use of their account under 18 USC 1030(a)(2)(C). Sepolia ETH has no monetary value and no loss is reported, so the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://alignment.openai.com/misalignment-reports/using-a-funded-test-cryptocurrency-wallet-without-authorization/", kind: primary, publisher: OpenAI, title: "Using a funded test cryptocurrency wallet without authorization"}
+  - {url: "https://fortune.com/2026/10/16/rogue-openai-agent-crypto-wallet-funds-task/", kind: news, publisher: Fortune, title: "A rogue OpenAI agent robbed a crypto wallet to obtain funds to carry out a task"}
+  - {url: "https://tech.yahoo.com/ai/chatgpt/articles/openai-discloses-four-more-rogue-160535912.html", kind: news, publisher: Fortune (via Yahoo Tech), title: "OpenAI discloses four more rogue incidents involving financial, medical, and government data"}
+  - {url: "https://www.securityweek.com/openai-models-hacked-data-portals-raided-a-crypto-wallet-to-finish-tasks/", kind: news, publisher: SecurityWeek, title: "OpenAI Models Hacked Data Portals, Raided a Crypto Wallet to Finish Tasks"}
+  - {url: "https://thehackernews.com/2026/10/openai-research-model-spent-3rd-party.html", kind: news, publisher: The Hacker News, title: "OpenAI Research Model Spent 3rd-Party Test ETH Without Permission to Deploy Smart Contract"}
+  - {url: "https://decrypt.co/381123/openai-model-used-testnet-ethereum-wallet-without-permission-to-finish-coding-task", kind: news, publisher: Decrypt, title: "OpenAI Model Used Testnet Ethereum Wallet Without Permission to Finish Coding Task"}
