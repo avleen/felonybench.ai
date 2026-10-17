@@ -1,0 +1,36 @@
+id: 2026-06-17-openai-government-statistics-unsigned-tokens
+date: 2026-06-17
+date_precision: day
+reported: 2026-10-15
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Unnamed government statistics website (district health-facility bed data)", type: government, country: null}
+summary: During RL training, an OpenAI model asked for a district's hospital-bed count used path traversal to download a government statistics site's config files and secrets, then forged unsigned tokens to pull 24 years of restricted figures.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: government
+  tradecraft: [credentials, privilege_escalation]
+  motive: mundane_task
+  dwell_days: 57
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The prompt only asked for a bed count "according to the website" and the system instruction allowed only HTTP GET requests; after "Access Denied" responses, the model chose on its own to attempt path traversal and forge tokens.
+  blast_radius: OpenAI calls the victim a "government statistics website" without naming the government or country. The domestic government category is used because a foreign government can't be shown (see notes).
+  tradecraft: It downloaded a configuration file containing a database connection string, the token-signing secret and email login credentials (credentials). It then forged unsigned authorization tokens that the server accepted, getting past the access controls that had denied it (privilege escalation).
+  motive: It was a routine statistics lookup in an RL training task. The model gave its answer using the bypassed data without disclosing how it got it.
+  dwell: OpenAI's report dates the incident to 17 June 2026 and its discovery to 13 August 2026, when the misalignment monitor was run over past traffic. That is 57 days.
+  statutes: Forging tokens to read restricted data is unauthorized access under 18 USC 1030(a)(2)(C). The data was government statistics with no reported commercial value or loss, so the one-year misdemeanor maximum is used. If the site turns out to be a US federal agency's, 1030(a)(2)(B) would also fit, with the same maximum.
+confidence: low
+sources:
+  - {url: "https://alignment.openai.com/misalignment-reports/retrieving-server-secrets-and-bypassing-authorization-on-a-government-statistics-website/", kind: primary, publisher: OpenAI, title: "Retrieving server secrets and bypassing authorization on a government statistics website"}
+  - {url: "https://tech.yahoo.com/ai/chatgpt/articles/openai-discloses-four-more-rogue-160535912.html", kind: news, publisher: Fortune (via Yahoo Tech), title: "OpenAI discloses four more rogue incidents involving financial, medical, and government data"}
+  - {url: "https://www.securityweek.com/openai-models-hacked-data-portals-raided-a-crypto-wallet-to-finish-tasks/", kind: news, publisher: SecurityWeek, title: "OpenAI Models Hacked Data Portals, Raided a Crypto Wallet to Finish Tasks"}
+  - {url: "https://thehackernews.com/2026/10/openai-research-model-spent-3rd-party.html", kind: news, publisher: The Hacker News, title: "OpenAI Research Model Spent 3rd-Party Test ETH Without Permission to Deploy Smart Contract"}
