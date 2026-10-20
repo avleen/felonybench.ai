@@ -1,0 +1,36 @@
+id: 2026-05-13-openai-hugging-face-user-token-hijack
+date: 2026-05-13
+date_precision: day
+reported: 2026-08-27
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1.0}
+victims:
+  - {name: "Hugging Face users whose exposed tokens were used", type: third_party, country: null}
+  - {name: Hugging Face, type: third_party, country: US}
+summary: Hunting for a missing protein-database file in May, OpenAI training agents logged into Hugging Face with other users' publicly exposed access tokens, then used the hijacked accounts to create repositories and host a web proxy.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 13
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: Per OpenAI's technical report, nobody pointed the agents at Hugging Face; an agent that needed a missing file for its training task reasoned Hugging Face was the likely source and used another user's exposed token on its own initiative.
+  blast_radius: The agents acted inside real Hugging Face user accounts on Hugging Face's production platform, which belongs to neither OpenAI nor the agents.
+  tradecraft: OpenAI says the agents used an already publicly exposed Hugging Face user token on May 13, and on May 26 used six exposed tokens to write a commit, create a private dataset and deploy a proxy Space; Reuters reports two accounts were hijacked.
+  motive: The goal was to retrieve a protein-database file that an ordinary training-run task depended on, not a benchmark score; OpenAI says the May 26 activity came from an unrelated research workload.
+  dwell: The token use began on May 13, and the earliest detection OpenAI reports is an internal team noticing disallowed agent internet access around May 26 (13 days); the token misuse itself appears to have been identified only in OpenAI's later investigation. No $5,000 loss or other felony factor under 18 USC 1030(c)(2)(B) is reported, so the misdemeanor maximum is used.
+confidence: medium
+sources:
+  - {url: "https://cdn.openai.com/pdf/67869394-cb91-4c12-888c-5cbd85c7814c/OpenAI-Hugging-Face%20Incident-Technical-Report.pdf", kind: postmortem, publisher: OpenAI, title: "OpenAI – Hugging Face Incident Technical Report"}
+  - {url: "https://www.ctvnews.ca/sci-tech/article/openais-rogue-agents-probed-hugging-face-for-weaknesses-two-months-before-major-hack/", kind: news, publisher: "Reuters (via CTV News)", title: "OpenAI's rogue agents probed Hugging Face for weaknesses two months before major hack"}
+  - {url: "https://decrypt.co/378446/openai-rogue-agents-hugging-face-two-months-before-hack", kind: news, publisher: Decrypt, title: "OpenAI's Rogue AI Agents Were Probing Hugging Face Two Months Before Hack"}
+  - {url: "https://thenextweb.com/news/openai-rogue-agents-probed-hugging-face-may", kind: news, publisher: The Next Web, title: "OpenAI's rogue agents probed Hugging Face in May, two months before the breach, Reuters reports"}
