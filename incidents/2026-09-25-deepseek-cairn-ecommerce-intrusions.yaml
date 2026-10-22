@@ -1,0 +1,41 @@
+id: 2026-09-25-deepseek-cairn-ecommerce-intrusions
+date: 2026-09-25
+date_precision: day
+reported: 2026-10-19
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: A Chinese-speaking hacker whose activity NorForge tracks as cluster AIA0001, running the open-source Cairn multi-agent platform
+models:
+  - {name: "DeepSeek V4.1 Flash", codename: null, family: deepseek, share: 1}
+victims:
+  - {name: "More than 100 companies' websites, mostly online shops in the US, Canada, Japan and Australia (incl. Deere, SharkNinja and a Cummins vendor, per Reuters)", type: third_party, country: US}
+summary: A Chinese-speaking hacker set AI agents on more than 1,200 websites through the open-source Cairn platform, apparently on DeepSeek V4.1 Flash, and they broke into more than 100 companies' sites, mostly online shops, and planted uploader shells.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws:
+  - {code: "Act on the Prohibition of Unauthorized Computer Access (Act No. 128 of 1999)", country: Japan}
+  - {code: "Criminal Code Act 1995 (Cth) s 478.1 (unauthorised access to, or modification of, restricted data)", country: Australia}
+  - {code: "Criminal Code s 342.1 (unauthorized use of computer)", country: Canada}
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [persistence]
+  dwell_days: 7
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: NorForge's Snorre Fagerland told Reuters the hacker "did almost none of the work", giving instructions of under 100 Chinese characters to agents that spent hours probing and breaking into sites unsupervised; NorForge says the agents did the reconnaissance, testing and exploitation.
+  guardrails: Neither Reuters nor NorForge reports a jailbreak or a modified model. NorForge notes the setup looked repurposed from an earlier CTF configuration, but doesn't say the model was misled, so guardrails are scored intact.
+  blast_radius: The victims are private companies, mostly e-commerce sites; Reuters names Deere, SharkNinja and a website run by a Cummins vendor. No government system is reported.
+  tradecraft: NorForge says AIA0001's goal was persistent access and its pipeline had agents plant an "uploader shell" on breached shops, and it confirmed a live uploader shell on a hardware parts vendor's site (persistence). Single exploits are described but none is shown to be a zero-day, and credential use isn't attributed to this cluster specifically.
+  dwell: Reuters says the campaign began on 25 September 2026 and that Fagerland found malicious Cairn instances starting around 2 October, so 7 days, detected by a third party (NorForge).
+  statutes: Planting uploader shells on more than 100 companies' web servers is intentional damage to the integrity of protected computers under 18 USC 1030(a)(5)(A); damage to 10 or more protected computers in a year supports the ten-year maximum under 1030(c)(4)(B). 1030(a)(2)(C) is left out because Reuters "could not determine" how much data, if any, was taken.
+confidence: low
+sources:
+  - {url: "https://norforge.com/blog/inside_cairn", kind: primary, publisher: NorForge, title: "Inside Cairn: Open Windows into massive AI-Driven Cyber Operations"}
+  - {url: "https://www.reuters.com/legal/government/how-one-hacker-used-ai-agents-few-thousand-dollars-break-into-scores-sites-2026-10-19/", kind: news, publisher: Reuters, title: "How one hacker used AI agents and a few thousand dollars to break into scores of sites"}
+  - {url: "https://www.yahoo.com/news/us/articles/exclusive-one-hacker-used-ai-100625247.html", kind: news, publisher: Reuters (via Yahoo News), title: "Exclusive-How one hacker used AI agents and a few thousand dollars to break into scores of sites"}
+  - {url: "https://thenextweb.com/news/ai-agents-hacker-cairn-100-sites-deere-norforge", kind: news, publisher: The Next Web, title: "AI agents broke into 100+ sites for one hacker at $50 each, researcher says"}
