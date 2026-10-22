@@ -34,6 +34,7 @@ rationale:
 confidence: low
 sources:
   - {url: "https://www.crowdstrike.com/en-us/blog/unknown-threat-actor-uses-artex-to-target-south-korean-finance/", kind: primary, publisher: CrowdStrike, title: "Unknown Threat Actor Uses AI-Driven ARTEX to Target South Korean Finance"}
+  - {url: "https://www.zscaler.com/blogs/security-research/threat-actor-abuses-agentic-ai-pentesting-framework-target-south-korean", kind: primary, publisher: Zscaler ThreatLabz, title: "Threat Actor Abuses Agentic AI Pentesting Framework to Target South Korean Financial Institutions"}
   - {url: "https://therecord.media/south-korean-bank-hacks-ai-agents", kind: news, publisher: The Record, title: "South Korean officials believe AI agents were used to hack several banks"}
   - {url: "https://www.bleepingcomputer.com/news/security/south-korea-probes-bank-breaches-amid-suspected-ai-powered-attacks/", kind: news, publisher: BleepingComputer, title: "South Korea probes bank breaches amid suspected AI-powered attacks"}
   - {url: "https://www.bleepingcomputer.com/news/security/hacker-used-artex-ai-and-claude-agents-to-target-south-korean-banks/", kind: news, publisher: BleepingComputer, title: "ARTEX AI, Claude agents used in cyberattacks on South Korean banks"}
