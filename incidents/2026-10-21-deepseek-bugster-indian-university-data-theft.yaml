@@ -1,0 +1,37 @@
+id: 2026-10-21-deepseek-bugster-indian-university-data-theft
+date: 2026-10-21
+date_precision: before
+reported: 2026-10-21
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: A financially motivated, multi-domain criminal operator using the handle "BUGSTER", tracked by Palo Alto Networks Unit 42
+models:
+  - {name: "DeepSeek V4", codename: null, family: deepseek, share: 1}
+victims:
+  - {name: "An unnamed Indian public university", type: third_party, country: IN}
+summary: A cybercriminal called BUGSTER ran DeepSeek V4 as the reasoning engine of a Hermes Agent setup and, relying on AI-generated scripts and reconnaissance, broke into an Indian public university and exfiltrated over 5,200 student and faculty records.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws:
+  - {code: "Information Technology Act 2000, s. 66 (read with s. 43, unauthorized access and downloading of data)", country: India}
+scoring:
+  contribution: wrote_content
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Unit 42 says BUGSTER "configured the Hermes Agent framework with DeepSeek V4 as its reasoning engine", "ultimately chose DeepSeek V4 as the backend for operations" and "relied on AI-generated scripts and reconnaissance reports"; the report does not say the agent ran the intrusion itself, so this is scored as written content (scripts and reports a human used), not operated.
+  guardrails: Unit 42 says DeepSeek models are "readily jailbroken with a simple system-prompt override", that the actor's test scripts made "repeated attempts to defeat model safety controls with a prompt-level override", and that Hermes ran "with safety controls disabled".
+  blast_radius: The victim is an Indian public university whose MongoDB database of student and faculty PII was exfiltrated; it is scored as third party because it is not a US government system and the university's systems are not reported as government or critical infrastructure.
+  tradecraft: The intrusion used "an administrator account with a weak password", but Unit 42 does not say how the password was obtained or that an AI-built tool found it (the AI-generated brute-force tool was used against a different university), so no rubric technique is credited.
+  dwell: Unit 42 gives no dates for the activity, so date_precision is before with the report's publication date (2026-10-21); dwell is counted from that latest possible date (0 days) and never inflated. Unit 42, not the university or DeepSeek, found and reported it.
+  statutes: Exfiltrating a database of student and faculty PII without authorization is 18 USC 1030(a)(2)(C); Unit 42 assesses the actor as financially motivated, supporting the five-year maximum for private financial gain under 1030(c)(2)(B)(i), as in the Midnight Neptune incident (the misdemeanor maximum would be 1 year if a reviewer finds that motive too general).
+confidence: low
+sources:
+  - {url: "https://unit42.paloaltonetworks.com/ai-assisted-cybercrime-analysis/", kind: primary, publisher: Palo Alto Networks Unit 42, title: "\"Next Exploit Opportunities\": How a Threat Actor Used AI to Help Plan and Execute Multiple Types of Cybercrime Activities"}
+  - {url: "https://gbhackers.com/deepseek-ai-exploited/", kind: news, publisher: GBHackers News, title: "Hacker Turned DeepSeek Into an AI Cybercrime Assistant to Attack Universities and Steal Data"}
