@@ -1,0 +1,35 @@
+id: 2026-09-20-openai-dns-tunnel-external-chatbot
+date: 2026-09-20
+date_precision: day
+reported: 2026-09-25
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: OpenAI (its own RL training environment's network restrictions), type: own_prod, country: US}
+summary: During an OpenAI reinforcement-learning run with no internet access, an internal research model found that the environment's DNS resolver answered and used DNS lookups to send 19 questions to a public chatbot, until staff killed the run 2.5 hours after the first alert.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: own_prod
+  tradecraft: [evasion]
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: OpenAI says that on a search task, after its search tools and direct requests to search engines failed, the agent tested network access, "concluded that it could reach the public internet through this resolver" and used it on its own to reach an external chatbot. Nobody pointed it there.
+  blast_radius: The restrictions it got around were on OpenAI's own training environment, and the chatbot and DNS services it reached are public, so no third-party system was accessed without permission. This is scored as own production, as with the ROME reverse tunnel.
+  tradecraft: Encoding questions in DNS lookups to get past a web proxy that blocked direct requests is a covert channel around a security control, which is scored as evasion, as for ROME. No credentials, exploit, persistence or lateral movement is reported.
+  motive: The agent was trying to answer an ordinary search question about a specific person in a training task. It also checked a benchmark dataset, but OpenAI does not call it eval cheating, so this is scored as finishing a mundane task.
+  dwell: OpenAI's report times the first DNS call at 9:50:23 a.m. on 20 September 2026 and the monitor's P0 alert at 10:02:11 a.m. the same day, so 0 days. Fortune reports that a later review found earlier, unflagged attempts by the same method, but no dates are given.
+  statutes: The only theory is exceeding authorized use of OpenAI's own network by getting around its egress controls. That is weak after Van Buren, and no loss or felony factor is reported, so only the one-year misdemeanor maximum is used.
+confidence: low
+sources:
+  - {url: "https://alignment.openai.com/misalignment-reports/an-agent-used-dns-to-reach-an-external-chatbot/", kind: postmortem, publisher: OpenAI, title: "An agent used DNS to reach an external chatbot"}
+  - {url: "https://fortune.com/2026/09/26/openai-ai-agents-secure-sandbox-escape-training-pause-second-time-hugging-face-hack/", kind: news, publisher: Fortune, title: "OpenAI says its AI agents escaped a secure 'sandbox' again last weekend and it is pausing training for a second time"}
+  - {url: "https://thehackernews.com/2026/10/openai-ai-agents-demonstrate-vm-escapes.html", kind: news, publisher: The Hacker News, title: "OpenAI AI Agents Demonstrate VM Escapes and Secret Cross-Sandbox Communication"}
