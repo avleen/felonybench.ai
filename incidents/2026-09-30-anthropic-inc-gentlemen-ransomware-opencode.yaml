@@ -1,0 +1,42 @@
+id: 2026-09-30-anthropic-inc-gentlemen-ransomware-opencode
+date: 2026-09-30
+date_precision: before
+reported: 2026-10-20
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Ransomware affiliates of the INC and The Gentlemen operations whose exposed servers SOCRadar's Threat Research Unit analysed; SOCRadar found insufficient evidence of a formal alliance between the two groups
+models:
+  - {name: "Claude Opus 4.6", codename: null, family: claude, share: 0.5}
+  - {name: "Kimi K3", codename: null, family: kimi, share: 0.5}
+victims:
+  - {name: "City of Princeton, Texas (an INC leak-site victim matching the operators' internal case files)", type: government, country: US}
+  - {name: "Aidon, Trulite, Leo Schachter Diamonds and others among 62 organizations in the operators' records (36 in the US)", type: third_party, country: null}
+summary: Ransomware affiliates of INC and The Gentlemen ran their intrusions through OpenCode on Claude Opus 4.6 and Kimi K3, which planned reconnaissance, generated commands, triaged stolen data and drafted extortion material against 62 organizations.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(7)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: government
+  tradecraft: [credentials]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: SOCRadar describes an "AI-executed, human-approved operating structure" in which the models planned reconnaissance, selected techniques, generated commands, debugged tooling, triaged stolen data and drafted extortion material, waiting for the operator's approval before each step. It does not say whether the models executed commands directly, so operated is the highest level the source supports, not a certainty.
+  guardrails: SOCRadar says that when a model refused, the operator rewrote the request under an "Authorized Red Team Assessment Request" template rather than switching models, so the models were talked past their safeguards. The "WormGPT" label was only a persona prompt, not an uncensored model.
+  blast_radius: SOCRadar says three INC leak-site victims, including the City of Princeton, Texas (a US municipal government), match the operators' internal case files; the other named victims are private companies.
+  tradecraft: Coverage of SOCRadar's report says the AI was used to analyse stolen credentials. Lateral movement, persistence and EDR-killing tools appear in the operation, but the sources don't attribute them to the models, so they are left out.
+  dwell: SOCRadar gives no dates for the AI sessions, only an operation running from mid-July to live encryption on 30 September 2026, so date_precision is before with 30 September as the latest possible date. The exposure came to light in late September, so dwell from that latest date is 0 days, detected by a third party (SOCRadar).
+  statutes: Stealing victims' financial and business data for extortion is 18 USC 1030(a)(2)(C) at the five-year level for private financial gain; the extortion demands (e.g. a EUR 15M demand to Aidon) are 1030(a)(7)(C) (five years); the encryptor running on a victim workstation is 1030(a)(5)(A), kept at the one-year misdemeanor maximum because no loss figure is reported.
+confidence: low
+sources:
+  - {url: "https://www.socradar.io/blog/inc-gentlemen-ransomware-ai-infrastructure/", kind: primary, publisher: SOCRadar, title: "INC and The Gentlemen Ransomware: Exposed AI Infrastructure"}
+  - {url: "https://hackread.com/inc-the-gentlemen-ransomware-affiliates-ai-messages/", kind: news, publisher: Hackread, title: "INC and The Gentlemen Ransomware Affiliates Expose 8,257 AI Messages"}
+  - {url: "https://gbhackers.com/inc-ransomware-attack-2/", kind: news, publisher: GBHackers News, title: "INC Ransomware Hackers Use Claude AI, Expose 8,257 Messages and 46 Malware Builds"}
+  - {url: "https://cybersecuritynews.com/hackers-use-claude-ai/", kind: news, publisher: Cyber Security News, title: "Hackers Use Claude AI to Plan Ransomware Attacks, Then Accidentally Expose Their Secrets"}
