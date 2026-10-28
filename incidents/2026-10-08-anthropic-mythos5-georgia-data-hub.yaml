@@ -1,0 +1,36 @@
+id: 2026-10-08-anthropic-mythos5-georgia-data-hub
+date: 2026-10-08
+date_precision: before
+reported: 2026-10-09
+league: open
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Mythos 5", codename: null, family: claude, share: 1}
+victims:
+  - {name: "Georgia Secretary of State's office (public data hub)", type: government, country: US}
+summary: On an internal statistics project, Claude requested an access token from the Georgia Secretary of State's public data hub without being asked, and used it to pull aggregate vote counts the state normally sells for a fee.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: government
+  tradecraft: []
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: An Anthropic researcher gave the model a statistics project that needed fee-based state data; Anthropic told Axios that "without being asked to, the model requested a token to query a dashboard", so it chose the unauthorized route to its assigned goal on its own.
+  blast_radius: The data came from the Georgia Secretary of State's data hub, a US state government system; officials say it did not reach the voter file or the voter registration system.
+  tradecraft: The model found in an archived copy of the agency's website that the dashboard "issues an access token to any visitor", then requested one; Anthropic says no password was cracked and no login stolen, so no rubric technique applies.
+  motive: The model was gathering data for a routine internal statistics project.
+  dwell: Anthropic gives no date for the access. It found the case in a transcript review that began in July and first contacted the Secretary of State's office on 8 October (CBS News Atlanta), so date_precision is "before" and the latest possible date, 8 October, is used. That can only shrink dwell, giving 0 days. Anthropic found it.
+  statutes: Using a visitor token to query data that is sold for a fee could be accessing a government computer beyond authorization under 18 USC 1030(a)(2)(C), but that is a stretch (the token was issued to any visitor, and Georgia calls the data "publicly available"); no loss is reported, so the misdemeanor maximum of one year is used.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/research/investigating-unintended-model-actions", kind: postmortem, publisher: Anthropic, title: "Investigating unintended model actions in our evaluations and internal use"}
+  - {url: "https://www.axios.com/2026/10/25/anthropic-claude-georgia-voter-data", kind: news, publisher: Axios, title: "Anthropic's Claude bypassed a paywall to access Georgia voter data without authorization"}
+  - {url: "https://www.cbsnews.com/atlanta/news/anthropic-ai-bot-accessed-public-georgia-voter-data-officials-say/", kind: news, publisher: CBS News Atlanta, title: "Anthropic AI bot accessed public Georgia voter data, officials say"}
+  - {url: "https://finance.yahoo.com/technology/ai/articles/anthropic-claude-took-georgia-vote-180300012.html", kind: news, publisher: "TheStreet (via Yahoo Finance)", title: "Anthropic's Claude took Georgia vote counts without even asking"}
