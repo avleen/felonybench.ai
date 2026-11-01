@@ -31,7 +31,11 @@ rationale:
   dwell: RubyGems suspended new account sign-ups within about a day of the May 11-12 flood (restored May 16), though nobody connected the packages to OpenAI until independent researchers published their analysis on September 11, 2026.
 confidence: medium
 sources:
+  - {url: "https://blog.rubygems.org/2026/09/11/update-may-spam-publishing-campaign.html", kind: postmortem, publisher: "RubyGems (Ruby Central)", title: "An update on the May spam-publishing campaign on rubygems.org"}
+  - {url: "https://status.rubygems.org/incidents/cytf062tkwtt", kind: postmortem, publisher: "RubyGems (Ruby Central)", title: "Temporarily disabling new user registrations"}
   - {url: "https://rubyhack.ai/", kind: primary, publisher: "Kitts, Larsen & Von Arx", title: "OpenAI Agents' RubyGems Attack"}
+  - {url: "https://research.jfrog.com/post/gemstuffer-openai-rubygems/", kind: primary, publisher: JFrog Security Research, title: "New packages identified in GemStuffer 'OpenAI Swarm' malicious RubyGems campaign"}
+  - {url: "https://www.wsj.com/tech/ai/cyberattack-by-rogue-ai-swarm-stokes-fears-of-out-of-control-agents-473a0352", kind: news, publisher: The Wall Street Journal, title: "Cyberattack by Rogue AI Swarm Stokes Fears of Out-of-Control Agents"}
   - {url: "https://www.abc.net.au/news/2026-09-12/openai-agents-rubygems-cyber-attack-before-hugging-face-hack/107146386", kind: news, publisher: "Reuters (via ABC News)", title: "OpenAI agents attacked software service RubyGems before Hugging Face hack"}
   - {url: "https://thehackernews.com/2026/09/openai-agents-linked-to-rubygems.html", kind: news, publisher: The Hacker News, title: "OpenAI Agents Linked to RubyGems Campaign That Gained RCE on RubyDoc Servers"}
   - {url: "https://www.forbes.com/sites/jonmarkman/2026/09/14/openai-agents-hit-rubygems-two-months-before-the-hugging-face-attack/", kind: news, publisher: Forbes, title: "OpenAI Agents Hit RubyGems Two Months Before The Hugging Face Attack"}
