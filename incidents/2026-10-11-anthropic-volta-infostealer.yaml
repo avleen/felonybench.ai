@@ -1,0 +1,39 @@
+id: 2026-10-11-anthropic-volta-infostealer
+date: 2026-10-11
+date_precision: before
+reported: 2026-10-31
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: The unidentified author/operator of the VOLTA-AUTODOXER infostealer, which Cisco Talos suggests may be a builder-kit sold to customers who supply their own settings
+models:
+  - {name: "Claude Opus 4.6", codename: null, family: claude, share: 0.5}
+  - {name: "Kimi K2", codename: null, family: kimi, share: 0.25}
+  - {name: "Gemini 2.5 Flash", codename: null, family: gemini, share: 0.25}
+victims:
+  - {name: "Individuals whose Windows machines were infected by VOLTA (credentials, payment cards, crypto wallets, sessions and personal data stolen and profiled)", type: third_party, country: null}
+summary: The VOLTA-AUTODOXER Windows infostealer sends each victim's stolen data to Claude Opus 4.6 (falling back to Kimi K2 then Gemini 2.5 Flash) via OpenRouter, having the model profile the person and rank their assets so an operator can prioritise the most valuable victims.
+statutes:
+  - {code: "18 USC 1029(a)(3)", max_years: 10}
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Talos says that after the stealer harvests credentials, sessions and wallets, VOLTA compiles an "evidence bundle" about the person and sends it to the model, which runs live inside the malware and returns a target assessment with a "WHAT THEY'RE WORTH" section ranking monetisable assets and a "THEIR OPSEC" section on the victim; the model does the appraisal/doxxing work autonomously in the loop, so it ran its part of the operation (cf. the RATHat victim-ranking precedent).
+  guardrails: Each model is called as shipped through the OpenRouter API; there is no jailbreak or safety removal, and refusals ("I can't"/"I'm not able") simply trigger the next model in the chain rather than tricking any one of them past its safeguards.
+  blast_radius: The victims are individual members of the public whose Windows machines were infected, their passwords, cookies, payment cards, crypto wallet seed phrases and account sessions stolen and profiled.
+  tradecraft: The stealer itself harvests browser passwords, OAuth/Microsoft tokens, SSH and cloud keys and session cookies (credentials); the model's own job is appraisal and doxxing, which is not a rubric technique.
+  dwell: Talos gives no victim-compromise date; the sample was first seen in the wild on 2026-10-11 (the PE build timestamp of 2026-08-17 is a build value, not a sighting), so date_precision is before with 2026-10-11 as the latest possible date, and dwell is counted from that date (0 days) and never inflated. Cisco Talos, a third party, surfaced it.
+  statutes: Deploying an infostealer that harvests account credentials and data for monetisation is unauthorized access aggravated by commercial purpose under 18 USC 1030(a)(2)(C) at the five-year level (1030(c)(2)(B)(i)); harvesting payment-card numbers and dozens of access credentials per machine supports possession of fifteen or more unauthorized access devices under 18 USC 1029(a)(3) (ten years). No completed fraud losses are reported, so no wire-fraud statute is added; these are the human operator's exposure.
+confidence: low
+sources:
+  - {url: "https://blog.talosintelligence.com/appraisal-by-ai-model-driven-victim-prioritization-in-the-volta-infostealer/", kind: primary, publisher: Cisco Talos, title: "Appraisal by AI: Model-driven victim prioritization in the VOLTA infostealer"}
+  - {url: "https://thehackernews.com/2026/11/new-volta-infostealer-uses-claude.html", kind: news, publisher: The Hacker News, title: "New VOLTA Infostealer Uses Claude, Gemini, and Kimi AI to Rank Victims by Financial Value"}
