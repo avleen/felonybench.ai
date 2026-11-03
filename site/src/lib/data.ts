@@ -39,6 +39,15 @@ export const allModels = () => {
   return [...models.values()];
 };
 
+// What a model's page shows by default: its best league, without low-confidence reports. Null if it has only those.
+export const defaultStanding = (slug: string) => {
+  const rows = LEAGUES.flatMap((l) => {
+    const row = (scores as any).confident.boards[l.key].all.models.find((m: any) => m.slug === slug);
+    return row ? [{ league: l.label, row }] : [];
+  });
+  return rows.sort((a, b) => b.row.score - a.row.score)[0] ?? null;
+};
+
 // Everyone charged with an incident, jointly and severally: the lab, then each other lab and modifier.
 // e.g. "Alibaba, with OrcaRouter (abliterated)".
 export const coDefendants = (i: any) => {

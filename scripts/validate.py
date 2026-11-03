@@ -72,6 +72,14 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
         errors.append(NEWS_REQUIRED)
     if incident["tier"] == "verified" and not kinds & {"postmortem", "primary"}:
         errors.append("tier: 'verified' requires a 'postmortem' or 'primary' source")
+    # Attribution can't be merely alleged when the lab itself published it. A lab's confirmation
+    # quoted only in the press doesn't count, so self_disclosed alone doesn't decide this.
+    lab_published = any(
+        source["kind"] in ("postmortem", "primary") and incident["org"].lower() in source["publisher"].lower()
+        for source in incident["sources"]
+    )
+    if incident["tier"] == "alleged" and lab_published:
+        errors.append("tier: 'alleged' can't apply when the lab itself published the incident")
 
     total_share = sum(m["share"] for m in incident["models"])
     if abs(total_share - 1) > 1e-6:

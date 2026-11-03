@@ -7,7 +7,7 @@ const steps = [
   ["Claude Code", "On a match, and once a week regardless, Claude Code reads the articles, checks for duplicates, looks for post-incident reviews and press coverage, and drafts or updates an incident file with a score and reasoning. The weekly run works through every lab, every kind of incident and every kind of source on a checklist, and cross-checks other incident trackers, not just whatever the RSS filter happened to catch."],
   ["Pull request", "A script opens one pull request per incident, with the score breakdown, the leaderboard change and validation results."],
   ["Human review", "A person checks every source and every score. Nothing is published without a human merging it."],
-  ["Publish", "Merging rebuilds the site on Cloudflare Pages. Scores are recalculated from scratch on every build."],
+  ["Publish", "Merging rebuilds the site on Cloudflare. Scores are recalculated from scratch on every build."],
 ];
 ---
 <Layout title="How it works" description="How FelonyBench finds, scores and publishes incidents.">
@@ -23,7 +23,7 @@ const steps = [
   <p>Leads come from lab blogs and system cards, government AI safety institutes and their reports, evaluation firms, research papers, regional and non-English news, security press, and other trackers (the AI Incident Database, felonybench.org and felonybench.com). Anything another tracker lists that we don't have is either written up or has a recorded reason for leaving it out.</p>
 
   <h2>Sources</h2>
-  <p>Every incident links the company's post-incident review when one exists, from the lab and from the victim, and at least one news report, preferring Wired, then AP. An incident is <strong>Verified</strong> only with a first-hand source; otherwise it's <strong>Alleged</strong>.</p>
+  <p>Every incident links the company's post-incident review when one exists, from the lab and from the victim, and at least one news report, preferring Wired, then AP. An incident is <strong>Verified</strong> when a first-hand source says directly that the lab's model did it. It's <strong>Alleged</strong> when that attribution rests on press reports or a third party's inference.</p>
 
   <h2 id="confidence">Confidence</h2>
   <p>Each incident also records how solid its sourcing and attribution are: <strong>high</strong>, <strong>medium</strong> or <strong>low</strong>. Low means the case was written up despite real doubts, such as whether it's in scope, which model was involved, or whether the act happened as reported. By default the site leaves low-confidence reports out entirely: they don't appear in lists and don't count toward any score, rank or trend. Use the switch at the top of any page to include them; your choice is remembered in this browser.</p>

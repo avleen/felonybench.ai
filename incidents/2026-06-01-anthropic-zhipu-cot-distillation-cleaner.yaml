@@ -18,7 +18,7 @@ foreign_laws: []
 scoring:
   contribution: operated
   guardrails: intact
-  legal_status: contested
+  legal_status: crime
   blast_radius: own_prod
   tradecraft: []
   dwell_days: 0

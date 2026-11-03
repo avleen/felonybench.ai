@@ -232,3 +232,38 @@ def test_family_check_skips_an_incident_with_malformed_models(make_incident, tmp
     (tmp_path / "2026-07-17-anthropic-b.yaml").write_text(yaml.safe_dump(bad))
     results = validate_dir(tmp_path, rubric, load_validator())
     assert list(results) == ["2026-07-17-anthropic-b.yaml"]
+
+
+def test_contested_needs_a_cited_dispute(make_accomplice, rubric):
+    incident = make_accomplice()
+    incident["scoring"]["legal_status"] = "contested"
+    incident["rationale"].pop("legal_status", None)
+    assert any("legal_status" in e and "required" in e for e in _errors(incident, rubric, incident["id"]))
+    incident["rationale"]["legal_status"] = "A court is weighing this: example v. example."
+    assert _errors(incident, rubric, incident["id"]) == []
+
+
+def test_a_crime_needs_no_dispute(make_accomplice, rubric):
+    incident = make_accomplice()
+    incident["scoring"]["legal_status"] = "crime"
+    incident["rationale"].pop("legal_status", None)
+    assert _errors(incident, rubric, incident["id"]) == []
+
+
+def test_alleged_cannot_apply_to_the_labs_own_account(make_incident, rubric):
+    incident = make_incident(tier="alleged", org="OpenAI")
+    incident["sources"] = [
+        {"url": "https://openai.com/x", "kind": "postmortem", "publisher": "OpenAI", "title": "T"},
+        {"url": "https://wired.com/x", "kind": "news", "publisher": "Wired", "title": "T"},
+    ]
+    assert any("alleged" in e for e in _errors(incident, rubric, incident["id"]))
+
+
+def test_alleged_allows_a_third_partys_account_and_press_quotes(make_incident, rubric):
+    incident = make_incident(tier="alleged", org="OpenAI")
+    incident["sources"] = [
+        {"url": "https://x.org/x", "kind": "primary", "publisher": "Transluce", "title": "T"},
+        {"url": "https://wired.com/x", "kind": "news", "publisher": "Wired on OpenAI", "title": "T"},
+    ]
+    incident["scoring"]["self_disclosed"] = True
+    assert _errors(incident, rubric, incident["id"]) == []

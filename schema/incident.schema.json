@@ -106,6 +106,10 @@
       }
     },
     {
+      "if": {"properties": {"scoring": {"properties": {"legal_status": {"const": "contested"}}, "required": ["legal_status"]}}, "required": ["scoring"]},
+      "then": {"properties": {"rationale": {"required": ["legal_status"]}}}
+    },
+    {
       "if": {"properties": {"league": {"enum": ["open", "sandbox"]}}, "required": ["league"]},
       "then": {
         "properties": {

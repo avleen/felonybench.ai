@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
-import { fmt, allModels } from "../../lib/data";
+import { fmt, allModels, defaultStanding } from "../../lib/data";
 
 export function getStaticPaths() {
   return [
@@ -24,9 +24,14 @@ export async function GET({ props }: { props: { model: any } }) {
     bar(24, 76), bar(46, 60), bar(68, 44), bar(90, 24),
     el("div", { position: "absolute", left: 16, top: 80, width: 96, height: 10, background: "#ff6b5e", borderRadius: 2 }, []),
   ]);
+  const standing = m && defaultStanding(m.slug);
+  const incidents = standing?.row.incidents.length;
+  const line = standing
+    ? `#${standing.row.rank} ${standing.league} · ${fmt(standing.row.score)} FBS · ${incidents} ${incidents === 1 ? "incident" : "incidents"}`
+    : "Low-confidence reports only";
   const lines = m
     ? [el("div", { fontSize: 28, opacity: 0.7 }, m.base_org && m.base_org !== m.org ? `${m.org}, base model by ${m.base_org}` : m.org), el("div", { fontSize: 72 }, m.name),
-       el("div", { fontSize: 36, color: "#ff6b5e" }, `#${m.rank} · ${fmt(m.score)} FBS · ${m.incidents.length} incident(s)`)]
+       el("div", { fontSize: 36, color: "#ff6b5e" }, line)]
     : [el("div", { fontSize: 80, letterSpacing: 2 }, "FELONYBENCH.ai"),
        el("div", { fontSize: 34, color: "#ff6b5e" }, "The leading benchmark for AI crime. Higher is better.")];
   const svg = await satori(

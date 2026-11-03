@@ -261,8 +261,10 @@ Each source has a `kind`:
   available; if Wired or AP covered it, one of them must be included.
 - `primary`: other first-hand statements such as model cards, government notices, advisories.
 
-`tier: verified` requires at least one `postmortem` or `primary` source. Otherwise use
-`tier: alleged`.
+`tier: verified` requires a first-hand source (`postmortem` or `primary`) saying directly that
+this lab's model did it. Use `tier: alleged` when the attribution rests on press reports or a
+third party's inference, even if the act itself is documented first-hand. If the lab published
+its own first-hand account, it can't be `alleged`.
 
 ## Writing an incident
 
@@ -278,7 +280,8 @@ Each source has a `kind`:
   `dwell_days` from the LATEST possible incident date, never an earlier guess, so an
   unknown date can only shrink `dwell_days`, never inflate it — say so explicitly in the
   `dwell` rationale line when `date_precision` isn't `day`.
-- `statutes`: the US federal statutes the conduct would violate if done by a human, with
+- `statutes`: the US federal statutes the conduct would violate if done by a human (if none
+  fits, the state offense, explained in `rationale.statutes`), with
   the maximum prison term for the most fitting subsection (first offense, aggravated
   where the facts support it). Common ones: 18 USC 1030(a)(2)(C) (5 aggravated),
   1030(a)(4) (5), 1030(a)(5)(A) (10), 1029(a)(2) (10), 1832 (10).
@@ -330,7 +333,8 @@ Human review of past sweeps kept correcting the same things. Get them right firs
   highest level the sources support, not the one the headline implies.
 - **Accomplice `legal_status`:** `crime` by default. `contested` only when legality is
   genuinely disputed (e.g. §1201 circumvention during security research), and cite the
-  dispute (a court case, a DMCA exemption, a lawyer quoted in coverage) in the notes.
+  dispute (a court case, a DMCA exemption, a lawyer quoted in coverage) in
+  `rationale.legal_status`, which is published and required.
 - **Accomplice `self_disclosed: true`** when the lab itself reported the misuse, e.g. in
   its threat report. A vendor's report about another lab's model doesn't count.
 - **Human actors:** describe them as the sources do ("a China-linked threat actor

@@ -2,7 +2,7 @@ from scripts.rubric import load_rubric
 
 
 def test_rubric_version():
-    assert load_rubric()["version"] == "1.1"
+    assert load_rubric()["version"] == "1.2"
 
 
 def test_tradecraft_points_sum_to_max():
@@ -32,8 +32,8 @@ def test_accomplice_section():
 
 def test_rubric_version_bumped():
     r = load_rubric()
-    assert r["version"] == "1.1"
-    assert r["changelog"][-1]["version"] == "1.1"
+    assert r["version"] == "1.2"
+    assert r["changelog"][-1]["version"] == "1.2"
 
 
 def test_public_blast_radius_sits_between_third_party_and_government():

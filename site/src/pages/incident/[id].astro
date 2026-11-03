@@ -15,7 +15,7 @@ const low = isLow(i);
 const acc = rubric.accomplice;
 const why = (key: string) => i.rationale[key] ? `: ${i.rationale[key]}` : ".";
 const rows = [
-  ["Sentence-Years", fmt(b.sentence_years), i.statutes.map((st: any) => st.code).join(", ")],
+  ["Sentence-Years", fmt(b.sentence_years), `${i.statutes.map((st: any) => st.code).join(", ")}${i.rationale.statutes ? `. ${i.rationale.statutes}` : ""}`],
   ...(accomplice ? [
     ["× Contribution", fmt(b.contribution), `${acc.contribution[s.contribution].label}${why("contribution")}`],
     ["× Blast Radius", fmt(b.blast_radius), `${rubric.blast_radius[s.blast_radius].label}: ${i.rationale.blast_radius}`],
@@ -39,7 +39,7 @@ const charged = coDefendants(i);
 const joint = accomplice && hasCoDefendants(i);
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
 ---
-<Layout title={i.summary} description={i.summary}>
+<Layout title={low ? `Low-confidence report: ${i.summary}` : i.summary} description={low ? `Low-confidence report: ${i.summary}` : i.summary}>
   {low && (
     <div class="panel low-notice" data-conf="confident">
       <p class="eyebrow">Low-confidence report</p>
