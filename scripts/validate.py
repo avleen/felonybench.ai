@@ -17,7 +17,8 @@ SCHEMA = ROOT / "schema" / "incident.schema.json"
 NEWS_REQUIRED = "sources: at least one 'news' source is required"
 ACCOMPLICE_ONLY = ("contribution", "guardrails", "legal_status")
 UNSUPERVISED_ONLY = ("autonomy", "motive")  # Open and Sandbox: what the model did on its own
-PUBLISHER_ALIASES = {"Google DeepMind": ("Google",)}
+PUBLISHER_ALIASES = {"Google DeepMind": ("Google",), "Moonshot AI": ("Moonshot",), "Zhipu AI": ("Zhipu",)}
+UNDISCLOSED_NAME = "Undisclosed model"  # one spelling, so a lab's unnamed models share one board row
 
 
 def load_validator(path: Path = SCHEMA) -> Draft202012Validator:
@@ -86,6 +87,8 @@ def _identity_errors(incident: dict) -> list[str]:
             errors.append(f"models: '{m['name']}' has no letters or digits in a-z0-9 to build a URL from")
         if "org" in m and not slugify(m["org"]):
             errors.append(f"models: org '{m['org']}' has no letters or digits in a-z0-9 to build a URL from")
+        if re.search(r"undisclosed|unnamed|unknown", m["name"], re.I) and m["name"] != UNDISCLOSED_NAME:
+            errors.append(f"models: '{m['name']}' must be exactly '{UNDISCLOSED_NAME}' when the model isn't named")
     slugs = [model_slug(incident, m) for m in incident["models"]]
     if len(slugs) != len(set(slugs)):
         errors.append("models: the same model is listed twice; give it one entry with the combined share")

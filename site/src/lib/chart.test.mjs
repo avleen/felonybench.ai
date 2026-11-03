@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { layout, W, H, PAD } from "./chart.ts";
+import { chartLabel, layout, W, H, PAD } from "./chart.ts";
 
 const series = (points) => ({ Acme: points });
 
@@ -87,11 +87,18 @@ test("every real trend chart has finite coordinates", () => {
           assert.ok(!s.path.includes("NaN"), `${league}/${tier}/${s.org} path`);
           assert.ok(Number.isFinite(s.labelY), `${league}/${tier}/${s.org} label`);
           assert.ok(s.labelY >= 0 && s.labelY <= H, `${league}/${tier}/${s.org} label inside the chart`);
-          // Labels start 22 units into the padding, and 13px mono is about 8 units per character.
-          const label = `${s.org} ${s.final.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
-          assert.ok(22 + label.length * 8 <= PAD.right, `"${label}" fits in the right margin`);
         }
       }
     }
   }
+});
+
+test("chartLabel keeps a long org's score and stays inside the right margin", () => {
+  const fits = (label) => 22 + label.length * 8 <= PAD.right;
+  assert.equal(chartLabel("OpenAI", "303"), "OpenAI 303");
+  const long = chartLabel("The Shanghai Artificial Intelligence Laboratory", "1,092.25");
+  assert.ok(fits(long), long);
+  assert.ok(long.endsWith(" 1,092.25"));
+  assert.ok(long.startsWith("The Shanghai"));
+  assert.ok(fits(chartLabel("x".repeat(500), "9".repeat(10))));
 });

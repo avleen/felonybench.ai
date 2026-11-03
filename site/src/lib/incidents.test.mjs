@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   chargedOrgs, clip, coDefendants, daysSince, fmt, hasCoDefendants, incidentDescription, incidentTitle,
-  hiddenPaths, isLow, modelTitle, newerThanLatest, occurred, scoreViews,
+  daysLabel, hiddenPaths, isLow, modelTitle, newerThanLatest, occurred, scoreViews,
 } from "./incidents.ts";
 
 test("one org charged is just its name", () => {
@@ -123,4 +123,12 @@ test("hiddenPaths lists low reports and models with nothing else", () => {
   const paths = hiddenPaths([inc("a", "low", "only-low", "both"), inc("b", "medium", "both", "none-low"), inc("c", "low", "only-low")]);
   assert.deepEqual(paths.sort(), ["/incident/a/", "/incident/c/", "/model/only-low/"]);
   assert.deepEqual(hiddenPaths([]), []);
+});
+
+test("daysLabel marks which way an imprecise date can be wrong", () => {
+  const now = Date.parse("2026-11-25T12:00:00Z");
+  assert.equal(daysLabel("2026-11-01", "day", now), "24");
+  assert.equal(daysLabel("2026-11-01", "before", now), "24+");
+  assert.equal(daysLabel("2026-11-01", "month", now), "≤24");
+  assert.equal(daysLabel("2026-11-01", undefined, now), "24");
 });

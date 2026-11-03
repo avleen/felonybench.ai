@@ -203,6 +203,7 @@ def trends(scored: list[dict], league: str, tier: str) -> dict:
             previous = points[-1]["cumulative"] if points else 0
             points.append({
                 "date": str(to_date(incident["date"])),
+                "date_precision": incident["date_precision"],
                 "incident_id": incident["id"],
                 "delta": total,
                 "cumulative": round(previous + total, 2),

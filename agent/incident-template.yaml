@@ -36,8 +36,8 @@ league: # open | sandbox | accomplice
 # ACCOMPLICE LEAGUE: `org` below is the lead model's lab. A model from another lab
 # sets its own `org`. All of those labs are co-defendants.
 
-# verified = at least one `postmortem` or `primary` source backs this up
-# alleged  = only news coverage exists so far (not allowed if the lab itself published it)
+# verified = a first-hand `postmortem` or `primary` source says directly that this lab's model did it
+# alleged  = the attribution rests on press reports or inference (not allowed if the lab itself published it)
 tier: # verified | alleged
 
 # The lab responsible for the model, or the lead model if the case used several.

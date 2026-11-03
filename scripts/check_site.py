@@ -39,13 +39,19 @@ def structure_errors(dist: Path) -> list[str]:
 def sitemap_errors(dist: Path) -> list[str]:
     """A page can't both ask search engines to skip it and be advertised to them."""
     errors = []
+    if not (dist / "sitemap-index.xml").is_file():
+        errors.append("sitemap-index.xml is missing, but robots.txt points at it")
+    home_listed = False
     for path in sorted(dist.glob("sitemap-[0-9]*.xml")):
         for url in re.findall(r"<loc>https?://[^/]+(/[^<]*)</loc>", path.read_text()):
+            home_listed = home_listed or url == "/"
             page = dist / url.strip("/") / "index.html"
             if not page.is_file():
                 errors.append(f"{path.name}: {url} has no page")
             elif re.search(r'<meta name="?robots"? content="?noindex', page.read_text()):
                 errors.append(f"{path.name}: {url} is marked noindex")
+    if not home_listed:
+        errors.append("the sitemap doesn't list the homepage")
     return errors
 
 

@@ -8,7 +8,7 @@ changelog:
     notes: Added the Accomplice League.
   - version: "1.2"
     date: "2026-11-03"
-    notes: Added the Public blast radius level. Contested legal status now needs a cited dispute. Tiers now depend on who attributes the act to the lab. Sentence-Years can use a state offense when no federal statute fits.
+    notes: Whoever modified a model is no longer charged, only its lab. Added the Public blast radius level. Contested legal status now needs a cited dispute. Tiers now depend on who attributes the act to the lab. Sentence-Years can use a state offense when no federal statute fits.
 
 autonomy:
   directed:

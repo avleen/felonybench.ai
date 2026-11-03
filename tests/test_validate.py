@@ -475,3 +475,24 @@ def test_model_spellings_that_only_match_when_joined_still_collide(make_incident
     message = "model slug 'acme-labs-one' has more than one spelling"
     assert any(message in e for e in results[f"{one['id']}.yaml"])
     assert any(message in e for e in results[f"{two['id']}.yaml"])
+
+
+@pytest.mark.parametrize("name", ["undisclosed-a", "Undisclosed Model", "An unnamed model", "Unknown"])
+def test_an_unnamed_model_has_one_spelling(make_incident, rubric, name):
+    incident = make_incident(models=[{"name": name, "codename": None, "family": None, "share": 1}])
+    errors = validate_incident(incident, incident["id"], rubric, load_validator())
+    assert any("must be exactly 'Undisclosed model'" in e for e in errors)
+
+
+def test_the_undisclosed_spelling_is_fine(make_incident, rubric):
+    incident = make_incident(models=[{"name": "Undisclosed model", "codename": None, "family": None, "share": 1}])
+    assert validate_incident(incident, incident["id"], rubric, load_validator()) == []
+
+
+@pytest.mark.parametrize("org,publisher", [("Zhipu AI", "Zhipu"), ("Moonshot AI", "Moonshot"), ("Google DeepMind", "Google")])
+def test_alleged_cant_apply_when_a_lab_publishes_under_its_short_name(make_incident, rubric, org, publisher):
+    incident = make_incident(org=org, tier="alleged", sources=[
+        {"url": "https://example.com/a", "kind": "primary", "publisher": publisher},
+        {"url": "https://example.com/b", "kind": "news", "publisher": "Wired"},
+    ])
+    assert any("can't apply when the lab" in e for e in validate_incident(incident, incident["id"], rubric, load_validator()))
