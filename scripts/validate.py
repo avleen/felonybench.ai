@@ -61,6 +61,21 @@ def _date_errors(incident: dict) -> list[str]:
     return errors
 
 
+def _dates_in(value, path: str = "") -> list[str]:
+    if isinstance(value, dict):
+        return [e for k, v in value.items() for e in _dates_in(v, f"{path}{k}/")]
+    if isinstance(value, list):
+        return [e for i, v in enumerate(value) for e in _dates_in(v, f"{path}{i}/")]
+    if isinstance(value, date):
+        return [f"{path.rstrip('/')}: '{value}' must be quoted, or YAML reads it as a date"]
+    return []
+
+
+def _stray_date_errors(incident: dict) -> list[str]:
+    """YAML reads a bare 2026-07-16 as a date. The schema sees text, but the checks below would crash."""
+    return _dates_in({k: v for k, v in incident.items() if k not in ("date", "reported")})
+
+
 def _identity_errors(incident: dict) -> list[str]:
     """Slugs become URLs and board rows, so an empty or repeated one breaks the site or merges rows."""
     errors = []
@@ -87,6 +102,9 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
         f"{'/'.join(map(str, e.absolute_path)) or '(root)'}: {e.message}"
         for e in validator.iter_errors(_jsonable(incident))
     ]
+    if errors:
+        return errors
+    errors = _stray_date_errors(incident)
     if errors:
         return errors
 
@@ -184,13 +202,13 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
         if errors:
             results[path.name] = errors
         # Other rule errors, like a missing news source, must not hide a misfiled model.
-        if validator.is_valid(_jsonable(incident)):
+        if validator.is_valid(_jsonable(incident)) and not _stray_date_errors(incident):
             for name in {incident["org"], *(model_lab(incident, m) for m in incident["models"])}:
                 org_names.setdefault(slugify(name), {}).setdefault(name, []).append(path.name)
             for m in incident["models"]:
                 if m.get("family"):
                     families.setdefault(m["family"], {}).setdefault(model_lab(incident, m), []).append(path.name)
-                spelling = f"{model_lab(incident, m)}: {m['name']}"
+                spelling = (model_lab(incident, m), m["name"])  # a tuple, so "A: B" + "C" isn't "A" + "B: C"
                 model_names.setdefault(model_slug(incident, m), {}).setdefault(spelling, []).append(path.name)
     # A family is one lab's model line, so a second lab usually means a model is missing its `org`.
     for family, labs in families.items():
