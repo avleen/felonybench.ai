@@ -46,6 +46,13 @@ def has_label(pr: dict, name: str) -> bool:
     return any(label.get("name") == name for label in pr.get("labels", []))
 
 
+def add_missing_labels(pr: dict, labels: list[str]) -> None:
+    for label in labels:
+        if not has_label(pr, label):
+            _run("gh", "pr", "edit", str(pr["number"]), "--add-label", label)
+            pr.setdefault("labels", []).append({"name": label})
+
+
 def pr_title(incident: dict, is_new: bool) -> str:
     if not is_new:
         return f"Update: {incident['id']}"
@@ -201,9 +208,7 @@ def main(argv: list[str] | None = None) -> int:
             # fails, an invalid revision still can't sit in a mergeable PR.
             if pr and errors and not pr.get("isDraft"):
                 # Labels first: a retry skips this block once the PR is a draft, so it couldn't add them.
-                for label in labels_for(incident, errors, previously_closed):
-                    if not has_label(pr, label):
-                        _run("gh", "pr", "edit", str(pr["number"]), "--add-label", label)
+                add_missing_labels(pr, labels_for(incident, errors, previously_closed))
                 _run("gh", "pr", "ready", str(pr["number"]), "--undo")
 
             _run("git", "add", path)
@@ -213,6 +218,7 @@ def main(argv: list[str] | None = None) -> int:
                 number = str(pr["number"])
                 _run("gh", "pr", "edit", number, "--title", title, "--body", body)
                 _run("gh", "pr", "comment", number, "--body", "Agent updated this incident. The description now reflects the new version.")
+                add_missing_labels(pr, labels_for(incident, errors, previously_closed))
                 if becomes_ready(pr, errors):
                     _run("gh", "pr", "ready", number)
                     stale = [label for label in ("awaiting-news", "needs-review") if has_label(pr, label) and label not in labels_for(incident, errors, previously_closed)]

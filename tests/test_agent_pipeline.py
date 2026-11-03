@@ -180,3 +180,29 @@ def test_the_agent_cannot_edit_outside_its_output():
     assert "--permission-mode dontAsk" in claude
     assert "acceptEdits" not in claude
     assert "Read(./.git/**)" in claude
+
+
+@pytest.mark.parametrize("text", [
+    "[source](https://medium.com/@researcher/report)",
+    "see https://medium.com/@researcher/report.",
+    "<https://medium.com/@researcher>",
+    "(https://x.com/@a) and **https://x.com/@b**",
+])
+def test_neutralize_leaves_links_working(text):
+    assert neutralize(text) == text
+
+
+@pytest.mark.parametrize("text", [
+    "@owner",
+    "hi @owner.",
+    "[a](https://x.com)@owner",
+    "https://x.com/a|@owner",
+    "https://@owner",
+    "https://x.com@owner",
+    "xhttps://x.com/@owner",
+    "https://x.com/ @owner",
+    "https://x.com/a\\@owner",
+])
+def test_neutralize_stops_every_mention_outside_a_link(text):
+    out = neutralize(text)
+    assert "@​owner" in out and "@owner" not in out

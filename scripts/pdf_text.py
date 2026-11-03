@@ -1,6 +1,6 @@
 """Print the text of a PDF, for the agent in GitHub Actions (which has no other way to read one).
 
-    python -m scripts.pdf_text <url-or-path> [--pages 3-10] [--max-chars N]
+    python -m scripts.pdf_text <url> [--pages 3-10] [--max-chars N]
 
 Government and lab reports are usually PDFs, and WebFetch times out on large ones. Pages are
 numbered from 1 and each starts with a "--- page N of M ---" header, so citations can name
@@ -13,7 +13,6 @@ import socket
 import sys
 import urllib.parse
 import urllib.request
-from pathlib import Path
 
 from pypdf import PdfReader
 
@@ -67,9 +66,7 @@ class PublicOnlyRedirects(urllib.request.HTTPRedirectHandler):
 
 
 def load(source: str, opener=None, resolve=socket.getaddrinfo) -> bytes:
-    """Read a local file, or fetch a public http(s) URL."""
-    if not source.startswith(("http://", "https://")):
-        return Path(source).read_bytes()
+    """Fetch a public http(s) URL. The agent may run this, so it must not reach local files."""
     check_url(source, resolve)
     opener = opener or urllib.request.build_opener(PublicOnlyRedirects(resolve)).open
     req = urllib.request.Request(source, headers={"User-Agent": BROWSER_UA})
@@ -93,7 +90,7 @@ def extract_text(data: bytes, pages: tuple[int, int] | None = None, max_chars: i
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("source", help="PDF URL or local path")
+    ap.add_argument("source", help="PDF URL")
     ap.add_argument("--pages", type=parse_pages, help="page range, e.g. 3-10 or 5 (1-based)")
     ap.add_argument("--max-chars", type=positive_int, default=DEFAULT_MAX_CHARS,
                     help=f"truncate output after this many characters (default {DEFAULT_MAX_CHARS})")
