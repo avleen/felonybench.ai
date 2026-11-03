@@ -1,5 +1,7 @@
 import scores from "../data/scores.json";
 
+export * from "./incidents.ts";
+
 export default scores as any;
 export const rubric = (scores as any).rubric;
 export const CORRECTIONS_EMAIL = "corrections@felonybench.ai";
@@ -28,7 +30,6 @@ export const CONFIDENCE_VIEWS = [
 ];
 export const isLow = (i: any) => !(scores as any).confident.incident_ids.includes(i.id);
 
-export const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 export const blastLabel = (key: string) => rubric.blast_radius[key]?.label ?? key;
 // Every model on any board, once; model pages and OG images are built from this.
 export const allModels = () => {
@@ -48,26 +49,5 @@ export const defaultStanding = (slug: string) => {
   return rows.sort((a, b) => b.row.score - a.row.score)[0] ?? null;
 };
 
-// Everyone charged with an incident, jointly and severally. The scorer decides who: this only formats it.
-// e.g. "Anthropic, with Moonshot AI".
-export const coDefendants = (i: any) => {
-  const [lead, ...others] = i.charged;
-  return others.length ? `${lead}, with ${others.join(", ")}` : lead;
-};
-
-// The same orgs as a plain list: "Anthropic and Moonshot AI".
-export const chargedOrgs = (i: any) =>
-  i.charged.length > 2 ? `${i.charged.slice(0, -1).join(", ")} and ${i.charged.at(-1)}` : i.charged.join(" and ");
-export const hasCoDefendants = (i: any) => i.charged.length > 1;
-
 export const incidentsFor = (slug: string) =>
   (scores as any).incidents.filter((i: any) => i.models.some((m: any) => m.slug === slug));
-
-// Imprecise dates are shown as such, never as a made-up day:
-// "month" → "April 2026"; "before" (date is the latest possible day) → "Before 23 July 2026".
-export const occurred = (i: any) => {
-  const d = new Date(`${i.date}T00:00:00Z`);
-  if (i.date_precision === "month") return d.toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-  if (i.date_precision === "before") return `Before ${d.toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}`;
-  return i.date;
-};

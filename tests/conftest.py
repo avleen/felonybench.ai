@@ -1,4 +1,5 @@
 import copy
+import re
 
 import pytest
 
@@ -7,6 +8,7 @@ from scripts.rubric import load_rubric
 BASE_INCIDENT = {
     "id": "2026-07-16-openai-exploitgym-huggingface",
     "date": "2026-07-16",
+    "date_precision": "day",
     "reported": "2026-07-21",
     "league": "open",
     "tier": "verified",
@@ -50,6 +52,8 @@ def rubric():
 def make_incident():
     def _make(scoring=None, **overrides):
         incident = copy.deepcopy(BASE_INCIDENT)
+        if re.match(r"\d{4}-\d{2}-\d{2}-", overrides.get("id", "")):  # an id starts with its date
+            incident["date"] = incident["reported"] = overrides["id"][:10]
         incident.update(overrides)
         if scoring:
             incident["scoring"].update(scoring)
@@ -81,6 +85,8 @@ ACCOMPLICE_INCIDENT = {
 def make_accomplice():
     def _make(scoring=None, **overrides):
         incident = copy.deepcopy(ACCOMPLICE_INCIDENT)
+        if re.match(r"\d{4}-\d{2}-\d{2}-", overrides.get("id", "")):  # an id starts with its date
+            incident["date"] = incident["reported"] = overrides["id"][:10]
         incident.update(overrides)
         if scoring:
             incident["scoring"].update(scoring)

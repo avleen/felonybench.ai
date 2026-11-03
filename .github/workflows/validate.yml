@@ -6,12 +6,33 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-  validate:
+  # Runs the PR's npm packages, so it gets no write access.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: pip install -r requirements.txt -r requirements-agent.txt
+      - run: bash scripts/check.sh
+
+  diff:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -20,12 +41,9 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install -r requirements.txt -r requirements-agent.txt
-      - run: python -m pytest -q
-      - run: python -m scripts.validate
+      - run: pip install -r requirements.txt
 
       - name: Leaderboard diff
-        if: github.event_name == 'pull_request'
         run: |
           git worktree add "$RUNNER_TEMP/base" "${{ github.event.pull_request.base.sha }}"
           python -m scripts.score --incidents "$RUNNER_TEMP/base/incidents" --out "$RUNNER_TEMP/before.json"
@@ -34,7 +52,7 @@ jobs:
           cat "$RUNNER_TEMP/diff.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment diff
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

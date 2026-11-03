@@ -27,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     generated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     scores = build_scores(load_incidents(args.incidents), load_rubric(args.rubric), generated_at)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(scores, indent=2, default=str))
+    args.out.write_text(json.dumps(scores, indent=2, default=str, allow_nan=False))
     print(f"Wrote {args.out} ({len(scores['incidents'])} incidents)")
     return 0
 

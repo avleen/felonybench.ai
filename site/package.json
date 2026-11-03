@@ -3,12 +3,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "data": "cd .. && python3 -m scripts.score --out site/src/data/scores.json",
+    "data": "cd .. && python3 -m scripts.validate && python3 -m scripts.score --out site/src/data/scores.json",
     "predev": "npm run data",
     "dev": "astro dev",
     "prebuild": "npm run data",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "pretest": "npm run data",
+    "test": "node --test src/lib/*.test.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

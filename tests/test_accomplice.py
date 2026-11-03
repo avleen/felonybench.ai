@@ -105,3 +105,12 @@ def test_scores_say_who_is_charged_lead_lab_first(make_accomplice, rubric):
 def test_a_single_lab_is_charged_once(make_accomplice, make_incident, rubric):
     assert build_scores([make_accomplice()], rubric, "now")["incidents"][0]["charged"] == ["Alibaba"]
     assert build_scores([make_incident()], rubric, "now")["incidents"][0]["charged"] == ["OpenAI"]
+
+
+def test_blast_radius_multiplies_the_accomplice_score(make_accomplice, rubric):
+    base = breakdown(make_accomplice(), rubric)
+    hit = breakdown(make_accomplice(scoring={"blast_radius": "government"}), rubric)
+    factor = rubric["blast_radius"]["government"]["multiplier"]
+    assert factor > 1 and base["blast_radius"] == 1
+    assert hit["base"] == base["base"] * factor
+    assert hit["total"] - base["total"] == base["base"] * (factor - 1)

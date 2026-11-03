@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BoardTable from "../components/BoardTable.astro";
-import scores, { LEAGUES, TIERS, VIEWS, CONFIDENCE_VIEWS, fmt, occurred, coDefendants, isLow } from "../lib/data";
+import scores, { LEAGUES, TIERS, VIEWS, CONFIDENCE_VIEWS, fmt, occurred, coDefendants, isLow, newerThanLatest } from "../lib/data";
 
 // Everything below the controls exists once per confidence view; CSS shows the one the reader picked.
 const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
@@ -14,7 +14,7 @@ const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
     sota: data.boards.open.verified.models[0],
     latest: [...counted].reverse().slice(0, 5),
     // Anything dated after the newest one shown here must be hidden. Compare dates, because same-day incidents sort by id.
-    newerHidden: scores.incidents.filter((i: any) => !counted.length || i.date > counted.at(-1).date).length,
+    newerHidden: newerThanLatest(scores.incidents, counted),
     // The newest incident in any league. Incidents sort by (date, id), so the last one has the latest date.
     lastIncident: counted.at(-1),
     orgs,
