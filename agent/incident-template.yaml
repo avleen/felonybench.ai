@@ -13,6 +13,10 @@ id: # <YYYY-MM-DD-org-slug>
 # When the incident happened (not when it was reported/disclosed). ISO date, YYYY-MM-DD.
 date: # <YYYY-MM-DD>
 
+# How exactly `date` is known. day = the actual day; month = some time that month (use the 1st);
+# before = no later than that day.
+date_precision: # day | month | before
+
 # When the lab or victim first disclosed/reported the incident publicly. ISO date, YYYY-MM-DD.
 # Must be on or after `date`.
 reported: # <YYYY-MM-DD>

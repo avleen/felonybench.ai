@@ -6,9 +6,11 @@
     "data": "cd .. && python3 -m scripts.score --out site/src/data/scores.json",
     "predev": "npm run data",
     "dev": "astro dev",
-    "prebuild": "npm run data",
+    "prebuild": "cd .. && python3 -m scripts.validate && cd site && npm run data",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "pretest": "npm run data",
+    "test": "node --test src/lib/*.test.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

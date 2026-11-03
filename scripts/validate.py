@@ -1,18 +1,22 @@
 """Validate incident files against the schema, the rubric and the source rules."""
 import argparse
 import json
+import math
 import re
 import sys
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import yaml
 from jsonschema import Draft202012Validator
 
 from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric
-from scripts.scoring import model_lab, to_date
+from scripts.scoring import model_lab, model_slug, slugify, to_date
 
 SCHEMA = ROOT / "schema" / "incident.schema.json"
 NEWS_REQUIRED = "sources: at least one 'news' source is required"
+ACCOMPLICE_ONLY = ("contribution", "guardrails", "legal_status")
+UNSUPERVISED_ONLY = ("autonomy", "motive")  # Open and Sandbox: what the model did on its own
 PUBLISHER_ALIASES = {"Google DeepMind": ("Google",)}
 
 
@@ -20,9 +24,78 @@ def load_validator(path: Path = SCHEMA) -> Draft202012Validator:
     return Draft202012Validator(json.loads(Path(path).read_text()))
 
 
+def _date_text(value) -> str:
+    if isinstance(value, date):
+        return str(value)
+    raise TypeError(f"YAML reads a value as {type(value).__name__}")  # such as !!binary or !!set
+
+
 def _jsonable(data):
     # YAML turns bare dates into date objects; the schema expects strings.
-    return json.loads(json.dumps(data, default=str))
+    return json.loads(json.dumps(data, default=_date_text))
+
+
+def _parse_date(value) -> date | None:
+    """The schema only checks the shape, so 2026-13-45 reaches here."""
+    try:
+        return to_date(value)
+    except ValueError:
+        return None
+
+
+def _date_errors(incident: dict) -> list[str]:
+    errors = []
+    occurred, reported = _parse_date(incident["date"]), _parse_date(incident["reported"])
+    if occurred is None:
+        errors.append(f"date: '{incident['date']}' is not a real date")
+    if reported is None:
+        errors.append(f"reported: '{incident['reported']}' is not a real date")
+    if occurred is None or reported is None:
+        return errors
+    # A day of grace, because an incident can be dated in a time zone ahead of UTC.
+    latest = datetime.now(timezone.utc).date() + timedelta(days=1)
+    if occurred > latest:
+        errors.append(f"date: {occurred} is in the future")
+    if reported > latest:
+        errors.append(f"reported: {reported} is in the future")
+    if reported < occurred:
+        errors.append("reported: earlier than date")
+    if incident["date_precision"] == "month" and occurred.day != 1:
+        errors.append("date_precision: 'month' dates must be the first of the month")
+    if not incident["id"].startswith(f"{occurred}-"):
+        errors.append(f"id: '{incident['id']}' must start with its date, {occurred}")
+    return errors
+
+
+def _dates_in(value, path: str = "") -> list[str]:
+    if isinstance(value, dict):
+        return [e for k, v in value.items() for e in _dates_in(v, f"{path}{k}/")]
+    if isinstance(value, list):
+        return [e for i, v in enumerate(value) for e in _dates_in(v, f"{path}{i}/")]
+    if isinstance(value, date):
+        return [f"{path.rstrip('/')}: '{value}' must be quoted, or YAML reads it as a date"]
+    return []
+
+
+def _stray_date_errors(incident: dict) -> list[str]:
+    """YAML reads a bare 2026-07-16 as a date. The schema sees text, but the checks below would crash."""
+    return _dates_in({k: v for k, v in incident.items() if k not in ("date", "reported")})
+
+
+def _identity_errors(incident: dict) -> list[str]:
+    """Slugs become URLs and board rows, so an empty or repeated one breaks the site or merges rows."""
+    errors = []
+    if not slugify(incident["org"]):
+        errors.append(f"org: '{incident['org']}' has no letters or digits in a-z0-9 to build a URL from")
+    for m in incident["models"]:
+        if not slugify(m["name"]):
+            errors.append(f"models: '{m['name']}' has no letters or digits in a-z0-9 to build a URL from")
+        if "org" in m and not slugify(m["org"]):
+            errors.append(f"models: org '{m['org']}' has no letters or digits in a-z0-9 to build a URL from")
+    slugs = [model_slug(incident, m) for m in incident["models"]]
+    if len(slugs) != len(set(slugs)):
+        errors.append("models: the same model is listed twice; give it one entry with the combined share")
+    return errors
 
 
 def _is_lab_publisher(org: str, publisher: str) -> bool:
@@ -37,12 +110,25 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     ]
     if errors:
         return errors
+    errors = _stray_date_errors(incident)
+    if errors:
+        return errors
 
     if incident["id"] != stem:
         errors.append(f"id '{incident['id']}' does not match filename '{stem}'")
 
     s = incident["scoring"]
+    # NaN gets past the schema's bounds, because every comparison with it is false.
+    numbers = [("statutes: max_years", x["max_years"]) for x in incident["statutes"]]
+    numbers += [("models: share", m["share"]) for m in incident["models"]]
+    not_finite = [label for label, value in numbers if not math.isfinite(value)]
+    errors += [f"{label} must be a finite number" for label in not_finite]
+
+    errors += _identity_errors(incident)
+    errors += _date_errors(incident)
+
     if incident["league"] == "accomplice":
+        errors += [f"scoring.{f}: only used outside the Accomplice League" for f in UNSUPERVISED_ONLY if f in s]
         acc = rubric["accomplice"]
         checks = (
             ("contribution", acc["contribution"]),
@@ -54,6 +140,9 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
         if all(model_lab(incident, m) != incident["org"] for m in incident["models"]):
             errors.append(f"models: no model belongs to org '{incident['org']}'")
     else:
+        errors += [f"scoring.{f}: only used in the Accomplice League" for f in ACCOMPLICE_ONLY if f in s]
+        if "human_actor" in incident:
+            errors.append("human_actor: only used in the Accomplice League")
         checks = (
             ("autonomy", rubric["autonomy"]),
             ("blast_radius", rubric["blast_radius"]),
@@ -86,41 +175,54 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     if incident["tier"] == "alleged" and lab_published:
         errors.append("tier: 'alleged' can't apply when the lab itself published the incident")
 
-    total_share = sum(m["share"] for m in incident["models"])
-    if abs(total_share - 1) > 1e-6:
-        errors.append(f"models: shares sum to {total_share}, expected 1")
-
-    if to_date(incident["reported"]) < to_date(incident["date"]):
-        errors.append("reported: earlier than date")
-    if incident.get("date_precision") == "month" and to_date(incident["date"]).day != 1:
-        errors.append("date_precision: 'month' dates must be the first of the month")
+    if not not_finite:
+        total_share = sum(m["share"] for m in incident["models"])
+        if abs(total_share - 1) > 1e-6:
+            errors.append(f"models: shares sum to {total_share}, expected 1")
     return errors
+
+
+def _load_yaml(text: str):
+    # No incident needs an alias, and a small file of them expands to gigabytes.
+    if any(isinstance(event, yaml.AliasEvent) for event in yaml.parse(text, Loader=yaml.SafeLoader)):
+        raise ValueError("aliases aren't allowed in incident files")
+    return yaml.safe_load(text)
 
 
 def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str]]:
     results, seen, families = {}, {}, {}
+    org_names, model_names = {}, {}  # slug -> spelling -> files
     for path in sorted(Path(directory).glob("*.yaml")):
         try:
-            incident = yaml.safe_load(path.read_text())
-        except yaml.YAMLError as e:
+            incident = _load_yaml(path.read_text())
+        except Exception as e:  # PyYAML lets out all sorts: !!bool foo is a KeyError, 1:1:...:1.0 an OverflowError
             results[path.name] = [f"YAML: {e}"]
             continue
         if not isinstance(incident, dict):
             results[path.name] = ["not a YAML mapping"]
             continue
+        try:
+            _jsonable(incident)
+        except (TypeError, ValueError, RecursionError) as e:  # a date used as a key, or very deep nesting
+            results[path.name] = [f"YAML: not plain data: {e}"]
+            continue
         errors = validate_incident(incident, path.stem, rubric, validator)
         incident_id = incident.get("id")
-        if incident_id is not None:
+        if isinstance(incident_id, str):
             if incident_id in seen:
                 errors.append(f"duplicate id, also in {seen[incident_id]}")
             seen.setdefault(incident_id, path.name)
         if errors:
             results[path.name] = errors
         # Other rule errors, like a missing news source, must not hide a misfiled model.
-        if validator.is_valid(_jsonable(incident)):
+        if validator.is_valid(_jsonable(incident)) and not _stray_date_errors(incident):
+            for name in {incident["org"], *(model_lab(incident, m) for m in incident["models"])}:
+                org_names.setdefault(slugify(name), {}).setdefault(name, []).append(path.name)
             for m in incident["models"]:
                 if m.get("family"):
                     families.setdefault(m["family"], {}).setdefault(model_lab(incident, m), []).append(path.name)
+                spelling = (model_lab(incident, m), m["name"])  # a tuple, so "A: B" + "C" isn't "A" + "B: C"
+                model_names.setdefault(model_slug(incident, m), {}).setdefault(spelling, []).append(path.name)
     # A family is one lab's model line, so a second lab usually means a model is missing its `org`.
     for family, labs in families.items():
         if len(labs) > 1:
@@ -128,6 +230,14 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
             for names in labs.values():
                 for name in names:
                     results.setdefault(name, []).append(message)
+    # One slug is one board row and one URL, so two spellings would merge or shadow each other.
+    for kind, slugs in (("org", org_names), ("model", model_names)):
+        for slug, spellings in slugs.items():
+            if len(spellings) > 1:
+                message = f"{kind} slug '{slug}' has more than one spelling: {sorted(spellings)}"
+                for names in spellings.values():
+                    for name in names:
+                        results.setdefault(name, []).append(message)
     return results
 
 

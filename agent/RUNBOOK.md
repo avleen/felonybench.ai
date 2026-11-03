@@ -278,8 +278,8 @@ its own first-hand account, it can't be `alleged`.
 - **Imprecise dates:** never invent a day. If sources only give a month, set
   `date_precision: month` and use the 1st of that month as `date`. If sources only give
   an upper bound (e.g. "before the review began on..."), set `date_precision: before` and
-  use that latest possible date. Set `date_precision: day` when the exact day is known
-  (this is also the default meaning when the field is omitted on old incidents). Compute
+  use that latest possible date. Set `date_precision: day` when the exact day is known.
+  The field is required on every incident. Compute
   `dwell_days` from the LATEST possible incident date, never an earlier guess, so an
   unknown date can only shrink `dwell_days`, never inflate it — say so explicitly in the
   `dwell` rationale line when `date_precision` isn't `day`.

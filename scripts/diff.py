@@ -21,7 +21,7 @@ def _rank(row) -> str:
     return f"#{row['rank']}" if row else "—"
 
 
-def render(before: dict, after: dict) -> str:
+def _tables(before: dict, after: dict) -> str:
     sections = []
     for league, tier, title in BOARDS:
         old, new = _orgs(before, league, tier), _orgs(after, league, tier)
@@ -33,8 +33,19 @@ def render(before: dict, after: dict) -> str:
                 continue
             lines.append(f"| {name} | {old_score:g} → {new_score:g} | {new_score - old_score:+g} | {_rank(o)} → {_rank(n)} |")
         if lines:
-            sections.append("\n".join([f"### {title}", "", "| Org | Score | Change | Rank |", "|---|---|---|---|", *lines]))
-    return "## Leaderboard impact\n\n" + ("\n\n".join(sections) or "No leaderboard changes.") + "\n"
+            sections.append("\n".join([f"#### {title}", "", "| Org | Score | Change | Rank |", "|---|---|---|---|", *lines]))
+    return "\n\n".join(sections)
+
+
+def render(before: dict, after: dict) -> str:
+    """The view readers get first, then every report: a low-confidence report only moves the second."""
+    default = _tables(before.get("confident", {}), after.get("confident", {}))
+    everything = _tables(before, after)
+    return (
+        "## Leaderboard impact\n\n"
+        f"### Default view (low-confidence reports hidden)\n\n{default or 'No change.'}\n\n"
+        f"### With low-confidence reports shown\n\n{everything or 'No change.'}\n"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

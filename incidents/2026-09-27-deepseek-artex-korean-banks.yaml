@@ -7,10 +7,10 @@ tier: verified
 org: DeepSeek
 human_actor: An unnamed threat actor that CrowdStrike assesses, with moderate confidence, is likely a financially motivated Chinese speaker
 models:
-  - {name: "DeepSeek v4.1-flash", codename: null, family: deepseek, share: 1}
+  - {name: "DeepSeek V4.1 Flash", codename: null, family: deepseek, share: 1}
 victims:
   - {name: "South Korean financial institutions (Shinhan Bank, KB Kookmin Bank, Hana Bank and others, per Korean press)", type: third_party, country: KR}
-summary: An unnamed, likely Chinese-speaking actor ran ARTEX, an open-source AI pentesting agent with DeepSeek v4.1-flash as its main model, against South Korean banks' peripheral systems, exposing data on tens of thousands of customers.
+summary: An unnamed, likely Chinese-speaking actor ran ARTEX, an open-source AI pentesting agent with DeepSeek V4.1 Flash as its main model, against South Korean banks' peripheral systems, exposing data on tens of thousands of customers.
 statutes:
   - {code: "18 USC 1030(a)(2)(A)", max_years: 5}
 foreign_laws:

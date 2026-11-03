@@ -1,7 +1,8 @@
-// Run with: node --experimental-strip-types --test src/lib/chart.test.mjs
+// Run with: npm test
 // (node's native TS type-stripping lets us import chart.ts directly, so the
 // logic under test never drifts from what the site actually ships.)
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { layout, W, H, PAD } from "./chart.ts";
 
@@ -72,4 +73,22 @@ test("labels nudged past the bottom of the chart move back up, still apart", () 
   // Labels are drawn 4px below labelY, so this keeps the text inside the viewBox.
   assert.ok(ys.at(-1) <= H - 8, `lowest label at ${ys.at(-1)}`);
   for (let i = 1; i < ys.length; i++) assert.ok(ys[i] - ys[i - 1] >= 16 - 1e-9, `labels ${i - 1} and ${i} overlap`);
+});
+
+test("every real trend chart has finite coordinates", () => {
+  const scores = JSON.parse(readFileSync(new URL("../data/scores.json", import.meta.url), "utf8"));
+  const today = new Date().toISOString().slice(0, 10);
+  for (const data of [scores, scores.confident]) {
+    for (const [league, tiers] of Object.entries(data.trends)) {
+      for (const [tier, series] of Object.entries(tiers)) {
+        const chart = layout(series, today);
+        if (!chart) continue;
+        for (const s of chart.orgs) {
+          assert.ok(!s.path.includes("NaN"), `${league}/${tier}/${s.org} path`);
+          assert.ok(Number.isFinite(s.labelY), `${league}/${tier}/${s.org} label`);
+          assert.ok(s.labelY >= 0 && s.labelY <= H, `${league}/${tier}/${s.org} label inside the chart`);
+        }
+      }
+    }
+  }
 });
