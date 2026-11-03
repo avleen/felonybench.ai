@@ -1,0 +1,36 @@
+id: 2026-08-24-anthropic-slime22-taiwan-lateral-movement
+date: 2026-08-24
+date_precision: before
+reported: 2026-08-24
+league: accomplice
+tier: alleged
+org: Anthropic
+human_actor: A Chinese state-affiliated hacking group that Taiwanese threat-intelligence firm TeamT5 calls Slime22
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A Taiwanese technology company (unnamed)", type: third_party, country: TW}
+summary: After breaking into a Taiwanese technology company, the Chinese group Slime22 set up its own Kali penetration-testing platform inside and, posing as an engineer running authorized tests, had Claude Code use it to move through the company's systems.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws:
+  - {code: "Criminal Code of the Republic of China (Taiwan) art. 358 (unauthorized access to a computer)", country: TW}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [lateral_movement]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Per TeamT5, as reported by Bloomberg, the group "managed to use Claude Code to move around inside the systems of a Taiwanese technology company", asking Claude to drive the Kali platform for lateral movement. Claude carried out that stage under the group's direction.
+  guardrails: TeamT5 says the hackers got past Claude's guardrails by posing as an engineer running authorized cybersecurity tests, so jailbroken.
+  blast_radius: The victim is a private Taiwanese technology company.
+  tradecraft: The only technique described is lateral movement inside the breached network. How the group first got in isn't described.
+  dwell: No date is given for the intrusion, so date_precision is before, using the Bloomberg report date as the latest possible date, and dwell is counted as 0 and not inflated. TeamT5, a third party, surfaced it.
+  statutes: Moving through a company's internal systems after breaking in is unauthorized access. Breaking in for a state-affiliated espionage campaign is in furtherance of other crimes, the five-year tier of 18 USC 1030(c)(2)(B)(ii). This is the group's exposure.
+confidence: low
+sources:
+  - {url: "https://www.insurancejournal.com/news/international/2026/08/25/882739.htm", kind: news, publisher: Insurance Journal (Bloomberg), title: "China's Hackers Use DeepSeek for Attacks, Researchers Say"}
