@@ -16,15 +16,16 @@ SWEEP_ISSUE = "Sweep reports"
 FEEDS_ISSUE = "Too many feeds are returning nothing"
 
 
-# A URL GitHub will link, where an @ in the path can't notify anyone. It has to start where a link
-# can, and have a real domain, so https://@owner and x|@owner stay outside it.
-_LINKED_URL = r"""(?<![^\s(<*_~])https?://[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()\[\]"'`|\\]*)?"""
-_URL_OR_AT = re.compile(f"{_LINKED_URL}|@", re.I)
+_URL = re.compile(r"https?://\S*", re.I)
 
 
 def neutralize(text: str) -> str:
-    """Agent text is untrusted: stop it notifying people when it's posted to GitHub."""
-    return _URL_OR_AT.sub(lambda m: "@​" if m[0] == "@" else m[0], text)
+    """Agent text is untrusted: stop it notifying people when it's posted to GitHub.
+
+    Leaves no bare @ at all, because predicting what Markdown will link is how mentions slip through.
+    In a URL, %40 means the same thing and the link keeps working.
+    """
+    return _URL.sub(lambda m: m[0].replace("@", "%40"), text).replace("@", "@\u200b")
 
 
 def agent_result(transcript: Path | None) -> dict | None:

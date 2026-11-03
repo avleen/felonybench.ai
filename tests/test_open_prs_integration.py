@@ -421,6 +421,58 @@ def test_a_ready_pr_revised_to_low_confidence_gets_needs_review_and_stays_ready(
     assert ["pr", "ready", "9", "--undo"] not in calls
 
 
+def test_a_low_confidence_revision_is_labelled_even_if_a_later_step_fails(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x", confidence="low")
+    _write_incident(sandbox["work"], incident)
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": False, "labels": [{"name": "agent"}]}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list, fail_call="pr comment").returncode == 1
+
+    assert ["pr", "edit", "9", "--add-label", "needs-review"] in _gh_calls(sandbox)
+
+
+def test_a_draft_awaiting_news_that_gets_another_error_stops_saying_so(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    incident["sources"] = []
+    _write_incident(sandbox["work"], incident)
+    labels = [{"name": "agent"}, {"name": "awaiting-news"}]
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": True, "labels": labels}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert ["pr", "edit", "9", "--add-label", "needs-review"] in calls
+    assert ["pr", "edit", "9", "--remove-label", "awaiting-news"] in calls
+
+
+def test_a_ready_pr_left_with_awaiting_news_is_repaired_on_its_next_update(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    labels = [{"name": "agent"}, {"name": "awaiting-news"}, {"name": "needs-review"}]
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": False, "labels": labels}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert ["pr", "edit", "9", "--remove-label", "awaiting-news"] in calls
+    assert ["pr", "edit", "9", "--remove-label", "needs-review"] not in calls  # a person may have asked for it
+
+
+def test_an_existing_pr_is_never_given_the_agent_label(tmp_path, make_incident):
+    # The head branch name can match someone else's PR, and the label marks rejected agent proposals.
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": False, "labels": []}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    assert ["pr", "edit", "9", "--add-label", "agent"] not in _gh_calls(sandbox)
+
+
 def test_a_resubmitted_rejected_incident_is_flagged(tmp_path, make_incident):
     sandbox = _make_sandbox(tmp_path)
     incident = make_incident(id="2026-06-01-openai-x")

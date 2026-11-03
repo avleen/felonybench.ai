@@ -219,11 +219,10 @@ def test_a_feed_outage_does_not_fail_the_watch_job():
 @pytest.mark.parametrize("text", [
     "[source](https://medium.com/@researcher/report)",
     "see https://medium.com/@researcher/report.",
-    "<https://medium.com/@researcher>",
-    "(https://x.com/@a) and **https://x.com/@b**",
+    "<https://medium.com/@researcher/report>",
 ])
-def test_neutralize_leaves_links_working(text):
-    assert neutralize(text) == text
+def test_neutralize_keeps_links_working_by_encoding_the_at(text):
+    assert "https://medium.com/%40researcher" in neutralize(text)
 
 
 @pytest.mark.parametrize("text", [
@@ -236,7 +235,11 @@ def test_neutralize_leaves_links_working(text):
     "xhttps://x.com/@owner",
     "https://x.com/ @owner",
     "https://x.com/a\\@owner",
+    "*https://x.com/*@owner",
+    "~~https://x.com/~~@owner",
+    "https://x.com/&#32;@owner",
+    "<div>\nhttps://x.com/@owner\n</div>",
+    "HTTPS://X.COM/@owner",
 ])
-def test_neutralize_stops_every_mention_outside_a_link(text):
-    out = neutralize(text)
-    assert "@​owner" in out and "@owner" not in out
+def test_neutralize_leaves_no_bare_mention(text):
+    assert "@owner" not in neutralize(text)
