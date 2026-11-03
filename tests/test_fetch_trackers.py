@@ -64,3 +64,12 @@ def test_main_never_fails(tmp_path, monkeypatch):
                         lambda out: fetch_com(out, get_text=boom))
     assert fetch_trackers.main(["--out", str(tmp_path / "t")]) == 0
     assert (tmp_path / "t" / "felonybench-com.txt").read_text().startswith("ERROR")
+
+
+def test_fetch_org_refuses_an_oversized_response(tmp_path, monkeypatch):
+    import io
+    import scripts.fetch_trackers as module
+    monkeypatch.setattr(module, "MAX_ORG_BYTES", 10)
+    result = fetch_org(tmp_path, opener=lambda req, timeout: io.BytesIO(b"x" * 11))
+    assert "larger than 10" in result
+    assert "larger than 10" in (tmp_path / "felonybench-org.txt").read_text()

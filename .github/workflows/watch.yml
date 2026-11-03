@@ -53,6 +53,12 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
 
+      # Last, so the agent still reads the feeds that work. Failing the job opens a failure issue.
+      - if: steps.rss.outputs.too_many_dead == 'true'
+        run: |
+          echo "::error::More than a fifth of the feeds returned nothing. See the job summary."
+          exit 1
+
   # Runs from a clean checkout with the only write token, so nothing the agent read or wrote
   # can reach it. Runs after a failed agent too: finished incidents still become PRs.
   publish:

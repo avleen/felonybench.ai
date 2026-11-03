@@ -38,6 +38,9 @@ def org_digest(data: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+MAX_ORG_BYTES = 50_000_000
+
+
 def clean_text(text: str) -> str:
     """Strip each line and collapse runs of blank lines."""
     lines = [line.strip() for line in text.splitlines()]
@@ -48,7 +51,10 @@ def fetch_org(out_dir: Path, opener=urllib.request.urlopen) -> str:
     try:
         req = urllib.request.Request(ORG_URL, headers={"User-Agent": AGENT_UA})
         with opener(req, timeout=60) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+            raw = resp.read(MAX_ORG_BYTES + 1)
+        if len(raw) > MAX_ORG_BYTES:
+            raise ValueError(f"larger than {MAX_ORG_BYTES} bytes")
+        data = json.loads(raw.decode("utf-8"))
         (out_dir / "felonybench-org.json").write_text(json.dumps(data, indent=2, ensure_ascii=False))
         (out_dir / "felonybench-org.txt").write_text(org_digest(data))
         return f"ok ({len(data.get('events', []))} events)"
