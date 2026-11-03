@@ -1,8 +1,12 @@
 ---
 import "../styles/global.css";
 import Mark from "../components/Mark.astro";
-import scores, { CORRECTIONS_EMAIL, rubric } from "../lib/data";
-const latestReport = scores.incidents.map((i: any) => i.reported).sort().at(-1);
+import scores, { CORRECTIONS_EMAIL, isLow, rubric } from "../lib/data";
+const latestIn = (incidents: any[]) => incidents.map((i) => i.reported).sort().at(-1);
+const latestReports = [
+  { key: "confident", date: latestIn(scores.incidents.filter((i: any) => !isLow(i))) },
+  { key: "all", date: latestIn(scores.incidents) },
+];
 
 interface Props { title?: string; description?: string; ogImage?: string; revealWithoutJs?: boolean; noindex?: boolean }
 const {
@@ -73,7 +77,7 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
     <main id="main"><slot /></main>
     <footer class="site-footer">
       <div class="wrap">
-        <p class="disclaimer"><Mark size={32} inverse /> <span>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet). Rubric v{rubric.version}. Latest report {latestReport}.</span></p>
+        <p class="disclaimer"><Mark size={32} inverse /> <span>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet). Rubric v{rubric.version}. {latestReports.map(({ key, date }) => date && <span data-conf={key}>Latest report {date}.</span>)}</span></p>
         <p class="contact"><span>Corrections and takedowns</span><a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a></p>
       </div>
     </footer>

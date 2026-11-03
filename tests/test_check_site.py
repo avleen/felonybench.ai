@@ -117,7 +117,8 @@ def test_page_structure_problems_are_found(tmp_path, html, error):
 
 def _sitemap(dist, *paths):
     (dist / "sitemap-index.xml").write_text("<sitemapindex></sitemapindex>")
-    (dist / "index.html").write_text("<html></html>")
+    if not (dist / "index.html").exists():
+        (dist / "index.html").write_text("<html></html>")
     paths = ("/", *paths)
     urls = "".join(f"<url><loc>https://felonybench.ai{path}</loc></url>" for path in paths)
     (dist / "sitemap-0.xml").write_text(f"<urlset>{urls}</urlset>")
