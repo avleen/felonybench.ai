@@ -27,7 +27,7 @@ scoring:
   self_disclosed: true
 rationale:
   contribution: Anthropic says Claude returns "a reference to its raw thinking as a 'thinking signature'" to mitigate distillation, and that Moonshot circumvented this by "eliciting Claude to convert the reasoning signature back into the full reasoning trace" in a new session; the owner ruled that this is Claude doing the work of the evasion, so Claude ran the operation.
-  legal_status: "The circumvention charge (17 USC 1201, criminal under 1204) and trade-secret theft are contested because the copyrightability and trade-secret status of model output are unsettled, and Anthropic ties Moonshot to \"a proxy service network of 5,380 fraudulent accounts\", which supports wire fraud."
+  legal_status: "The circumvention charge (17 USC 1201, criminal under 1204) is contested because section 1201 protects copyrighted works, and Thaler v. Perlmutter (D.C. Cir. 2025) held that copyright requires a human author, so model output may not be protected at all. The trade-secret status of model output is also unsettled. Anthropic ties Moonshot to \"a proxy service network of 5,380 fraudulent accounts\", which supports wire fraud."
   guardrails: No jailbreak is reported; Claude was used as shipped, so guardrails are scored intact.
   blast_radius: The victim is Anthropic, the lab whose own model did the work, so blast radius is own lab's production.
   tradecraft: Converting the signature back into the raw trace defeated a technical control that exists to stop distillation, which is scored as evasion.
