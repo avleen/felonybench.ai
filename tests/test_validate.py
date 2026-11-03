@@ -406,3 +406,31 @@ def test_cli_exits_zero_when_valid(make_incident, tmp_path):
     _write(tmp_path, make_incident())
     result = _cli(tmp_path)
     assert result.returncode == 0 and "All incidents valid." in result.stdout
+
+
+def _alleged(make_incident, org, publisher):
+    return make_incident(org=org, tier="alleged", sources=[
+        {"url": "https://a.example/report", "kind": "primary", "publisher": publisher},
+        {"url": "https://b.example/story", "kind": "news", "publisher": "Wired"},
+    ])
+
+
+@pytest.mark.parametrize("org, publisher", [
+    ("Google DeepMind", "Google Threat Intelligence Group"),
+    ("OpenAI", "OpenAI"),
+    ("OpenAI", "openai"),
+])
+def test_alleged_is_rejected_when_the_lab_published_it(make_incident, rubric, org, publisher):
+    assert any("'alleged' can't apply" in e for e in _errors(_alleged(make_incident, org, publisher), rubric))
+
+
+@pytest.mark.parametrize("org, publisher", [("Meta", "Metasploit"), ("OpenAI", "Transluce")])
+def test_alleged_is_fine_when_someone_else_published_it(make_incident, rubric, org, publisher):
+    assert not any("'alleged' can't apply" in e for e in _errors(_alleged(make_incident, org, publisher), rubric))
+
+
+@pytest.mark.parametrize("text", ["", "   "])
+def test_contested_needs_a_written_dispute(make_accomplice, rubric, text):
+    inc = make_accomplice(scoring={"legal_status": "contested"})
+    inc["rationale"]["legal_status"] = text
+    assert any(e.startswith("rationale/legal_status") for e in _errors(inc, rubric, stem=inc["id"]))

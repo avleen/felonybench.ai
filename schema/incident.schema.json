@@ -104,7 +104,7 @@
     },
     {
       "if": {"properties": {"scoring": {"properties": {"legal_status": {"const": "contested"}}, "required": ["legal_status"]}}, "required": ["scoring"]},
-      "then": {"properties": {"rationale": {"required": ["legal_status"]}}}
+      "then": {"properties": {"rationale": {"required": ["legal_status"], "properties": {"legal_status": {"pattern": "\\S"}}}}}
     },
     {
       "if": {"properties": {"league": {"enum": ["open", "sandbox"]}}, "required": ["league"]},

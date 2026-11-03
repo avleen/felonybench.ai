@@ -2,6 +2,7 @@
 import argparse
 import json
 import math
+import re
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -16,6 +17,7 @@ SCHEMA = ROOT / "schema" / "incident.schema.json"
 NEWS_REQUIRED = "sources: at least one 'news' source is required"
 ACCOMPLICE_ONLY = ("contribution", "guardrails", "legal_status")
 UNSUPERVISED_ONLY = ("autonomy", "motive")  # Open and Sandbox: what the model did on its own
+PUBLISHER_ALIASES = {"Google DeepMind": ("Google",)}
 
 
 def load_validator(path: Path = SCHEMA) -> Draft202012Validator:
@@ -73,6 +75,11 @@ def _identity_errors(incident: dict) -> list[str]:
     if len(slugs) != len(set(slugs)):
         errors.append("models: the same model is listed twice; give it one entry with the combined share")
     return errors
+
+
+def _is_lab_publisher(org: str, publisher: str) -> bool:
+    """Whole words, so Meta isn't Metasploit. Some labs publish under their parent's name."""
+    return any(re.search(rf"\b{re.escape(name)}\b", publisher, re.I) for name in (org, *PUBLISHER_ALIASES.get(org, ())))
 
 
 def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> list[str]:
@@ -138,7 +145,7 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     # Attribution can't be merely alleged when the lab itself published it. A lab's confirmation
     # quoted only in the press doesn't count, so self_disclosed alone doesn't decide this.
     lab_published = any(
-        source["kind"] in ("postmortem", "primary") and incident["org"].lower() in source["publisher"].lower()
+        source["kind"] in ("postmortem", "primary") and _is_lab_publisher(incident["org"], source["publisher"])
         for source in incident["sources"]
     )
     if incident["tier"] == "alleged" and lab_published:
