@@ -9,7 +9,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric, load_yaml
+from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric, load_incident_yaml
 from scripts.scoring import model_lab, model_slug, slugify, to_date
 
 SCHEMA = ROOT / "schema" / "incident.schema.json"
@@ -186,7 +186,7 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
     org_names, model_names = {}, {}  # slug -> spelling -> files
     for path in sorted(Path(directory).glob("*.yaml")):
         try:
-            incident = load_yaml(path.read_text())
+            incident = load_incident_yaml(path.read_text())
         except Exception as e:  # PyYAML lets out all sorts: !!bool foo is a KeyError, 1:1:...:1.0 an OverflowError
             results[path.name] = [f"YAML: {e}"]
             continue

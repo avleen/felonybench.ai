@@ -562,14 +562,17 @@ def test_a_file_of_yaml_aliases_fails_alone_without_expanding(tmp_path, make_inc
     assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
 
 
-def test_a_notes_file_that_isnt_utf8_doesnt_cost_the_incident_its_pr(tmp_path, make_incident):
+@pytest.mark.parametrize("content", [b"caf\xff\n", b"caf\x00e\n", b"caf" + b"\xff" * 64000])
+def test_bad_notes_dont_cost_the_incident_its_pr(tmp_path, make_incident, content):
     sandbox = _make_sandbox(tmp_path)
     incident = make_incident(id="2026-06-01-openai-x")
     _write_incident(sandbox["work"], incident)
     notes = sandbox["work"] / ".agent-out"
     notes.mkdir(exist_ok=True)
-    (notes / f"{incident['id']}.md").write_bytes(b"caf\xff\n")
+    (notes / f"{incident['id']}.md").write_bytes(content)
 
     assert _run_open_prs(sandbox).returncode == 0
 
-    assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert len(create) == 1
+    assert "caf" in create[0][create[0].index("--body") + 1]

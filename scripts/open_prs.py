@@ -10,10 +10,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 from scripts.diff import render
-from scripts.rubric import ROOT, load_rubric, load_yaml
-from scripts.run_report import neutralize
+from scripts.rubric import ROOT, load_rubric, load_incident_yaml
+from scripts.run_report import postable
 from scripts.score import load_incidents
 from scripts.scoring import build_scores
 from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir
@@ -54,9 +53,9 @@ def add_missing_labels(pr: dict, labels: list[str]) -> None:
 
 def pr_title(incident: dict, is_new: bool) -> str:
     if not is_new:
-        return neutralize(f"Update: {incident['id']}")
+        return postable(f"Update: {incident['id']}")
     victims = ", ".join(v.get("name", "?") for v in incident.get("victims") or [])
-    return neutralize(f"New felony: {incident.get('org', '?')} — {victims}")
+    return postable(f"New felony: {incident.get('org', '?')} — {victims}")
 
 
 def awaiting_news(errors: list[str]) -> bool:
@@ -128,11 +127,7 @@ def pr_body(
     parts.append("## Agent notes (unverified)\n\n" + quote_notes(notes.strip() or summary))
     parts.append("_Opened by the FelonyBench agent. Check every source before merging._")
     # The org, victims and validation errors come from the agent too, not just its notes.
-    body = neutralize("\n\n".join(parts))
-    if len(body) > PR_BODY_LIMIT:
-        suffix = "\n\n_…truncated._"
-        body = body[: PR_BODY_LIMIT - len(suffix)] + suffix
-    return body
+    return postable("\n\n".join(parts), PR_BODY_LIMIT)
 
 
 def _run(*cmd: str) -> str:
@@ -190,7 +185,7 @@ def main(argv: list[str] | None = None) -> int:
         stem = Path(path).stem
         branch = f"agent/{stem}"
         try:
-            incident = load_yaml(text)
+            incident = load_incident_yaml(text)
             if not isinstance(incident, dict):
                 raise ValueError("not a YAML mapping")
             _run("git", "switch", "-C", branch, args.base)

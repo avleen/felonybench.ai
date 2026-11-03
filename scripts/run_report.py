@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 COMMENT_LIMIT = 60000
+MAX_ARG_BYTES = 120000  # Linux refuses a single argument over 128 KB, and a character can be 4 bytes
 SWEEP_ISSUE = "Sweep reports"
 FEEDS_ISSUE = "Too many feeds are returning nothing"
 
@@ -29,6 +30,16 @@ def neutralize(text: str) -> str:
     """
     text = _AT_ENTITY.sub("@", text)
     return _URL.sub(lambda m: m[0].replace("@", "%40"), text).replace("@", "@\u200b")
+
+
+def postable(text: str, max_chars: int = COMMENT_LIMIT) -> str:
+    """Agent text made safe to hand to gh: no mentions, no NUL bytes, and short enough to be an argument."""
+    text = neutralize(text.replace("\0", ""))
+    if len(text) <= max_chars and len(text.encode("utf-8", "replace")) <= MAX_ARG_BYTES:
+        return text
+    suffix = "\n\n_…truncated._"
+    kept = text[: max_chars - len(suffix)].encode("utf-8", "replace")[: MAX_ARG_BYTES - len(suffix.encode())]
+    return kept.decode("utf-8", "ignore") + suffix
 
 
 def agent_result(transcript: Path | None) -> dict | None:
@@ -103,7 +114,7 @@ def report(workflow: str, url: str, agent: str, publish: str, result: dict | Non
         if existing:
             _gh("issue", "close", str(existing), "--comment", f"Recovered: {url}")
     if sweep_report.strip():
-        _post(SWEEP_ISSUE, neutralize(f"Run: {url}\n\n{sweep_report}")[:COMMENT_LIMIT])
+        _post(SWEEP_ISSUE, postable(f"Run: {url}\n\n{sweep_report}"))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -121,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a") as f:
-            f.write(f"{describe(result)}\n\n{neutralize(sweep)[:COMMENT_LIMIT]}\n")
+            f.write(f"{describe(result)}\n\n{postable(sweep)}\n")
     report(os.environ["GITHUB_WORKFLOW"], url, args.agent, args.publish, result, sweep)
     report_feeds(url, args.dead_feeds)
     return 1 if failed(args.agent, args.publish) else 0
