@@ -1,6 +1,7 @@
 """Validate incident files against the schema, the rubric and the source rules."""
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from scripts.scoring import model_lab, to_date
 
 SCHEMA = ROOT / "schema" / "incident.schema.json"
 NEWS_REQUIRED = "sources: at least one 'news' source is required"
+PUBLISHER_ALIASES = {"Google DeepMind": ("Google",)}
 
 
 def load_validator(path: Path = SCHEMA) -> Draft202012Validator:
@@ -21,6 +23,11 @@ def load_validator(path: Path = SCHEMA) -> Draft202012Validator:
 def _jsonable(data):
     # YAML turns bare dates into date objects; the schema expects strings.
     return json.loads(json.dumps(data, default=str))
+
+
+def _is_lab_publisher(org: str, publisher: str) -> bool:
+    """Whole words, so Meta isn't Metasploit. Some labs publish under their parent's name."""
+    return any(re.search(rf"\b{re.escape(name)}\b", publisher, re.I) for name in (org, *PUBLISHER_ALIASES.get(org, ())))
 
 
 def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> list[str]:
@@ -75,7 +82,7 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     # Attribution can't be merely alleged when the lab itself published it. A lab's confirmation
     # quoted only in the press doesn't count, so self_disclosed alone doesn't decide this.
     lab_published = any(
-        source["kind"] in ("postmortem", "primary") and incident["org"].lower() in source["publisher"].lower()
+        source["kind"] in ("postmortem", "primary") and _is_lab_publisher(incident["org"], source["publisher"])
         for source in incident["sources"]
     )
     if incident["tier"] == "alleged" and lab_published:

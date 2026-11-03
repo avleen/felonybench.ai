@@ -1,3 +1,4 @@
+import pytest
 import yaml
 
 from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir, validate_incident
@@ -267,3 +268,31 @@ def test_alleged_allows_a_third_partys_account_and_press_quotes(make_incident, r
     ]
     incident["scoring"]["self_disclosed"] = True
     assert _errors(incident, rubric, incident["id"]) == []
+
+
+def _alleged(make_incident, org, publisher):
+    return make_incident(org=org, tier="alleged", sources=[
+        {"url": "https://a.example/report", "kind": "primary", "publisher": publisher},
+        {"url": "https://b.example/story", "kind": "news", "publisher": "Wired"},
+    ])
+
+
+@pytest.mark.parametrize("org, publisher", [
+    ("Google DeepMind", "Google Threat Intelligence Group"),
+    ("OpenAI", "OpenAI"),
+    ("OpenAI", "openai"),
+])
+def test_alleged_is_rejected_when_the_lab_published_it(make_incident, rubric, org, publisher):
+    assert any("'alleged' can't apply" in e for e in _errors(_alleged(make_incident, org, publisher), rubric))
+
+
+@pytest.mark.parametrize("org, publisher", [("Meta", "Metasploit"), ("OpenAI", "Transluce")])
+def test_alleged_is_fine_when_someone_else_published_it(make_incident, rubric, org, publisher):
+    assert not any("'alleged' can't apply" in e for e in _errors(_alleged(make_incident, org, publisher), rubric))
+
+
+@pytest.mark.parametrize("text", ["", "   "])
+def test_contested_needs_a_written_dispute(make_accomplice, rubric, text):
+    inc = make_accomplice(scoring={"legal_status": "contested"})
+    inc["rationale"]["legal_status"] = text
+    assert any(e.startswith("rationale/legal_status") for e in _errors(inc, rubric, stem=inc["id"]))
