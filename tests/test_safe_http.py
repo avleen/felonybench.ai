@@ -54,12 +54,20 @@ def test_a_huge_redirect_body_is_not_read(code):
     assert sent["bytes"] < 50 * 1024 * 1024
 
 
+class _Stop(Exception):
+    pass
+
+
 def _spy_on_openers(monkeypatch):
     built = []
 
+    class Opener:
+        def open(self, *args, **kwargs):
+            raise _Stop
+
     def build_opener(*handlers):
         built.extend(handlers)
-        raise ConnectionError("stop before any network")
+        return Opener()
 
     monkeypatch.setattr(urllib.request, "build_opener", build_opener)
     return built
@@ -67,13 +75,12 @@ def _spy_on_openers(monkeypatch):
 
 def test_fetch_org_uses_the_no_drain_handler_by_default(monkeypatch, tmp_path):
     built = _spy_on_openers(monkeypatch)
-    with pytest.raises(ConnectionError):
-        fetch_trackers.fetch_org(tmp_path)
+    fetch_trackers.fetch_org(tmp_path)  # reports the failure in its result, and doesn't raise
     assert any(isinstance(h, NoDrainRedirects) for h in built)
 
 
 def test_pdf_load_uses_the_no_drain_handler_by_default(monkeypatch):
     built = _spy_on_openers(monkeypatch)
-    with pytest.raises(ConnectionError):
+    with pytest.raises(_Stop):
         pdf_text.load("https://example.com/r.pdf", resolve=lambda *a, **k: [(2, 1, 6, "", ("93.184.216.34", 443))])
     assert any(isinstance(h, NoDrainRedirects) for h in built)

@@ -10,10 +10,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-import yaml
 
 from scripts.diff import render
-from scripts.rubric import ROOT, load_rubric
+from scripts.rubric import ROOT, load_rubric, load_yaml
 from scripts.run_report import neutralize
 from scripts.score import load_incidents
 from scripts.scoring import build_scores
@@ -55,9 +54,9 @@ def add_missing_labels(pr: dict, labels: list[str]) -> None:
 
 def pr_title(incident: dict, is_new: bool) -> str:
     if not is_new:
-        return f"Update: {incident['id']}"
+        return neutralize(f"Update: {incident['id']}")
     victims = ", ".join(v.get("name", "?") for v in incident.get("victims") or [])
-    return f"New felony: {incident.get('org', '?')} — {victims}"
+    return neutralize(f"New felony: {incident.get('org', '?')} — {victims}")
 
 
 def awaiting_news(errors: list[str]) -> bool:
@@ -191,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
         stem = Path(path).stem
         branch = f"agent/{stem}"
         try:
-            incident = yaml.safe_load(text)
+            incident = load_yaml(text)
             if not isinstance(incident, dict):
                 raise ValueError("not a YAML mapping")
             _run("git", "switch", "-C", branch, args.base)
@@ -206,7 +205,7 @@ def main(argv: list[str] | None = None) -> int:
 
             title = pr_title(incident, is_new=path in new_files)
             notes_path = args.notes / f"{stem}.md"
-            notes = notes_path.read_text() if notes_path.exists() else ""
+            notes = notes_path.read_text(errors="replace") if notes_path.exists() else ""
             previously_closed = closed_heads.get(branch)
             body = pr_body(incident, notes, breakdown, diff_md, errors, previously_closed)
 

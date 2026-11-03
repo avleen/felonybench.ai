@@ -116,7 +116,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     result = agent_result(args.transcript)
-    sweep = args.sweep_report.read_text() if args.sweep_report and args.sweep_report.is_file() else ""
+    sweep = args.sweep_report.read_text(errors="replace") if args.sweep_report and args.sweep_report.is_file() else ""
     url = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
