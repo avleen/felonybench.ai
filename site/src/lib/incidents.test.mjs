@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   chargedOrgs, clip, coDefendants, daysSince, fmt, hasCoDefendants, incidentDescription, incidentTitle,
-  isLow, modelTitle, newerThanLatest, occurred, scoreViews,
+  hiddenPaths, isLow, modelTitle, newerThanLatest, occurred, scoreViews,
 } from "./incidents.ts";
 
 test("one org charged is just its name", () => {
@@ -95,9 +95,32 @@ test("model title doesn't repeat a lab already in the name", () => {
 });
 
 test("low-confidence titles and descriptions carry the qualifier, even when clipped", () => {
-  const i = { id: "2026-01-01-x", org: "Acme", confidence: "low", summary: "s".repeat(300), models: [{ name: "M" }] };
+  const i = { id: "2026-01-01-x", org: "Acme", charged: ["Acme"], confidence: "low", summary: "s".repeat(300), models: [{ name: "M" }] };
   assert.equal(incidentTitle(i), "Low-confidence report: Acme / M: Case FB-2026-01-01-x");
   assert.ok(incidentDescription(i).startsWith("Low-confidence report: "));
   assert.equal(incidentDescription(i).length, 155);
   assert.equal(incidentTitle({ ...i, confidence: "high" }), "Acme / M: Case FB-2026-01-01-x");
+});
+
+test("modelTitle only drops the lab when the name really starts with it", () => {
+  assert.equal(modelTitle({ name: "Metamorph", org: "Meta" }), "Meta Metamorph rap sheet");
+  assert.equal(modelTitle({ name: "Meta", org: "Meta" }), "Meta rap sheet");
+  assert.equal(modelTitle({ name: "DeepSeek-Coder", org: "DeepSeek" }), "DeepSeek-Coder rap sheet");
+});
+
+test("incidentTitle names every lab charged and always keeps the case number", () => {
+  const models = Array.from({ length: 30 }, (_, n) => ({ name: `Model ${n}` }));
+  const title = incidentTitle({ id: "2026-01-01-x", confidence: "high", charged: ["Acme", "Beta"], models });
+  assert.ok(title.startsWith("Acme, Beta / Model 0"));
+  assert.ok(title.endsWith(": Case FB-2026-01-01-x"));
+  assert.ok(title.length <= 120);
+  const longId = "2026-01-01-" + "x".repeat(150);
+  assert.ok(incidentTitle({ id: longId, confidence: "high", charged: ["Acme"], models }).endsWith(longId));
+});
+
+test("hiddenPaths lists low reports and models with nothing else", () => {
+  const inc = (id, confidence, ...slugs) => ({ id, confidence, models: slugs.map((slug) => ({ slug })) });
+  const paths = hiddenPaths([inc("a", "low", "only-low", "both"), inc("b", "medium", "both", "none-low"), inc("c", "low", "only-low")]);
+  assert.deepEqual(paths.sort(), ["/incident/a/", "/incident/c/", "/model/only-low/"]);
+  assert.deepEqual(hiddenPaths([]), []);
 });

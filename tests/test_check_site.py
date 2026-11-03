@@ -1,6 +1,6 @@
 import pytest
 
-from scripts.check_site import broken_values, main, redirect_errors, structure_errors
+from scripts.check_site import broken_values, main, redirect_errors, sitemap_errors, structure_errors
 
 
 GOOD_PAGE = "<main><h1>ok</h1></main>"
@@ -112,3 +112,29 @@ def test_page_structure_problems_are_found(tmp_path, html, error):
     _site(tmp_path)
     (tmp_path / "index.html").write_text(html)
     assert f"index.html: {error}" in structure_errors(tmp_path)
+
+
+def _sitemap(dist, *paths):
+    urls = "".join(f"<url><loc>https://felonybench.ai{path}</loc></url>" for path in paths)
+    (dist / "sitemap-0.xml").write_text(f"<urlset>{urls}</urlset>")
+
+
+def test_sitemap_with_indexable_pages_is_fine(tmp_path):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "a" / "index.html").write_text("<html></html>")
+    (tmp_path / "index.html").write_text("<html></html>")
+    _sitemap(tmp_path, "/", "/a/")
+    assert sitemap_errors(tmp_path) == []
+
+
+@pytest.mark.parametrize("meta", ['<meta name="robots" content="noindex" />', "<meta name=robots content=noindex>"])
+def test_sitemap_cannot_list_a_noindex_page(tmp_path, meta):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "a" / "index.html").write_text(f"<html><head>{meta}</head></html>")
+    _sitemap(tmp_path, "/a/")
+    assert sitemap_errors(tmp_path) == ["sitemap-0.xml: /a/ is marked noindex"]
+
+
+def test_sitemap_cannot_list_a_missing_page(tmp_path):
+    _sitemap(tmp_path, "/gone/")
+    assert sitemap_errors(tmp_path) == ["sitemap-0.xml: /gone/ has no page"]

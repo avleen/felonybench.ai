@@ -1,6 +1,6 @@
 ---
 import { fmt, blastLabel, rubric } from "../lib/data";
-const { rows, view, league } = Astro.props;
+const { rows, view, league, label } = Astro.props;
 const byModel = view === "models";
 const top = rows[0]?.score || 1;
 const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
@@ -12,7 +12,7 @@ const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
     <p class="panel muted">No convictions yet. Suspiciously clean.</p>
   )
 ) : (
-  <div class="table-wrap" tabindex="0" role="region" aria-label="Table">
+  <div class="table-wrap" tabindex="0" role="region" aria-label={label}>
     <table class="board">
       <thead>
         <tr>

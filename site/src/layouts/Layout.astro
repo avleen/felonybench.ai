@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import Mark from "../components/Mark.astro";
 import scores, { CORRECTIONS_EMAIL, rubric } from "../lib/data";
+const latestReport = scores.incidents.map((i: any) => i.reported).sort().at(-1);
 
 interface Props { title?: string; description?: string; ogImage?: string; revealWithoutJs?: boolean; noindex?: boolean }
 const {
@@ -72,7 +73,7 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
     <main id="main"><slot /></main>
     <footer class="site-footer">
       <div class="wrap">
-        <p class="disclaimer"><Mark size={32} inverse /> <span>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet). Rubric v{rubric.version}. Data as of {String(scores.generated_at).slice(0, 10)}.</span></p>
+        <p class="disclaimer"><Mark size={32} inverse /> <span>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet). Rubric v{rubric.version}. Latest report {latestReport}.</span></p>
         <p class="contact"><span>Corrections and takedowns</span><a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a></p>
       </div>
     </footer>
@@ -89,8 +90,10 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
       document.querySelectorAll("[data-show-low]").forEach((button) => button.addEventListener("click", () => {
         input("all").checked = true;
         form.dispatchEvent(new Event("change"));
-        // The button just hid itself, so put keyboard users on what it revealed.
-        const heading = [...document.querySelectorAll<HTMLElement>("main h1")].find((h) => h.offsetParent);
+        // The button just hid itself, so put keyboard users on what it revealed: the page's
+        // heading, or the section's when only part of the page changed.
+        const headings = button.getAttribute("data-focus") ?? "main h1";
+        const heading = [...document.querySelectorAll<HTMLElement>(headings)].find((h) => h.offsetParent);
         heading?.setAttribute("tabindex", "-1");
         heading?.focus();
       }));

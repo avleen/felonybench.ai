@@ -36,6 +36,19 @@ def structure_errors(dist: Path) -> list[str]:
     return errors
 
 
+def sitemap_errors(dist: Path) -> list[str]:
+    """A page can't both ask search engines to skip it and be advertised to them."""
+    errors = []
+    for path in sorted(dist.glob("sitemap-[0-9]*.xml")):
+        for url in re.findall(r"<loc>https?://[^/]+(/[^<]*)</loc>", path.read_text()):
+            page = dist / url.strip("/") / "index.html"
+            if not page.is_file():
+                errors.append(f"{path.name}: {url} has no page")
+            elif re.search(r'<meta name="?robots"? content="?noindex', page.read_text()):
+                errors.append(f"{path.name}: {url} is marked noindex")
+    return errors
+
+
 def _target_exists(dist: Path, target: str) -> bool:
     path = dist / target.lstrip("/")
     return path.is_file() or (path / "index.html").is_file()
@@ -78,7 +91,7 @@ def main(argv: list[str] | None = None) -> int:
     if not (args.dist / "index.html").is_file():
         print(f"No built site at {args.dist}", file=sys.stderr)
         return 1
-    errors = broken_values(args.dist) + structure_errors(args.dist) + redirect_errors(args.dist)
+    errors = broken_values(args.dist) + structure_errors(args.dist) + sitemap_errors(args.dist) + redirect_errors(args.dist)
     for error in errors:
         print(error, file=sys.stderr)
     print(f"Built site: {len(errors)} problems.")
