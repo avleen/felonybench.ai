@@ -28,7 +28,9 @@ import sys
 args = sys.argv[1:]
 
 if len(args) >= 2 and args[0] == "pr" and args[1] == "list":
-    print(os.environ.get("FAKE_PR_LIST", "[]"))
+    state = args[args.index("--state") + 1]
+    assert "--limit" in args, "gh pr list silently stops at 30 results without --limit"
+    print(os.environ.get("FAKE_CLOSED_PR_LIST" if state == "closed" else "FAKE_PR_LIST", "[]"))
     sys.exit(0)
 
 log_path = os.environ["FAKE_GH_LOG"]
@@ -93,12 +95,13 @@ def _write_notes(work: Path, incident_id: str, text: str) -> None:
     (notes_dir / f"{incident_id}.md").write_text(text)
 
 
-def _run_open_prs(sandbox: dict, fake_pr_list: str = "[]", fail_marker: str | None = None):
+def _run_open_prs(sandbox: dict, fake_pr_list: str = "[]", fail_marker: str | None = None, closed_pr_list: str = "[]"):
     env = os.environ.copy()
     env["PATH"] = f"{sandbox['bin_dir']}{os.pathsep}{env.get('PATH', '')}"
-    env["PYTHONPATH"] = str(sandbox["work"])
+    env["PYTHONPATH"] = os.pathsep.join(filter(None, [str(sandbox["work"]), env.get("PYTHONPATH")]))
     env["FAKE_GH_LOG"] = str(sandbox["gh_log"])
     env["FAKE_PR_LIST"] = fake_pr_list
+    env["FAKE_CLOSED_PR_LIST"] = closed_pr_list
     if fail_marker:
         env["FAKE_GH_FAIL_MARKER"] = fail_marker
     return subprocess.run(
@@ -246,7 +249,7 @@ def test_awaiting_news_draft_is_marked_ready_when_news_arrives(tmp_path, make_in
 
     calls = _gh_calls(sandbox)
     assert len(_calls(calls, "pr", "ready", "9")) == 1
-    assert _calls(calls, "pr", "edit", "9") == [["pr", "edit", "9", "--remove-label", "awaiting-news"]]
+    assert ["pr", "edit", "9", "--remove-label", "awaiting-news"] in calls
 
 
 def test_missing_news_opens_a_draft(tmp_path, make_incident):
@@ -274,3 +277,94 @@ def test_invalid_incident_is_opened_as_a_draft(tmp_path, make_incident):
 
     create = _calls(_gh_calls(sandbox), "pr", "create")
     assert len(create) == 1 and "--draft" in create[0]
+
+
+def _branch_files(sandbox: dict, branch: str) -> list[str]:
+    out = subprocess.run(
+        ["git", "diff", "--name-only", "origin/main", f"origin/{branch}"],
+        cwd=sandbox["work"], check=True, capture_output=True, text=True,
+    ).stdout
+    return out.split()
+
+
+@pytest.mark.parametrize("bad_text", [
+    "{",  # malformed YAML
+    "",  # empty
+    "- a\n- list\n",  # not a mapping
+    "id: x\n",  # missing most fields
+])
+def test_a_bad_file_does_not_cost_other_incidents_their_prs(tmp_path, make_incident, bad_text):
+    sandbox = _make_sandbox(tmp_path)
+    (sandbox["work"] / "incidents" / "0000-bad.yaml").write_text(bad_text)
+    good = make_incident(id="2026-06-01-openai-good")
+    _write_incident(sandbox["work"], good)
+
+    result = _run_open_prs(sandbox)
+
+    created = [c for c in _gh_calls(sandbox) if c[:2] == ["pr", "create"]]
+    assert any(f"agent/{good['id']}" in c for c in created), result.stderr
+
+
+def test_each_pr_contains_only_its_own_incident(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    a = make_incident(id="2026-06-01-openai-a")
+    b = make_incident(id="2026-06-02-openai-b")
+    _write_incident(sandbox["work"], a)
+    _write_incident(sandbox["work"], b)
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    subprocess.run(["git", "fetch", "origin"], cwd=sandbox["work"], check=True, capture_output=True)
+    assert _branch_files(sandbox, f"agent/{a['id']}") == [f"incidents/{a['id']}.yaml"]
+    assert _branch_files(sandbox, f"agent/{b['id']}") == [f"incidents/{b['id']}.yaml"]
+
+
+def test_a_ready_pr_that_becomes_invalid_goes_back_to_draft(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    incident["sources"] = []
+    _write_incident(sandbox["work"], incident)
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": False, "labels": []}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert ["pr", "ready", "9", "--undo"] in calls
+    assert ["pr", "edit", "9", "--add-label", "needs-review"] in calls
+    edit = next(c for c in calls if c[:3] == ["pr", "edit", "9"] and "--body" in c)
+    assert "❌ Failed" in edit[edit.index("--body") + 1]
+
+
+def test_a_resubmitted_rejected_incident_is_flagged(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    closed = json.dumps([{"number": 55, "headRefName": f"agent/{incident['id']}", "mergedAt": None}])
+
+    assert _run_open_prs(sandbox, closed_pr_list=closed).returncode == 0
+
+    create = next(c for c in _gh_calls(sandbox) if c[:2] == ["pr", "create"])
+    assert "#55" in create[create.index("--body") + 1]
+    assert "needs-review" in create
+
+
+def test_a_merged_pr_does_not_count_as_rejected(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    closed = json.dumps([{"number": 55, "headRefName": f"agent/{incident['id']}", "mergedAt": "2026-01-01T00:00:00Z"}])
+
+    assert _run_open_prs(sandbox, closed_pr_list=closed).returncode == 0
+
+    create = next(c for c in _gh_calls(sandbox) if c[:2] == ["pr", "create"])
+    assert "#55" not in create[create.index("--body") + 1]
+
+
+def test_files_outside_the_incident_layout_are_reported_not_dropped(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    (sandbox["work"] / "incidents" / "notes.yml").write_text("a: 1\n")
+
+    result = _run_open_prs(sandbox)
+
+    assert result.returncode == 1
+    assert "notes.yml" in result.stderr
