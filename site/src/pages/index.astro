@@ -13,8 +13,8 @@ const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
     count: counted.length,
     sota: data.boards.open.verified.models[0],
     latest: [...counted].reverse().slice(0, 5),
-    // Incidents are sorted oldest first, so anything after the newest one shown here is hidden and newer.
-    newerHidden: scores.incidents.length - 1 - scores.incidents.indexOf(counted.at(-1)),
+    // Anything dated after the newest one shown here must be hidden. Compare dates, because same-day incidents sort by id.
+    newerHidden: scores.incidents.filter((i: any) => !counted.length || i.date > counted.at(-1).date).length,
     lastDate: data.last_incident_date.open,
     lastIncident: [...counted].reverse().find((i: any) => i.league === "open"),
     orgs,
