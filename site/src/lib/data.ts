@@ -39,25 +39,25 @@ export const allModels = () => {
   return [...models.values()];
 };
 
-// Everyone charged with an incident, jointly and severally: the lab, then each distinct modifier.
+// Everyone charged with an incident, jointly and severally: the lab, then each other lab and modifier.
 // e.g. "Alibaba, with OrcaRouter (abliterated)".
 export const coDefendants = (i: any) => {
-  const seen = new Set([i.org]);
-  const extra: string[] = [];
+  // An org can be both a model's lab and a modifier, so keep what it did even if it was seen first as a lab.
+  const roles = new Map<string, string | undefined>([[i.org, undefined]]);
   for (const m of i.models) {
-    if (!m.modified_by || seen.has(m.modified_by)) continue;
-    seen.add(m.modified_by);
-    extra.push(m.modification ? `${m.modified_by} (${m.modification})` : m.modified_by);
+    if (m.org && !roles.has(m.org)) roles.set(m.org, undefined);
+    if (m.modified_by && !roles.get(m.modified_by)) roles.set(m.modified_by, m.modification);
   }
-  return extra.length ? `${i.org}, with ${extra.join(", ")}` : i.org;
+  const [lead, ...extra] = [...roles].map(([org, did]) => (did ? `${org} (${did})` : org));
+  return extra.length ? `${lead}, with ${extra.join(", ")}` : lead;
 };
 
 // The same orgs as a plain list: "Alibaba and OrcaRouter".
 export const chargedOrgs = (i: any) => {
-  const orgs = [...new Set([i.org, ...i.models.map((m: any) => m.modified_by).filter(Boolean)])] as string[];
+  const orgs = [...new Set([i.org, ...i.models.flatMap((m: any) => [m.org, m.modified_by]).filter(Boolean)])] as string[];
   return orgs.length > 2 ? `${orgs.slice(0, -1).join(", ")} and ${orgs.at(-1)}` : orgs.join(" and ");
 };
-export const hasCoDefendants = (i: any) => i.models.some((m: any) => m.modified_by && m.modified_by !== i.org);
+export const hasCoDefendants = (i: any) => i.models.some((m: any) => [m.org, m.modified_by].some((org) => org && org !== i.org));
 
 export const incidentsFor = (slug: string) =>
   (scores as any).incidents.filter((i: any) => i.models.some((m: any) => m.slug === slug));

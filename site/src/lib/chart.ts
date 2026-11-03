@@ -5,6 +5,8 @@ export const PAD = { top: 16, right: 160, bottom: 32, left: 56 };
 
 // Minimum vertical gap between two end-of-line labels before we nudge them apart.
 const LABEL_GAP = 16;
+// Lowest a label's anchor can sit: labels are drawn 4px below it, and the viewBox clips anything past H.
+const LABEL_MAX_Y = H - 8;
 
 const day = (d: string) => Date.parse(d) / 86_400_000;
 
@@ -28,13 +30,18 @@ export interface Layout {
   labelX: number;
 }
 
-/** Push overlapping labels apart, top to bottom, by the smallest amount that clears them. */
+/** Push overlapping labels apart, top to bottom, by the smallest amount that clears them, then back up if they ran off the chart. */
 function resolveLabelCollisions(orgs: { labelAnchorY: number }[]): number[] {
   const order = orgs.map((_, i) => i).sort((a, b) => orgs[a].labelAnchorY - orgs[b].labelAnchorY);
   const y: number[] = orgs.map((s) => s.labelAnchorY);
   for (let k = 1; k < order.length; k++) {
     const i = order[k], prev = order[k - 1];
     if (y[i] - y[prev] < LABEL_GAP) y[i] = y[prev] + LABEL_GAP;
+  }
+  let limit = LABEL_MAX_Y;
+  for (let k = order.length - 1; k >= 0; k--) {
+    y[order[k]] = Math.min(y[order[k]], limit);
+    limit = y[order[k]] - LABEL_GAP;
   }
   return y;
 }

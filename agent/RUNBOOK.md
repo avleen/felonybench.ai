@@ -119,10 +119,16 @@ Out of scope: capability claims and benchmarks; uncensored or abliterated model
 *releases* with no documented misuse; jailbreak demos; plainly lawful acts (e.g. a
 normal bug-bounty report).
 
-**Co-defendants:** `org` is the base model's lab. If someone altered the model, put the
+**Co-defendants:** `org` is the lead model's lab. If someone altered a model, put the
 altering organization in that model's `modified_by` and what they did in `modification`
 (e.g. `modified_by: OrcaRouter`, `modification: abliterated`). The lab and every
 modifier are each charged the full score. `modified_by` is only allowed in this league.
+
+**Models from several labs:** `org` is the lead model's lab. Give every model from another
+lab its own `org` (e.g. `{name: "Kimi K2", family: kimi, org: Moonshot AI, share: 0.25}`);
+without it, the model is filed under the wrong lab, and validation fails if that family
+is already on file under its real lab. Each lab is charged the full score.
+Per-model `org` is only allowed in this league.
 
 **Fields to fill** (see `agent/incident-template.yaml`): `human_actor`;
 `scoring.contribution`, `scoring.guardrails`, `scoring.legal_status`; the shared

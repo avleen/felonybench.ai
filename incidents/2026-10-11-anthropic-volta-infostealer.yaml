@@ -8,8 +8,8 @@ org: Anthropic
 human_actor: The unidentified author/operator of the VOLTA-AUTODOXER infostealer, which Cisco Talos suggests may be a builder-kit sold to customers who supply their own settings
 models:
   - {name: "Claude Opus 4.6", codename: null, family: claude, share: 0.5}
-  - {name: "Kimi K2", codename: null, family: kimi, share: 0.25}
-  - {name: "Gemini 2.5 Flash", codename: null, family: gemini, share: 0.25}
+  - {name: "Kimi K2", codename: null, family: kimi, org: Moonshot AI, share: 0.25}
+  - {name: "Gemini 2.5 Flash", codename: null, family: gemini, org: Google DeepMind, share: 0.25}
 victims:
   - {name: "Individuals whose Windows machines were infected by VOLTA (credentials, payment cards, crypto wallets, sessions and personal data stolen and profiled)", type: third_party, country: null}
 summary: The VOLTA-AUTODOXER Windows infostealer sends each victim's stolen data to Claude Opus 4.6 (falling back to Kimi K2 then Gemini 2.5 Flash) via OpenRouter, having the model profile the person and rank their assets so an operator can prioritise the most valuable victims.

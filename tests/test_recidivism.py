@@ -49,3 +49,12 @@ def test_explicit_day_precision_still_counts(make_incident, rubric):
     a, b = _pair(make_incident, "2026-06-01", "2026-07-16")
     a["date_precision"] = b["date_precision"] = "day"
     assert recidivist_ids([a, b], rubric) == {"b"}
+
+
+def test_family_belongs_to_the_models_lab_not_the_incident_org(make_incident, rubric):
+    a, b = _pair(make_incident, "2026-06-01", "2026-07-16", family_a="kimi", family_b="kimi")
+    a["org"], b["org"] = "Anthropic", "Moonshot AI"
+    assert recidivist_ids([a, b], rubric) == set()
+    for m in a["models"]:
+        m["org"] = "Moonshot AI"
+    assert recidivist_ids([a, b], rubric) == {"b"}

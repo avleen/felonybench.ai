@@ -8,7 +8,7 @@ import yaml
 from jsonschema import Draft202012Validator
 
 from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric
-from scripts.scoring import to_date
+from scripts.scoring import model_lab, to_date
 
 SCHEMA = ROOT / "schema" / "incident.schema.json"
 NEWS_REQUIRED = "sources: at least one 'news' source is required"
@@ -43,6 +43,9 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
             ("legal_status", acc["legal_status"]),
             ("blast_radius", rubric["blast_radius"]),
         )
+        # `org` is the lead model's lab, and it gets charged, so it must have a model here.
+        if all(model_lab(incident, m) != incident["org"] for m in incident["models"]):
+            errors.append(f"models: no model belongs to org '{incident['org']}'")
     else:
         checks = (
             ("autonomy", rubric["autonomy"]),
@@ -52,6 +55,8 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
         # Co-defendants are only charged when a human used the model.
         if any("modified_by" in m or "modification" in m for m in incident["models"]):
             errors.append("models: modified_by and modification are only used in the Accomplice League")
+        if any("org" in m for m in incident["models"]):
+            errors.append("models: org is only used in the Accomplice League")
     for field, allowed in checks:
         if s[field] not in allowed:
             errors.append(f"scoring.{field}: '{s[field]}' is not one of {sorted(allowed)}")
@@ -80,7 +85,7 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
 
 
 def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str]]:
-    results, seen = {}, {}
+    results, seen, families = {}, {}, {}
     for path in sorted(Path(directory).glob("*.yaml")):
         try:
             incident = yaml.safe_load(path.read_text())
@@ -98,6 +103,18 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
             seen.setdefault(incident_id, path.name)
         if errors:
             results[path.name] = errors
+        # Other rule errors, like a missing news source, must not hide a misfiled model.
+        if validator.is_valid(_jsonable(incident)):
+            for m in incident["models"]:
+                if m.get("family"):
+                    families.setdefault(m["family"], {}).setdefault(model_lab(incident, m), []).append(path.name)
+    # A family is one lab's model line, so a second lab usually means a model is missing its `org`.
+    for family, labs in families.items():
+        if len(labs) > 1:
+            message = f"models: family '{family}' is filed under more than one lab: {sorted(labs)}"
+            for names in labs.values():
+                for name in names:
+                    results.setdefault(name, []).append(message)
     return results
 
 
