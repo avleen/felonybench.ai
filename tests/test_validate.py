@@ -169,5 +169,12 @@ def test_model_org_only_in_accomplice_league(make_incident, make_accomplice, rub
     inc["models"][0]["org"] = "Moonshot AI"
     assert any("models: org" in e for e in _errors(inc, rubric))
     inc = make_accomplice()
-    inc["models"][0]["org"] = "Moonshot AI"
+    inc["models"] = [{**inc["models"][0], "share": 0.5},
+                     {"name": "Kimi K2", "codename": None, "family": "kimi", "org": "Moonshot AI", "share": 0.5}]
     assert _errors(inc, rubric, stem=ACC) == []
+
+
+def test_a_model_must_belong_to_the_incident_org(make_accomplice, rubric):
+    inc = make_accomplice()
+    inc["models"][0]["org"] = "Moonshot AI"
+    assert any("no model belongs" in e for e in _errors(inc, rubric, stem=ACC))

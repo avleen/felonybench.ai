@@ -1,6 +1,11 @@
 # Models from other labs were once filed under the incident's lab. Keep the old links working.
+/model/anthropic-deepseek-v4-1-flash /model/deepseek-deepseek-v4-1-flash/ 301
 /model/anthropic-deepseek-v4-1-flash/ /model/deepseek-deepseek-v4-1-flash/ 301
+/model/anthropic-gemini-2-5-flash /model/google-deepmind-gemini-2-5-flash/ 301
 /model/anthropic-gemini-2-5-flash/ /model/google-deepmind-gemini-2-5-flash/ 301
+/model/anthropic-glm-5-2 /model/zhipu-ai-glm-5-2/ 301
 /model/anthropic-glm-5-2/ /model/zhipu-ai-glm-5-2/ 301
+/model/anthropic-kimi-k2 /model/moonshot-ai-kimi-k2/ 301
 /model/anthropic-kimi-k2/ /model/moonshot-ai-kimi-k2/ 301
+/model/anthropic-kimi-k3 /model/moonshot-ai-kimi-k3/ 301
 /model/anthropic-kimi-k3/ /model/moonshot-ai-kimi-k3/ 301

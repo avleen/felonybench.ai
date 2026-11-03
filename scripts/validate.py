@@ -43,6 +43,9 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
             ("legal_status", acc["legal_status"]),
             ("blast_radius", rubric["blast_radius"]),
         )
+        # `org` is the lead model's lab, and it gets charged, so it must have a model here.
+        if all(m.get("org", incident["org"]) != incident["org"] for m in incident["models"]):
+            errors.append(f"models: no model belongs to org '{incident['org']}'")
     else:
         checks = (
             ("autonomy", rubric["autonomy"]),
