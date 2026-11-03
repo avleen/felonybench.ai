@@ -366,6 +366,32 @@ def test_an_invalid_revision_is_not_pushed_if_the_pr_cant_be_made_a_draft(tmp_pa
     assert f"agent/{incident['id']}" not in _remote_branches(sandbox["origin"])
 
 
+def test_a_ready_pr_stays_ready_if_it_cant_be_labelled(tmp_path, make_incident):
+    # A retry skips the labels once the PR is a draft, so a draft must mean they were added.
+    sandbox, incident, open_list = _invalid_revision_of_a_ready_pr(tmp_path, make_incident)
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list, fail_call="pr edit 9 --add-label").returncode == 1
+
+    assert ["pr", "ready", "9", "--undo"] not in _gh_calls(sandbox)
+    assert f"agent/{incident['id']}" not in _remote_branches(sandbox["origin"])
+
+
+def test_a_ready_pr_that_loses_its_only_news_source_is_awaiting_news(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    incident["sources"] = [s for s in incident["sources"] if s["kind"] != "news"]
+    _write_incident(sandbox["work"], incident)
+    labels = [{"name": "agent"}]
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": False, "labels": labels}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert ["pr", "ready", "9", "--undo"] in calls
+    assert ["pr", "edit", "9", "--add-label", "awaiting-news"] in calls
+    assert ["pr", "edit", "9", "--add-label", "needs-review"] not in calls
+
+
 def test_a_resubmitted_rejected_incident_is_flagged(tmp_path, make_incident):
     sandbox = _make_sandbox(tmp_path)
     incident = make_incident(id="2026-06-01-openai-x")
