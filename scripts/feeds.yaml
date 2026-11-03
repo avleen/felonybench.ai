@@ -16,6 +16,10 @@ triggers: [sandbox, escaped, escape, unauthorized, unsanctioned, credential, bre
            went rogue, misuse, mining, mined, cryptocurrenc, crypto mining, tunnel, phishing,
            sockpuppet, sock puppet, impersonat, pull request, Dependabot, supply chain,
            supply-chain, malicious, cancelled, canceled, DNS server,
+           # Consumer harm: an agent acting on someone's behalf. Narrow, because labs delete,
+           # book and buy things in ordinary news too.
+           agent deleted, bot deleted, deleted customer, deleted production, agent booked,
+           booked flight, agent purchased, purchased goods, reward hack,
            # Accomplice League: humans using a model for a crime. "uncensored" and
            # "abliterated" are deliberately not triggers: a model release isn't an incident.
            threat actor, malware, ransomware, zero-day, cybercrim, criminal, fraudster,

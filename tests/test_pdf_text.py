@@ -159,3 +159,13 @@ def test_main_prints_text(monkeypatch, capsys):
 def test_main_reports_errors_without_a_traceback(capsys):
     assert pdf_text.main(["/no/such/file.pdf"]) == 1
     assert "ERROR" in capsys.readouterr().err
+
+
+def test_oversized_download_is_refused(monkeypatch):
+    import io
+    import scripts.pdf_text as module
+    monkeypatch.setattr(module, "MAX_DOWNLOAD_BYTES", 10)
+    opener = lambda req, timeout: io.BytesIO(b"x" * 11)
+    public = lambda host, port, **kw: [(2, 1, 6, "", ("93.184.216.34", 0))]
+    with pytest.raises(ValueError, match="larger than 10"):
+        module.load("https://example.com/a.pdf", opener=opener, resolve=public)

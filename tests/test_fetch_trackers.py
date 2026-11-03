@@ -26,13 +26,13 @@ def test_clean_text_collapses_blank_lines():
     assert clean_text("  a  \n\n\n\n b\n") == "a\n\nb\n"
 
 
-def test_fetch_org_writes_json_and_digest(tmp_path):
+def test_fetch_org_writes_only_the_digest(tmp_path):
     def opener(req, timeout):
         return io.BytesIO(json.dumps(ORG_DATA).encode())
 
     assert fetch_org(tmp_path, opener=opener).startswith("ok")
-    assert json.loads((tmp_path / "felonybench-org.json").read_text()) == ORG_DATA
     assert "OpenAI" in (tmp_path / "felonybench-org.txt").read_text()
+    assert [p.name for p in tmp_path.iterdir()] == ["felonybench-org.txt"]
 
 
 def test_fetch_org_records_errors(tmp_path):
@@ -40,7 +40,7 @@ def test_fetch_org_records_errors(tmp_path):
         raise OSError("network down")
 
     assert "network down" in fetch_org(tmp_path, opener=opener)
-    assert "network down" in json.loads((tmp_path / "felonybench-org.json").read_text())["error"]
+    assert "network down" in (tmp_path / "felonybench-org.txt").read_text()
 
 
 def test_fetch_com_records_checkpoint_as_error(tmp_path):
@@ -64,3 +64,12 @@ def test_main_never_fails(tmp_path, monkeypatch):
                         lambda out: fetch_com(out, get_text=boom))
     assert fetch_trackers.main(["--out", str(tmp_path / "t")]) == 0
     assert (tmp_path / "t" / "felonybench-com.txt").read_text().startswith("ERROR")
+
+
+def test_fetch_org_refuses_an_oversized_response(tmp_path, monkeypatch):
+    import io
+    import scripts.fetch_trackers as module
+    monkeypatch.setattr(module, "MAX_ORG_BYTES", 10)
+    result = fetch_org(tmp_path, opener=lambda req, timeout: io.BytesIO(b"x" * 11))
+    assert "larger than 10" in result
+    assert "larger than 10" in (tmp_path / "felonybench-org.txt").read_text()

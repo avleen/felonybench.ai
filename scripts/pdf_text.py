@@ -16,6 +16,8 @@ import urllib.request
 
 from pypdf import PdfReader
 
+from scripts.safe_http import NoDrainRedirects
+
 # Some report hosts refuse non-browser clients.
 BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36")
@@ -56,7 +58,10 @@ def check_url(url: str, resolve=socket.getaddrinfo) -> None:
             raise ValueError(f"refusing to fetch {url}: {parts.hostname} resolves to non-public address {ip}")
 
 
-class PublicOnlyRedirects(urllib.request.HTTPRedirectHandler):
+MAX_DOWNLOAD_BYTES = 100_000_000
+
+
+class PublicOnlyRedirects(NoDrainRedirects):
     def __init__(self, resolve=socket.getaddrinfo):
         self.resolve = resolve
 
@@ -71,7 +76,10 @@ def load(source: str, opener=None, resolve=socket.getaddrinfo) -> bytes:
     opener = opener or urllib.request.build_opener(PublicOnlyRedirects(resolve)).open
     req = urllib.request.Request(source, headers={"User-Agent": BROWSER_UA})
     with opener(req, timeout=120) as resp:
-        return resp.read()
+        data = resp.read(MAX_DOWNLOAD_BYTES + 1)
+    if len(data) > MAX_DOWNLOAD_BYTES:
+        raise ValueError(f"larger than {MAX_DOWNLOAD_BYTES} bytes")
+    return data
 
 
 def extract_text(data: bytes, pages: tuple[int, int] | None = None, max_chars: int | None = None) -> str:
