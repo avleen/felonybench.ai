@@ -7,7 +7,9 @@ import yaml
 
 from scripts.apply_agent_output import apply_output
 from scripts.closed_prs import closing_reason, rejected, render, snapshot_name
-from scripts.open_prs import labels_for, pr_body
+from scripts.open_prs import labels_for, pr_body, pr_title
+from scripts.rubric import load_yaml
+from scripts import run_report
 from scripts.run_report import agent_result, describe, failed, failure_body, neutralize
 from scripts.validate import NEWS_REQUIRED
 
@@ -225,3 +227,25 @@ def test_neutralize_leaves_no_bare_mention(text):
 @pytest.mark.parametrize("text", ["&#640;", "&#x401;", "&amp;#64;", "AT&T"])
 def test_neutralize_leaves_other_entities_alone(text):
     assert neutralize(text) == text
+
+
+def test_a_pr_title_cant_mention_anyone():
+    assert "@owner" not in pr_title({"org": "@owner", "victims": [{"name": "@other"}]}, is_new=True)
+    assert "@other" not in pr_title({"org": "@owner", "victims": [{"name": "@other"}]}, is_new=True)
+
+
+def test_incident_loading_refuses_aliases_but_reads_plain_yaml():
+    assert load_yaml("a: 1\n") == {"a": 1}
+    with pytest.raises(yaml.YAMLError):
+        load_yaml("a: &a 1\nb: *a\n")
+
+
+def test_a_sweep_report_that_isnt_utf8_still_reports(tmp_path, monkeypatch):
+    report = tmp_path / "sweep.md"
+    report.write_bytes(b"caf\xff\n")
+    summary = tmp_path / "summary"
+    monkeypatch.setattr(run_report, "report", lambda *args: None)
+    for key, value in {"GITHUB_SERVER_URL": "s", "GITHUB_REPOSITORY": "r", "GITHUB_RUN_ID": "1", "GITHUB_WORKFLOW": "w", "GITHUB_STEP_SUMMARY": str(summary)}.items():
+        monkeypatch.setenv(key, value)
+    assert run_report.main(["--agent", "success", "--publish", "success", "--sweep-report", str(report)]) == 0
+    assert "caf" in summary.read_text()
