@@ -1,0 +1,72 @@
+name: Publish FelonyBench agent run
+description: Open PRs from the agent's output and report how the run went. Runs from a clean checkout.
+inputs:
+  agent_result:
+    description: Result of the agent job
+    required: true
+  expect_output:
+    description: Whether the agent ran, so its output must exist ("true" or "false")
+    required: true
+  dead_feeds:
+    description: Names of dead feeds if too many died, or "none". Empty when feeds weren't checked.
+    default: ""
+  github_token:
+    description: Token that can open PRs and issues
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: "3.11"
+        cache: pip
+    - shell: bash
+      run: pip install -r requirements.txt
+
+    - name: Download the agent's output
+      id: output
+      continue-on-error: true  # a run with no candidates uploads nothing; Open PRs decides if that's a failure
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: agent-output-${{ github.run_id }}
+        path: ${{ runner.temp }}/agent-output
+
+    - name: Download the agent's transcript
+      continue-on-error: true
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: agent-transcript-${{ github.run_id }}
+        path: ${{ runner.temp }}/agent-transcript
+
+    - name: Open PRs
+      id: open_prs
+      continue-on-error: true
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        EXPECT_OUTPUT: ${{ inputs.expect_output }}
+        OUTPUT_DOWNLOAD: ${{ steps.output.outcome }}
+      run: |
+        if [ "$EXPECT_OUTPUT" = true ] && [ "$OUTPUT_DOWNLOAD" != success ]; then
+          echo "::error::The agent ran but its output could not be downloaded"
+          exit 1
+        fi
+        git config user.name "felonybench-agent"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git fetch -q origin +main:refs/remotes/origin/main
+        python -m scripts.apply_agent_output "$RUNNER_TEMP/agent-output"
+        python -m scripts.open_prs
+
+    # Runs even if Python setup failed, and needs nothing from requirements.txt.
+    - name: Report the run
+      if: always()
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        AGENT_RESULT: ${{ inputs.agent_result }}
+        PUBLISH_OUTCOME: ${{ steps.open_prs.outcome }}
+        DEAD_FEEDS: ${{ inputs.dead_feeds }}
+      run: |
+        python3 -m scripts.run_report --agent "$AGENT_RESULT" --publish "$PUBLISH_OUTCOME" \
+          --transcript "$RUNNER_TEMP/agent-transcript/claude-execution-output.json" \
+          --sweep-report .agent-out/sweep-report.md --dead-feeds "$DEAD_FEEDS"

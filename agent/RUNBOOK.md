@@ -13,6 +13,9 @@ because they only searched for "hacking" in the news.
 2. Read `rubric/v1.yaml`, `schema/incident.schema.json`, `agent/incident-template.yaml`.
 3. List `incidents/` and skim every file, so you know what already exists.
 4. Read every file in `.agent-out/open/`. Those are incidents in open PRs awaiting review.
+   Read every file in `.agent-out/closed/` too. A human closed those PRs without merging, so
+   treat them like rejected known leads: don't write them again, under this id or any other,
+   unless there's genuinely new information, and say what's new in your notes.
 5. Sweep mode: read every file in `.agent-out/trackers/` (other trackers' incident lists,
    prefetched for you — felonybench.com can't be read with WebFetch). A file starting
    with `ERROR` means the prefetch failed; try the site yourself and note it in the report.
@@ -39,7 +42,8 @@ because they only searched for "hacking" in the news.
 - Write only to `incidents/*.yaml` and `.agent-out/*.md`. Never delete files.
 - Never invent facts. Every field must be supported by a source you actually fetched.
 - When unsure, still write the incident, set `confidence: low`, and explain in the notes.
-  A human reviews every change.
+  A human reviews every change. Low-confidence incidents are hidden from the default view of
+  the site and don't count toward its default scores, so don't use `low` for a well-sourced case.
 
 ## Modes
 

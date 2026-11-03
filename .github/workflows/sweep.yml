@@ -5,21 +5,23 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write   # PR labels
+  contents: read
+  pull-requests: read
+  issues: read   # PR labels
 
 concurrency:
   group: agent
   cancel-in-progress: false
 
 jobs:
-  sweep:
+  agent:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
           cache: pip
@@ -27,20 +29,25 @@ jobs:
       - uses: ./.github/actions/run-agent
         with:
           mode: sweep
-          max_turns: "150"
+          max_turns: "300"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
 
-      - name: Open an issue on failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          title="Agent run failed: ${{ github.workflow }}"
-          url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
-          if [ -n "$existing" ]; then
-            gh issue comment "$existing" --body "Failed again: $url"
-          else
-            gh issue create --title "$title" --body "The scheduled agent run failed: $url. Its transcript and notes are attached to the run as an artifact."
-          fi
+  # Runs from a clean checkout with the only write token, so nothing the agent read or wrote
+  # can reach it. Runs after a failed agent too: finished incidents still become PRs.
+  publish:
+    needs: agent
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write   # PR labels and failure reports
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/publish-run
+        with:
+          agent_result: ${{ needs.agent.result }}
+          expect_output: "true"
+          github_token: ${{ github.token }}
