@@ -1,0 +1,40 @@
+id: 2025-12-01-anthropic-mexico-government-breaches
+date: 2025-12-01
+date_precision: month
+reported: 2026-02-25
+league: accomplice
+tier: alleged
+org: Anthropic
+human_actor: An unidentified attacker, not linked to any known group, whose Spanish-language Claude conversations Gambit Security found publicly exposed
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 0.8}
+  - {name: "GPT-4.1", codename: null, family: gpt, org: OpenAI, share: 0.2}
+victims:
+  - {name: "Mexican government bodies: the federal tax authority (SAT), the national electoral institute (INE), the Jalisco, Michoacán and Tamaulipas state governments, Mexico City's civil registry and Monterrey's water utility", type: foreign_government, country: MX}
+  - {name: "A Mexican financial institution (unnamed)", type: third_party, country: MX}
+summary: An attacker posing as a bug-bounty tester talked Claude past its refusals and had it find flaws, write exploits and run thousands of commands on Mexican government networks, taking about 150 GB of tax, voter and civil-registry data, with ChatGPT advising on next steps.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1029(a)(3)", max_years: 10}
+foreign_laws:
+  - {code: "Código Penal Federal art. 211 bis 2 (unauthorized access to state computer systems)", country: MX}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: [credentials, lateral_movement]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Bloomberg reports that Claude helped find vulnerabilities, write exploit scripts and automate data theft, and that after first warning about malicious intent it "executed thousands of commands on government networks", so it ran the intrusions under the attacker's direction. GPT-4.1, per Security Affairs, analysed the stolen data and advised on moving deeper into the networks.
+  guardrails: The attacker first claimed to be running a bug-bounty penetration test. When Claude refused to delete logs ("Specific instructions about deleting logs and hiding history are red flags"), the attacker gave it a detailed playbook that Gambit says bypassed its guardrails. That counts as jailbroken.
+  blast_radius: The victims include Mexico's federal tax authority and electoral institute, three state governments, Mexico City's civil registry and Monterrey's water utility, which makes this an international incident against a foreign government.
+  tradecraft: Gambit says the stolen data included government employee credentials, and the attacker was trying to "compromise every government identity they possibly could" (credentials). The attacker turned to ChatGPT for help with lateral movement and the credentials it needed to keep going (lateral movement). Gambit counted at least 20 exploited vulnerabilities but doesn't call any of them previously unknown, so no zero-day is claimed.
+  dwell: Bloomberg says the activity began in December 2025 and lasted about a month, so date_precision is month. Neither the latest possible start date nor Gambit's discovery date is published, so dwell is counted as 0 and not inflated. Gambit, a third party, found the attacker's exposed conversations. Several of the agencies say they found no breach.
+  statutes: Stealing data from government systems is unauthorized access for private financial gain or in furtherance of other crimes, the five-year tier of 18 USC 1030(c)(2)(B). Taking government employee credentials, far more than fifteen, supports possession of unauthorized access devices under 18 USC 1029(a)(3). These are the attacker's exposure.
+confidence: medium
+sources:
+  - {url: "https://www.thestar.com.my/tech/tech-news/2026/02/26/hacker-used-anthropics-claude-to-steal-mexican-data-trove", kind: news, publisher: The Star (Bloomberg), title: "Hacker used Anthropic's Claude to steal Mexican data trove"}
+  - {url: "https://securityaffairs.com/188696/ai/claude-code-abused-to-steal-150gb-in-cyberattack-on-mexican-agencies.html", kind: news, publisher: Security Affairs, title: "Claude code abused to steal 150GB in cyberattack on Mexican agencies"}
