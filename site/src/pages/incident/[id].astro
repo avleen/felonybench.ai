@@ -41,7 +41,7 @@ const charged = coDefendants(i);
 const joint = accomplice && hasCoDefendants(i);
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
 ---
-<Layout title={incidentTitle(i)} description={incidentDescription(i)} revealWithoutJs={low}>
+<Layout title={incidentTitle(i)} description={incidentDescription(i)} revealWithoutJs={low} noindex={low}>
   {low && (
     <div class="panel low-notice" data-conf="confident">
       <p class="eyebrow">Low-confidence report · Case No. FB-{i.id}</p>
@@ -76,7 +76,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
     <div>
       <h2>Score breakdown</h2>
       {views.map((view) => (
-        <div class="table-wrap" tabindex="0" role="region" aria-label="Table" data-conf={view.key}>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Score breakdown" data-conf={view.key}>
           <table>
             <thead><tr><th scope="col">Component</th><th scope="col" class="num">Value</th><th scope="col">Reasoning</th></tr></thead>
             <tbody>

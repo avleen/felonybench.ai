@@ -1,7 +1,7 @@
 ---
 import { layout, W, H, PAD } from "../lib/chart";
 import { fmt } from "../lib/data";
-const { series, label = "All leagues" } = Astro.props;
+const { series, label } = Astro.props;
 const chart = layout(series, new Date().toISOString().slice(0, 10));
 ---
 {!chart ? <p class="muted">No incidents yet.</p> : (
@@ -37,7 +37,7 @@ const chart = layout(series, new Date().toISOString().slice(0, 10));
     </div>
     <details class="table-fallback">
       <summary>View as table</summary>
-      <div class="table-wrap" tabindex="0" role="region" aria-label="Table">
+      <div class="table-wrap" tabindex="0" role="region" aria-label={`Data: ${label}`}>
         <table>
           <thead><tr><th scope="col">Org</th><th scope="col">Date</th><th scope="col" class="num">Change</th><th scope="col" class="num">Cumulative</th></tr></thead>
           <tbody>
