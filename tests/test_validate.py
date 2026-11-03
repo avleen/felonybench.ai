@@ -486,13 +486,22 @@ def test_a_binary_model_name_is_reported_without_crashing(make_incident, tmp_pat
     assert any("bytes" in e for e in errors)
 
 
-@pytest.mark.parametrize("text", ["org: !!bool foo\n", 'org: !!int ""\n', 'org: !!float ""\n', "org: !!timestamp foo\n", "[" * 3000])
+@pytest.mark.parametrize("text", ["org: !!bool foo\n", 'org: !!int ""\n', 'org: !!float ""\n', "org: !!timestamp foo\n", "[" * 3000, "org: " + ":".join(["1"] * 180) + ".0\n"])
 def test_yaml_that_pyyaml_cant_construct_is_reported_without_crashing(tmp_path, rubric, text):
     (tmp_path / "bad.yaml").write_text(text)
     (tmp_path / "other.yaml").write_text("{}\n")
     results = validate_dir(tmp_path, rubric, load_validator())
     assert results["bad.yaml"][0].startswith("YAML: ")
     assert results["other.yaml"]
+
+
+@pytest.mark.parametrize("text", [
+    "a: &a [*a]\n",
+    "a0: &a0 [x, x]\n" + "".join(f"a{n}: &a{n} [*a{n - 1}, *a{n - 1}]\n" for n in range(1, 41)),
+])
+def test_yaml_aliases_are_reported_without_expanding_them(tmp_path, rubric, text):
+    (tmp_path / "bad.yaml").write_text(text)
+    assert "aliases" in validate_dir(tmp_path, rubric, load_validator())["bad.yaml"][0]
 
 
 def test_the_date_fields_may_stay_unquoted(make_incident, tmp_path, rubric):
