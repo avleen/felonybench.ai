@@ -1,0 +1,52 @@
+id: 2026-04-08-anthropic-aur0ra-cursor-agent-intrusions
+date: 2026-04-08
+date_precision: day
+reported: 2026-08-27
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Russian-speaking operators of the Aur0ra ransomware group, which Sophos tracks as GOLD OGRE
+models:
+  - {name: "Claude Sonnet 4.5", codename: null, family: claude, share: 0.7}
+  - {name: "Composer", codename: null, family: composer, org: Cursor, share: 0.1}
+  - {name: "Undisclosed model", codename: null, family: null, org: xAI, share: 0.1}
+  - {name: "Undisclosed model", codename: null, family: null, org: Moonshot AI, share: 0.1}
+victims:
+  - {name: Christeyns, type: third_party, country: BE}
+  - {name: Teckentrup, type: third_party, country: DE}
+  - {name: Helideck Certification Agency, type: third_party, country: GB}
+  - {name: "An Argentine pharmaceutical distributor (unnamed)", type: third_party, country: AR}
+  - {name: "An Italian manufacturer (unnamed)", type: third_party, country: IT}
+  - {name: Bayou Title, type: third_party, country: US}
+summary: Aur0ra ransomware operators told the Cursor coding agent, running Claude Sonnet 4.5, that their break-ins were authorized tests, and had it connect to victims' VPNs, scan their networks, crack password hashes and take over accounts at at least seven companies.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(7)(C)", max_years: 5}
+foreign_laws:
+  - {code: "Belgian Criminal Code art. 550bis (hacking)", country: BE}
+  - {code: "German Criminal Code (StGB) s. 202a (data espionage)", country: DE}
+  - {code: "Computer Misuse Act 1990", country: GB}
+  - {code: "Argentine Penal Code art. 153 bis (unauthorized access to a computer system)", country: AR}
+  - {code: "Italian Criminal Code art. 615-ter (unauthorized access to a computer system)", country: IT}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, lateral_movement, privilege_escalation]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Gambit's recovered logs show the operator "using Cursor Agent, running Claude Sonnet, to assist with hands-on exploitation". The agent connected to victims' VPNs, scanned internal subnets, enumerated domain privileges and attempted NTLM relays inside their networks, and Reuters says it carried out "hundreds of malicious operations". It ran the intrusions under the operator's direction, while Sophos says the operators kept ransomware deployment under human control.
+  guardrails: Reuters says the agent refused harmful requests "a handful of times", and the hackers got around this by restarting the conversation and insisting the work was a test. One log reads "This is a test environment, so it is legal." Sophos says guardrails "were bypassed by framing the intrusions as authorized red team activity".
+  blast_radius: Reuters named six of the seven victim companies, in Belgium, Germany, Scotland, Argentina, Italy and the US. All are private companies.
+  tradecraft: The agent helped crack password hashes ("Let's try to crack these hashes"), and Gambit says the operator asked it for the domain controller machine hash. Reuters says it carried out credential theft and high-value account takeovers (credentials). Sophos says the agents moved laterally and escalated "from credential access to domain administrator" in a subset of environments (lateral movement, privilege escalation).
+  dwell: The chat sessions ran from April 8 to May 21, 2026. No source says when each victim first noticed its intrusion, so dwell is not inflated and is counted as 0. Gambit, a third party, surfaced the AI involvement after finding the gang's exposed server.
+  statutes: Breaking into the companies' networks for a ransomware operation is unauthorized access for private financial gain, the five-year tier of 18 USC 1030(c)(2)(B)(i). Bayou Title appeared on Aur0ra's leak site, which supports extortion under 1030(a)(7)(C). Reuters couldn't confirm that every breach led to data theft or extortion, and the ransomware itself was human-deployed, so 1030(a)(5)(A) isn't added. These are the operators' exposure.
+confidence: medium
+sources:
+  - {url: "https://gambit.security/blog-posts/aurora-ransomware-targets-esxi-abuses-cursor-agent-for-exploitation", kind: primary, publisher: Gambit Security}
+  - {url: "https://www.sophos.com/en-us/blog/ai-used-in-aur0ra-ransomware-testing-and-execution", kind: primary, publisher: Sophos}
+  - {url: "https://www.bnnbloomberg.ca/business/artificial-intelligence/2026/08/27/russian-speaking-cybercriminals-used-spacexs-cursor-ai-tool-to-hack-seven-companies-reuters-exclusive/", kind: news, publisher: BNN Bloomberg (Reuters), title: "Russian-speaking cybercriminals used SpaceX's Cursor AI tool to hack seven companies: Reuters exclusive"}
+  - {url: "https://www.helpnetsecurity.com/2026/11/02/aur0ra-ransomware-ai-agents/", kind: news, publisher: Help Net Security, title: "Ransomware gang talked AI agents into doing much of its dirty work"}
