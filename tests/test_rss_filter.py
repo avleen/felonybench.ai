@@ -214,7 +214,7 @@ def test_main_reports_healthy_feeds(tmp_path, monkeypatch):
 
 
 def test_time_limit_stops_a_feed_that_never_finishes():
-    with pytest.raises(TimeoutError):
+    with pytest.raises(rss_filter.FeedTimedOut):
         with rss_filter.time_limit(1):
             time.sleep(5)
 
@@ -223,6 +223,46 @@ def test_time_limit_clears_itself():
     with rss_filter.time_limit(1):
         pass
     time.sleep(1.1)  # would raise here if the alarm were still set
+
+
+def test_the_time_limit_is_not_an_oserror():
+    # socket.create_connection swallows OSErrors and tries the next address, past the deadline.
+    assert not issubclass(rss_filter.FeedTimedOut, OSError)
+
+
+def test_main_skips_the_remaining_feeds_when_the_overall_limit_is_spent(tmp_path, monkeypatch):
+    monkeypatch.setattr(rss_filter, "FEEDS_TOTAL_SECONDS", 0)
+    fetched = []
+
+    def fetch(feed):
+        fetched.append(feed["name"])
+        return []
+
+    _, output, _ = _run_main(tmp_path, monkeypatch, fetch)
+    assert fetched == []
+    assert "dead_feeds=A" in output
+
+
+def test_main_gives_a_feed_only_the_time_that_is_left(tmp_path, monkeypatch):
+    now = {"t": 0.0}
+    monkeypatch.setattr(rss_filter.time, "monotonic", lambda: now["t"])
+    monkeypatch.setattr(rss_filter, "FEEDS_TOTAL_SECONDS", 100)
+    monkeypatch.setattr(rss_filter, "FEED_TOTAL_SECONDS", 90)
+    limits = []
+    real = rss_filter.time_limit
+
+    def spy(seconds):
+        limits.append(seconds)
+        return real(seconds)
+
+    monkeypatch.setattr(rss_filter, "time_limit", spy)
+
+    def fetch(feed):
+        now["t"] += 70
+        return [{"feed": feed["name"], "title": "x", "link": f"{feed['url']}/1", "summary": ""}]
+
+    _run_main(tmp_path, monkeypatch, fetch)
+    assert limits[:2] == [90, 30]
 
 
 def test_main_counts_a_timed_out_feed_as_dead(tmp_path, monkeypatch):

@@ -17,6 +17,8 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+from scripts.safe_http import NoDrainRedirects
+
 # Some report hosts refuse non-browser clients.
 BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36")
@@ -60,7 +62,7 @@ def check_url(url: str, resolve=socket.getaddrinfo) -> None:
 MAX_DOWNLOAD_BYTES = 100_000_000
 
 
-class PublicOnlyRedirects(urllib.request.HTTPRedirectHandler):
+class PublicOnlyRedirects(NoDrainRedirects):
     def __init__(self, resolve=socket.getaddrinfo):
         self.resolve = resolve
 

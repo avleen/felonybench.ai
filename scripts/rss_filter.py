@@ -1,6 +1,7 @@
 """Free keyword prefilter over RSS feeds. Writes candidates for the agent."""
 import argparse
 import json
+import math
 import os
 import re
 import signal
@@ -21,6 +22,7 @@ MAX_AGE_DAYS = 7  # skip older items: already-seen news, or a newly added feed's
 USER_AGENT = "felonybench-watch/1.0 (+https://felonybench.ai/how-it-works)"
 FEED_IDLE_SECONDS = 60  # feedparser has no timeout of its own, and a hung feed would stall the run
 FEED_TOTAL_SECONDS = 120  # the idle limit never fires on a server that drips a byte at a time
+FEEDS_TOTAL_SECONDS = 600  # the watch job has 30 minutes, and triage needs most of them
 MAX_DEAD_SHARE = 0.2  # one feed down is normal; more than this means we're going blind
 
 
@@ -66,10 +68,14 @@ def fetch(feed: dict) -> list[dict]:
     ]
 
 
+class FeedTimedOut(Exception):
+    """Not an OSError: socket.create_connection catches those and moves on to the next address."""
+
+
 @contextmanager
 def time_limit(seconds: int):
     def expired(signum, frame):
-        raise TimeoutError(f"took longer than {seconds}s")
+        raise FeedTimedOut(f"took longer than {seconds}s")
 
     previous = signal.signal(signal.SIGALRM, expired)
     signal.alarm(seconds)
@@ -121,9 +127,13 @@ def main(argv: list[str] | None = None) -> int:
     socket.setdefaulttimeout(FEED_IDLE_SECONDS)
 
     entries, counts = [], {}
+    deadline = time.monotonic() + FEEDS_TOTAL_SECONDS
     for feed in config["feeds"]:
+        remaining = math.ceil(deadline - time.monotonic())
         try:
-            with time_limit(FEED_TOTAL_SECONDS):
+            if remaining <= 0:  # counts as dead, so the run still reports what it missed
+                raise FeedTimedOut("no time left for this run's feeds")
+            with time_limit(min(FEED_TOTAL_SECONDS, remaining)):
                 got = fetch(feed)
         except Exception as e:  # one bad feed must not stop the run
             print(f"warning: {feed['name']}: {e}", file=sys.stderr)

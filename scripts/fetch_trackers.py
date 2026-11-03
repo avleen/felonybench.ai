@@ -11,6 +11,7 @@ import urllib.request
 from pathlib import Path
 
 from scripts.rubric import ROOT
+from scripts.safe_http import NoDrainRedirects
 
 ORG_URL = "https://felonybench.org/felonies.json"
 COM_URL = "https://www.felonybench.com/"
@@ -47,7 +48,7 @@ def clean_text(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip() + "\n"
 
 
-def fetch_org(out_dir: Path, opener=urllib.request.urlopen) -> str:
+def fetch_org(out_dir: Path, opener=urllib.request.build_opener(NoDrainRedirects()).open) -> str:
     try:
         req = urllib.request.Request(ORG_URL, headers={"User-Agent": AGENT_UA})
         with opener(req, timeout=60) as resp:
