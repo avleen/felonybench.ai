@@ -1,0 +1,36 @@
+id: 2026-09-25-openai-custom-gpt-clickfix-rat
+date: 2026-09-25
+date_precision: before
+reported: 2026-09-28
+league: accomplice
+tier: verified
+org: OpenAI
+human_actor: Unidentified attackers who published malicious Custom GPTs on chatgpt.com, including one called "Plus 5.6", and advertised them in sponsored Google results for "chatgpt"
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Windows users who followed a Custom GPT to the ClickFix lure and installed a remote access trojan (at least two confirmed by Huntress)", type: third_party, country: null}
+summary: Attackers published fake "ChatGPT Plus 5.6" Custom GPTs that told users the service was down and sent them to a backup site, where a fake CAPTCHA tricked them into running a command that installed a remote access trojan.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Huntress says each GPT was "programmed to respond to their prompts with a message that included a Google Sites link", a fake "Service Availability Notice" pointing to a backup domain. The model delivered the attackers' lure to victims, while the ClickFix page and the malware did the rest. That is writing content a human deployed, not running the intrusion.
+  guardrails: The GPTs were built on OpenAI's ordinary Custom GPT feature. No jailbreak is described, and OpenAI removed the first GPT once Huntress reported it.
+  blast_radius: The victims are individual Windows users. Huntress confirmed that two of at least 40 incidents from the lure domain came through a Custom GPT.
+  tradecraft: The RAT's persistence script and encrypted file system belong to the human-built malware, not to anything the model did, so no rubric technique is credited to the model.
+  dwell: Huntress says the first Custom GPT "was taken down as of September 25" after it reported it to OpenAI. That is used as the latest possible date, and dwell is counted as 0 and not inflated. Huntress, a third party, found it.
+  statutes: Tricking users into running a command that installs a remote access trojan with remote-desktop, camera and audio capture is knowingly transmitting code that damages protected computers. Infections across dozens of machines meet the ten-or-more-computers felony factor of 1030(c)(4)(A)(i)(VI) for the campaign as a whole. This is the attackers' exposure.
+confidence: low
+sources:
+  - {url: "https://www.huntress.com/blog/chatgpt-custom-gpts-clickfix-rat", kind: primary, publisher: Huntress, title: "Attackers Abuse ChatGPT Custom GPTs to Deliver RAT via ClickFix"}
+  - {url: "https://www.helpnetsecurity.com/2026/09/29/malicious-chatgpt-custom-gpt-malware-via-clickfix/", kind: news, publisher: Help Net Security, title: "Malicious Custom GPT on chatgpt.com lures users into installing a RAT"}
