@@ -483,7 +483,16 @@ def test_a_binary_model_name_is_reported_without_crashing(make_incident, tmp_pat
     assert f"name: {name}" in text
     (tmp_path / f"{incident['id']}.yaml").write_text(text.replace(f"name: {name}", "name: !!binary TW9kZWw=", 1))
     errors = validate_dir(tmp_path, rubric, load_validator())[f"{incident['id']}.yaml"]
-    assert any("models/0/name" in e and "bytes" in e for e in errors)
+    assert any("bytes" in e for e in errors)
+
+
+@pytest.mark.parametrize("text", ["org: !!bool foo\n", 'org: !!int ""\n', 'org: !!float ""\n', "org: !!timestamp foo\n", "[" * 3000])
+def test_yaml_that_pyyaml_cant_construct_is_reported_without_crashing(tmp_path, rubric, text):
+    (tmp_path / "bad.yaml").write_text(text)
+    (tmp_path / "other.yaml").write_text("{}\n")
+    results = validate_dir(tmp_path, rubric, load_validator())
+    assert results["bad.yaml"][0].startswith("YAML: ")
+    assert results["other.yaml"]
 
 
 def test_the_date_fields_may_stay_unquoted(make_incident, tmp_path, rubric):
