@@ -547,3 +547,29 @@ def test_files_outside_the_incident_layout_are_reported_not_dropped(tmp_path, ma
 
     assert result.returncode == 1
     assert "notes.yml" in result.stderr
+
+
+def test_a_file_of_yaml_aliases_fails_alone_without_expanding(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    levels = "".join(f"a{n}: &a{n} [*a{n - 1}, *a{n - 1}]\n" for n in range(1, 41))
+    bomb = f"a0: &a0 [x, x]\n{levels}org: *a40\nsummary: *a40\n"
+    (sandbox["work"] / "incidents" / "2026-06-02-openai-y.yaml").write_text(bomb)
+
+    assert _run_open_prs(sandbox).returncode == 1
+
+    assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
+
+
+def test_a_notes_file_that_isnt_utf8_doesnt_cost_the_incident_its_pr(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    notes = sandbox["work"] / ".agent-out"
+    notes.mkdir(exist_ok=True)
+    (notes / f"{incident['id']}.md").write_bytes(b"caf\xff\n")
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
