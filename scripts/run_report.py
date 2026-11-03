@@ -16,14 +16,17 @@ SWEEP_ISSUE = "Sweep reports"
 
 
 _URL = re.compile(r"https?://\S*", re.I)
+_AT_ENTITY = re.compile(r"&(?:#0*64(?![0-9])|#x0*40(?![0-9a-f])|commat;);?", re.I)  # GitHub renders these as @
 
 
 def neutralize(text: str) -> str:
     """Agent text is untrusted: stop it notifying people when it's posted to GitHub.
 
-    Leaves no bare @ at all, because predicting what Markdown will link is how mentions slip through.
-    In a URL, %40 means the same thing and the link keeps working.
+    Leaves no bare @ at all, written plainly or as an entity, because predicting what Markdown will
+    link is how mentions slip through. In a URL it becomes %40, which keeps the link working on most
+    sites, though a few treat it differently. A wrong link is better than a stray notification.
     """
+    text = _AT_ENTITY.sub("@", text)
     return _URL.sub(lambda m: m[0].replace("@", "%40"), text).replace("@", "@\u200b")
 
 
