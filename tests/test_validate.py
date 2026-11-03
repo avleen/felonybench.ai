@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from datetime import date
 
 import pytest
 import yaml
@@ -434,3 +435,43 @@ def test_contested_needs_a_written_dispute(make_accomplice, rubric, text):
     inc = make_accomplice(scoring={"legal_status": "contested"})
     inc["rationale"]["legal_status"] = text
     assert any(e.startswith("rationale/legal_status") for e in _errors(inc, rubric, stem=inc["id"]))
+
+
+@pytest.mark.parametrize(
+    "where",
+    ["model name", "model org", "org", "publisher", "summary"],
+)
+def test_an_unquoted_date_outside_the_date_fields_is_an_error_not_a_crash(make_incident, make_accomplice, tmp_path, rubric, where):
+    incident = make_accomplice() if where == "model org" else make_incident()
+    bare = date(2026, 7, 16)
+    if where == "model name":
+        incident["models"][0]["name"] = bare
+    elif where == "model org":
+        incident["models"][0]["share"] = 0.5
+        incident["models"].append({"name": "Other", "codename": None, "family": None, "org": bare, "share": 0.5})
+    elif where == "org":
+        incident["org"] = bare
+    elif where == "publisher":
+        incident["sources"][0]["publisher"] = bare
+    else:
+        incident["summary"] = bare
+    (tmp_path / f"{incident['id']}.yaml").write_text(yaml.safe_dump(incident))
+    errors = validate_dir(tmp_path, rubric, load_validator())[f"{incident['id']}.yaml"]
+    assert any("must be quoted" in e and "2026-07-16" in e for e in errors)
+
+
+def test_the_date_fields_may_stay_unquoted(make_incident, tmp_path, rubric):
+    incident = make_incident(date=date(2026, 1, 1), reported=date(2026, 1, 2), id="2026-01-01-openai-a")
+    (tmp_path / f"{incident['id']}.yaml").write_text(yaml.safe_dump(incident))
+    assert validate_dir(tmp_path, rubric, load_validator()) == {}
+
+
+def test_model_spellings_that_only_match_when_joined_still_collide(make_incident, tmp_path, rubric):
+    one = make_incident(id="2026-01-01-a", org="Acme: Labs", models=[{"name": "One", "codename": None, "family": None, "share": 1}])
+    two = make_incident(id="2026-01-02-b", org="Acme", models=[{"name": "Labs: One", "codename": None, "family": None, "share": 1}])
+    for incident in (one, two):
+        (tmp_path / f"{incident['id']}.yaml").write_text(yaml.safe_dump(incident))
+    results = validate_dir(tmp_path, rubric, load_validator())
+    message = "model slug 'acme-labs-one' has more than one spelling"
+    assert any(message in e for e in results[f"{one['id']}.yaml"])
+    assert any(message in e for e in results[f"{two['id']}.yaml"])
