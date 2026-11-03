@@ -188,14 +188,20 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     return errors
 
 
+def _load_yaml(text: str):
+    # No incident needs an alias, and a small file of them expands to gigabytes.
+    if any(isinstance(event, yaml.AliasEvent) for event in yaml.parse(text, Loader=yaml.SafeLoader)):
+        raise ValueError("aliases aren't allowed in incident files")
+    return yaml.safe_load(text)
+
+
 def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str]]:
     results, seen, families = {}, {}, {}
     org_names, model_names = {}, {}  # slug -> spelling -> files
     for path in sorted(Path(directory).glob("*.yaml")):
         try:
-            incident = yaml.safe_load(path.read_text())
-        except (yaml.YAMLError, RecursionError, ValueError, LookupError, AttributeError) as e:
-            # PyYAML lets these out for a bad date, !!bool foo, !!int "" and !!timestamp foo.
+            incident = _load_yaml(path.read_text())
+        except Exception as e:  # PyYAML lets out all sorts: !!bool foo is a KeyError, 1:1:...:1.0 an OverflowError
             results[path.name] = [f"YAML: {e}"]
             continue
         if not isinstance(incident, dict):
@@ -203,7 +209,7 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
             continue
         try:
             _jsonable(incident)
-        except (TypeError, ValueError, RecursionError) as e:  # a date used as a key, or a YAML alias loop
+        except (TypeError, ValueError, RecursionError) as e:  # a date used as a key, or very deep nesting
             results[path.name] = [f"YAML: not plain data: {e}"]
             continue
         errors = validate_incident(incident, path.stem, rubric, validator)
