@@ -12,9 +12,14 @@ def slugify(text: str) -> str:
 
 
 def model_slug(incident: dict, model: dict) -> str:
-    """A model's identity: its modifier, if any, then its lab and name, so labs never share a row."""
-    parts = (model.get("modified_by"), model_lab(incident, model), model["name"])
-    return slugify(" ".join(dict.fromkeys(filter(None, parts))))
+    """A model's identity: its lab and name, after its modifier if someone else altered it.
+
+    Slugs never contain "--", so that separator can't be confused with part of a name.
+    """
+    lab = model_lab(incident, model)
+    slug = slugify(f"{lab} {model['name']}")
+    modifier = model.get("modified_by")
+    return f"{slugify(modifier)}--{slug}" if modifier and modifier != lab else slug
 
 
 def dwell_points(scoring: dict, rubric: dict) -> int:
