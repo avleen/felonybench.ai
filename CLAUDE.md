@@ -10,11 +10,13 @@ Passing tests and a clean build on today's data don't show a change is correct. 
 4. **When adding a schema field, list the rules it could break, and enforce them in `scripts/validate.py`.** A rule that lives only in the runbook isn't enforced. Check your tests too: they shouldn't build a record the rules forbid and call it valid.
 5. **When a value can play two roles, test both at once.** An org can be both a model's lab and another model's modifier. Sharing one "seen" set between the roles loses information.
 6. **Test site helpers directly.** `site/src/lib/data.ts` has no tests, so its output is easy to skip. Check it with hand-built incidents, not only by reading the built pages.
-7. **Run Cloudflare behavior locally rather than asking the user to check it after merging.** Copy `site/dist` and `wrangler.jsonc` to a scratch directory and run `wrangler dev`, so `.wrangler/` stays out of the repo. For URL changes, try each path with and without a trailing slash.
+7. **Run Cloudflare behavior locally rather than asking the user to check it after merging.** Copy `wrangler.jsonc` and the build to a scratch directory, keeping the build at `<scratch>/site/dist` because the config expects that path, then run `wrangler dev` from there. This keeps `.wrangler/` out of the repo. For URL changes, try each path with and without a trailing slash.
 
 ## After opening a PR
 
 Copilot reviews each PR within a few minutes. CI passing doesn't mean the review is finished. Wait for the review and read it with `gh api repos/avleen/felonybench.ai/pulls/<n>/comments` before telling the user a PR is ready to merge.
+
+Copilot doesn't automatically review later pushes, and old comments can move onto the new commit and look new. Check `/pulls/<n>/reviews` to see which commit was actually reviewed.
 
 ## Why these rules exist
 
