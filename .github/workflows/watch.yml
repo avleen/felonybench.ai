@@ -17,6 +17,8 @@ jobs:
   agent:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      has_candidates: ${{ steps.rss.outputs.has_candidates }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -36,19 +38,20 @@ jobs:
       - id: rss
         run: python -m scripts.rss_filter
 
+      # Uploaded before the agent starts, so the agent can't change it.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rss-seen-${{ github.run_id }}
+          path: .agent-state/seen.json
+          retention-days: 1
+          include-hidden-files: true  # .agent-state/ is a dot-directory
+
       - if: steps.rss.outputs.has_candidates == 'true'
         uses: ./.github/actions/run-agent
         with:
           mode: triage
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
-
-      # Only remember what we've seen once the agent has handled it, so a failed run retries tomorrow.
-      - uses: actions/cache/save@v6
-        if: success()
-        with:
-          path: .agent-state/seen.json
-          key: rss-seen-${{ github.run_id }}
 
   # Runs from a clean checkout with the only write token, so nothing the agent read or wrote
   # can reach it. Runs after a failed agent too: finished incidents still become PRs.
@@ -66,4 +69,16 @@ jobs:
       - uses: ./.github/actions/publish-run
         with:
           agent_result: ${{ needs.agent.result }}
+          expect_output: ${{ needs.agent.outputs.has_candidates == 'true' }}
           github_token: ${{ github.token }}
+
+      # Only remember what we've seen once its PRs exist, so a failed run retries tomorrow.
+      # publish-run fails if the agent or publishing did, which skips these.
+      - uses: actions/download-artifact@v8
+        with:
+          name: rss-seen-${{ github.run_id }}
+          path: .agent-state
+      - uses: actions/cache/save@v6
+        with:
+          path: .agent-state/seen.json
+          key: rss-seen-${{ github.run_id }}

@@ -67,9 +67,14 @@ def _post(title: str, body: str) -> None:
         _gh("issue", "create", "--title", title, "--body", body)
 
 
+def failed(agent: str, publish: str) -> bool:
+    """Publishing has to have actually succeeded: if it was skipped, nothing got published."""
+    return agent in ("failure", "cancelled") or publish != "success"
+
+
 def report(workflow: str, url: str, agent: str, publish: str, result: dict | None, sweep_report: str) -> None:
     title = f"Agent run failed: {workflow}"
-    if agent in ("failure", "cancelled") or publish in ("failure", "cancelled"):
+    if failed(agent, publish):
         _post(title, failure_body(url, agent, publish, result))
     else:
         existing = _find_issue(title)
@@ -95,7 +100,7 @@ def main(argv: list[str] | None = None) -> int:
         with open(summary, "a") as f:
             f.write(f"{describe(result)}\n\n{neutralize(sweep)[:COMMENT_LIMIT]}\n")
     report(os.environ["GITHUB_WORKFLOW"], url, args.agent, args.publish, result, sweep)
-    return 1 if {args.agent, args.publish} & {"failure", "cancelled"} else 0
+    return 1 if failed(args.agent, args.publish) else 0
 
 
 if __name__ == "__main__":

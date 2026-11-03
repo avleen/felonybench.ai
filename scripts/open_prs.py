@@ -14,6 +14,7 @@ import yaml
 
 from scripts.diff import render
 from scripts.rubric import ROOT, load_rubric
+from scripts.run_report import neutralize
 from scripts.score import load_incidents
 from scripts.scoring import build_scores
 from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir
@@ -66,15 +67,16 @@ def labels_for(incident: dict, errors: list[str], previously_closed: int | None 
     labels = ["agent"]
     if awaiting_news(errors):
         labels.append("awaiting-news")
-    elif errors or incident.get("confidence") == "low" or previously_closed:
+    elif errors or incident.get("confidence") == "low":
+        labels.append("needs-review")
+    if previously_closed and "needs-review" not in labels:  # a rejection needs review even while awaiting news
         labels.append("needs-review")
     return labels
 
 
 def quote_notes(notes: str) -> str:
-    """Agent notes are untrusted: keep them visibly separate, and stop them notifying people."""
-    lines = notes.strip().replace("@", "@\u200b").splitlines()
-    return "\n".join(f"> {line}" for line in lines)
+    """Agent notes are untrusted: keep them visibly separate."""
+    return "\n".join(f"> {line}" for line in notes.strip().splitlines())
 
 
 def pr_body(
@@ -119,7 +121,8 @@ def pr_body(
     summary = str(incident.get("summary", ""))
     parts.append("## Agent notes (unverified)\n\n" + quote_notes(notes.strip() or summary))
     parts.append("_Opened by the FelonyBench agent. Check every source before merging._")
-    body = "\n\n".join(parts)
+    # The org, victims and validation errors come from the agent too, not just its notes.
+    body = neutralize("\n\n".join(parts))
     if len(body) > PR_BODY_LIMIT:
         suffix = "\n\n_…truncated._"
         body = body[: PR_BODY_LIMIT - len(suffix)] + suffix
@@ -203,7 +206,7 @@ def main(argv: list[str] | None = None) -> int:
                 _run("gh", "pr", "comment", number, "--body", "Agent updated this incident. The description now reflects the new version.")
                 if becomes_ready(pr, errors):
                     _run("gh", "pr", "ready", number)
-                    stale = [label for label in ("awaiting-news", "needs-review") if has_label(pr, label) and label not in labels_for(incident, errors)]
+                    stale = [label for label in ("awaiting-news", "needs-review") if has_label(pr, label) and label not in labels_for(incident, errors, previously_closed)]
                     for label in stale:
                         _run("gh", "pr", "edit", number, "--remove-label", label)
                 elif errors and not pr.get("isDraft"):  # agent PRs get no CI check; a draft can't be merged by accident

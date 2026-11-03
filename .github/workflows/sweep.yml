@@ -49,4 +49,5 @@ jobs:
       - uses: ./.github/actions/publish-run
         with:
           agent_result: ${{ needs.agent.result }}
+          expect_output: "true"
           github_token: ${{ github.token }}

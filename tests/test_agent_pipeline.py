@@ -5,9 +5,10 @@ import pytest
 import yaml
 
 from scripts.apply_agent_output import apply_output
-from scripts.closed_prs import closing_reason, rejected, render
-from scripts.open_prs import pr_body, quote_notes
-from scripts.run_report import agent_result, describe, failure_body, neutralize
+from scripts.closed_prs import closing_reason, rejected, render, snapshot_name
+from scripts.open_prs import labels_for, pr_body
+from scripts.run_report import agent_result, describe, failed, failure_body, neutralize
+from scripts.validate import NEWS_REQUIRED
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -93,7 +94,54 @@ def test_failure_body_names_both_outcomes():
 
 def test_untrusted_text_cannot_mention_people():
     assert "@owner" not in neutralize("hi @owner")
-    assert "@owner" not in quote_notes("hi @owner")
+
+
+def test_no_agent_text_in_a_pr_body_can_mention_people(make_incident):
+    body = pr_body(make_incident(org="@org"), "@notes", None, "| @diff |", ["@error"])
+    for handle in ("@org", "@notes", "@diff", "@error"):
+        assert handle not in body
+
+
+def test_two_rejections_of_one_incident_keep_separate_snapshots():
+    first = {"headRefName": "agent/x", "number": 10}
+    second = {"headRefName": "agent/x", "number": 20}
+    assert snapshot_name(first) != snapshot_name(second)
+    assert "/" not in snapshot_name({"headRefName": "agent/a/b", "number": 1})
+
+
+def test_a_rejected_incident_needs_review_even_while_awaiting_news(make_incident):
+    assert labels_for(make_incident(), [NEWS_REQUIRED], previously_closed=7) == ["agent", "awaiting-news", "needs-review"]
+    assert labels_for(make_incident(), [], previously_closed=7) == ["agent", "needs-review"]
+    assert labels_for(make_incident(), [NEWS_REQUIRED]) == ["agent", "awaiting-news"]
+
+
+@pytest.mark.parametrize("agent, publish, expected", [
+    ("success", "success", False),
+    ("skipped", "success", False),
+    ("failure", "success", True),
+    ("success", "failure", True),
+    ("success", "skipped", True),  # setup failed, so nothing was published: not a recovery
+])
+def test_only_a_real_publish_counts_as_success(agent, publish, expected):
+    assert failed(agent, publish) is expected
+
+
+def test_seen_leads_are_only_saved_after_publishing():
+    jobs = yaml.safe_load((ROOT / ".github/workflows/watch.yml").read_text())["jobs"]
+    uses = [s.get("uses", "") for s in jobs["publish"]["steps"]]
+    assert not any("cache/save" in s.get("uses", "") for s in jobs["agent"]["steps"])
+    assert uses.index("./.github/actions/publish-run") < next(i for i, u in enumerate(uses) if "cache/save" in u)
+    assert not any("if" in s for s in jobs["publish"]["steps"] if "cache/save" in s.get("uses", ""))
+    agent = jobs["agent"]["steps"]
+    upload = next(i for i, s in enumerate(agent) if "upload-artifact" in s.get("uses", ""))
+    assert upload < next(i for i, s in enumerate(agent) if "run-agent" in s.get("uses", ""))
+
+
+def test_a_failed_download_is_not_treated_as_no_output():
+    steps = yaml.safe_load((ROOT / ".github/actions/publish-run/action.yml").read_text())["runs"]["steps"]
+    open_prs = next(s for s in steps if s.get("id") == "open_prs")
+    assert "$EXPECT_OUTPUT" in open_prs["run"] and "OUTPUT_DOWNLOAD" in open_prs["env"]
+    assert next(s for s in steps if s.get("name") == "Report the run")["if"] == "always()"
 
 
 def test_notes_come_after_generated_sections(make_incident):

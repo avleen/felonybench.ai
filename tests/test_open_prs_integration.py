@@ -348,6 +348,22 @@ def test_a_resubmitted_rejected_incident_is_flagged(tmp_path, make_incident):
     assert "needs-review" in create
 
 
+def test_a_rejected_incident_keeps_needs_review_when_its_draft_becomes_ready(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    branch = f"agent/{incident['id']}"
+    closed = json.dumps([{"number": 55, "headRefName": branch, "mergedAt": None}])
+    labels = [{"name": "agent"}, {"name": "awaiting-news"}, {"name": "needs-review"}]
+    draft = json.dumps([{"number": 9, "headRefName": branch, "isDraft": True, "labels": labels}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=draft, closed_pr_list=closed).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert ["pr", "edit", "9", "--remove-label", "awaiting-news"] in calls
+    assert ["pr", "edit", "9", "--remove-label", "needs-review"] not in calls
+
+
 def test_a_merged_pr_does_not_count_as_rejected(tmp_path, make_incident):
     sandbox = _make_sandbox(tmp_path)
     incident = make_incident(id="2026-06-01-openai-x")

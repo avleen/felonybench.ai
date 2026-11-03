@@ -4,6 +4,9 @@ inputs:
   agent_result:
     description: Result of the agent job
     required: true
+  expect_output:
+    description: Whether the agent ran, so its output must exist ("true" or "false")
+    required: true
   github_token:
     description: Token that can open PRs and issues
     required: true
@@ -18,7 +21,8 @@ runs:
       run: pip install -r requirements.txt
 
     - name: Download the agent's output
-      continue-on-error: true  # a run with no candidates uploads nothing
+      id: output
+      continue-on-error: true  # a run with no candidates uploads nothing; Open PRs decides if that's a failure
       uses: actions/download-artifact@v8
       with:
         name: agent-output-${{ github.run_id }}
@@ -37,20 +41,28 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
+        EXPECT_OUTPUT: ${{ inputs.expect_output }}
+        OUTPUT_DOWNLOAD: ${{ steps.output.outcome }}
       run: |
+        if [ "$EXPECT_OUTPUT" = true ] && [ "$OUTPUT_DOWNLOAD" != success ]; then
+          echo "::error::The agent ran but its output could not be downloaded"
+          exit 1
+        fi
         git config user.name "felonybench-agent"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git fetch -q origin +main:refs/remotes/origin/main
         python -m scripts.apply_agent_output "$RUNNER_TEMP/agent-output"
         python -m scripts.open_prs
 
+    # Runs even if Python setup failed, and needs nothing from requirements.txt.
     - name: Report the run
+      if: always()
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
         AGENT_RESULT: ${{ inputs.agent_result }}
         PUBLISH_OUTCOME: ${{ steps.open_prs.outcome }}
       run: |
-        python -m scripts.run_report --agent "$AGENT_RESULT" --publish "$PUBLISH_OUTCOME" \
+        python3 -m scripts.run_report --agent "$AGENT_RESULT" --publish "$PUBLISH_OUTCOME" \
           --transcript "$RUNNER_TEMP/agent-transcript/claude-execution-output.json" \
           --sweep-report .agent-out/sweep-report.md

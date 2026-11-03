@@ -28,6 +28,12 @@ def render(pr: dict) -> str:
     return f"# {pr['title']}\n\nPR #{pr['number']}, closed {pr.get('closedAt')} without merging: {pr.get('url')}\n\nReason: {reason}\n"
 
 
+def snapshot_name(pr: dict) -> str:
+    """One file per PR: an incident can be rejected twice, and each reason counts."""
+    incident = pr["headRefName"].removeprefix("agent/").replace("/", "-")
+    return f"{incident}-pr{pr['number']}.md"
+
+
 def main() -> int:
     out = subprocess.run(
         ["gh", "pr", "list", "--label", "agent", "--state", "closed", "--limit", "200", "--json", FIELDS],
@@ -36,7 +42,7 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     prs = rejected(json.loads(out))
     for pr in prs:
-        (OUT / f"{pr['headRefName'].removeprefix('agent/')}.md").write_text(render(pr))
+        (OUT / snapshot_name(pr)).write_text(render(pr))
     print(f"{len(prs)} closed agent PRs")
     return 0
 
