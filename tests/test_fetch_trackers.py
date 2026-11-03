@@ -26,13 +26,13 @@ def test_clean_text_collapses_blank_lines():
     assert clean_text("  a  \n\n\n\n b\n") == "a\n\nb\n"
 
 
-def test_fetch_org_writes_only_the_digest(tmp_path):
+def test_fetch_org_writes_json_and_digest(tmp_path):
     def opener(req, timeout):
         return io.BytesIO(json.dumps(ORG_DATA).encode())
 
     assert fetch_org(tmp_path, opener=opener).startswith("ok")
+    assert json.loads((tmp_path / "felonybench-org.json").read_text()) == ORG_DATA
     assert "OpenAI" in (tmp_path / "felonybench-org.txt").read_text()
-    assert [p.name for p in tmp_path.iterdir()] == ["felonybench-org.txt"]
 
 
 def test_fetch_org_records_errors(tmp_path):
@@ -40,7 +40,7 @@ def test_fetch_org_records_errors(tmp_path):
         raise OSError("network down")
 
     assert "network down" in fetch_org(tmp_path, opener=opener)
-    assert "network down" in (tmp_path / "felonybench-org.txt").read_text()
+    assert "network down" in json.loads((tmp_path / "felonybench-org.json").read_text())["error"]
 
 
 def test_fetch_com_records_checkpoint_as_error(tmp_path):
