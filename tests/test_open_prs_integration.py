@@ -37,6 +37,10 @@ log_path = os.environ["FAKE_GH_LOG"]
 with open(log_path, "a") as f:
     f.write(json.dumps(args) + "\\n")
 
+if os.environ.get("FAKE_GH_FAIL_CALL") and " ".join(args).startswith(os.environ["FAKE_GH_FAIL_CALL"]):
+    print("simulated failure", file=sys.stderr)
+    sys.exit(1)
+
 if len(args) >= 2 and args[0] == "pr" and args[1] == "create":
     marker = os.environ.get("FAKE_GH_FAIL_MARKER")
     if marker and "--title" in args and marker in args[args.index("--title") + 1]:
@@ -95,7 +99,7 @@ def _write_notes(work: Path, incident_id: str, text: str) -> None:
     (notes_dir / f"{incident_id}.md").write_text(text)
 
 
-def _run_open_prs(sandbox: dict, fake_pr_list: str = "[]", fail_marker: str | None = None, closed_pr_list: str = "[]"):
+def _run_open_prs(sandbox: dict, fake_pr_list: str = "[]", fail_marker: str | None = None, fail_call: str | None = None, closed_pr_list: str = "[]"):
     env = os.environ.copy()
     env["PATH"] = f"{sandbox['bin_dir']}{os.pathsep}{env.get('PATH', '')}"
     env["PYTHONPATH"] = os.pathsep.join(filter(None, [str(sandbox["work"]), env.get("PYTHONPATH")]))
@@ -104,6 +108,8 @@ def _run_open_prs(sandbox: dict, fake_pr_list: str = "[]", fail_marker: str | No
     env["FAKE_CLOSED_PR_LIST"] = closed_pr_list
     if fail_marker:
         env["FAKE_GH_FAIL_MARKER"] = fail_marker
+    if fail_call:
+        env["FAKE_GH_FAIL_CALL"] = fail_call
     return subprocess.run(
         [sys.executable, "-m", "scripts.open_prs"],
         cwd=sandbox["work"],
@@ -333,6 +339,31 @@ def test_a_ready_pr_that_becomes_invalid_goes_back_to_draft(tmp_path, make_incid
     assert ["pr", "edit", "9", "--add-label", "needs-review"] in calls
     edit = next(c for c in calls if c[:3] == ["pr", "edit", "9"] and "--body" in c)
     assert "❌ Failed" in edit[edit.index("--body") + 1]
+
+
+def _invalid_revision_of_a_ready_pr(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    incident["sources"] = []
+    _write_incident(sandbox["work"], incident)
+    return sandbox, incident, json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": False, "labels": []}])
+
+
+def test_an_invalid_revision_is_a_draft_even_if_a_later_step_fails(tmp_path, make_incident):
+    sandbox, incident, open_list = _invalid_revision_of_a_ready_pr(tmp_path, make_incident)
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list, fail_call="pr comment").returncode == 1
+
+    assert f"agent/{incident['id']}" in _remote_branches(sandbox["origin"])
+    assert ["pr", "ready", "9", "--undo"] in _gh_calls(sandbox)
+
+
+def test_an_invalid_revision_is_not_pushed_if_the_pr_cant_be_made_a_draft(tmp_path, make_incident):
+    sandbox, incident, open_list = _invalid_revision_of_a_ready_pr(tmp_path, make_incident)
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list, fail_call="pr ready 9 --undo").returncode == 1
+
+    assert f"agent/{incident['id']}" not in _remote_branches(sandbox["origin"])
 
 
 def test_a_resubmitted_rejected_incident_is_flagged(tmp_path, make_incident):

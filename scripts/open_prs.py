@@ -196,11 +196,17 @@ def main(argv: list[str] | None = None) -> int:
             previously_closed = closed_heads.get(branch)
             body = pr_body(incident, notes, breakdown, diff_md, errors, previously_closed)
 
+            pr = open_heads.get(branch)
+            # Agent PRs get no CI check, so this comes before the push: if anything after it
+            # fails, an invalid revision still can't sit in a mergeable PR.
+            if pr and errors and not pr.get("isDraft"):
+                _run("gh", "pr", "ready", str(pr["number"]), "--undo")
+                _run("gh", "pr", "edit", str(pr["number"]), "--add-label", "needs-review")
+
             _run("git", "add", path)
             _run("git", "commit", "-m", title)
             _run("git", "push", "--force", "origin", f"HEAD:refs/heads/{branch}")
-            if branch in open_heads:
-                pr = open_heads[branch]
+            if pr:
                 number = str(pr["number"])
                 _run("gh", "pr", "edit", number, "--title", title, "--body", body)
                 _run("gh", "pr", "comment", number, "--body", "Agent updated this incident. The description now reflects the new version.")
@@ -209,9 +215,6 @@ def main(argv: list[str] | None = None) -> int:
                     stale = [label for label in ("awaiting-news", "needs-review") if has_label(pr, label) and label not in labels_for(incident, errors, previously_closed)]
                     for label in stale:
                         _run("gh", "pr", "edit", number, "--remove-label", label)
-                elif errors and not pr.get("isDraft"):  # agent PRs get no CI check; a draft can't be merged by accident
-                    _run("gh", "pr", "ready", number, "--undo")
-                    _run("gh", "pr", "edit", number, "--add-label", "needs-review")
             else:
                 label_args = [x for label in labels_for(incident, errors, previously_closed) for x in ("--label", label)]
                 draft = ["--draft"] if errors else []  # agent PRs get no CI check; a draft can't be merged by accident
