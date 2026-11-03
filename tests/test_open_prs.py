@@ -6,13 +6,22 @@ from scripts.open_prs import _run, disallowed, labels_for, main, parse_porcelain
 
 
 def test_parse_porcelain():
-    out = "?? incidents/new.yaml\n M incidents/old.yaml\n D incidents/gone.yaml\nR  a.yaml -> incidents/b.yaml\n"
+    out = "?? incidents/new.yaml\0 M incidents/old.yaml\0 D incidents/gone.yaml\0R  incidents/b.yaml\0a.yaml\0"
     assert parse_porcelain(out) == [
         ("??", "incidents/new.yaml"),
         ("M", "incidents/old.yaml"),
         ("D", "incidents/gone.yaml"),
         ("R", "incidents/b.yaml"),
+        ("D", "a.yaml"),
     ]
+
+
+def test_parse_porcelain_is_not_fooled_by_arrows_in_a_filename():
+    assert parse_porcelain("?? scripts/a -> incidents/x.yaml\0") == [("??", "scripts/a -> incidents/x.yaml")]
+
+
+def test_parse_porcelain_keeps_non_ascii_names():
+    assert parse_porcelain("?? incidents/é.yaml\0") == [("??", "incidents/é.yaml")]
 
 
 def test_disallowed_paths():

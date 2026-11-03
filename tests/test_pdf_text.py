@@ -78,10 +78,12 @@ def test_parse_pages_rejects_bad_ranges(spec):
         parse_pages(spec)
 
 
-def test_load_reads_a_local_file(tmp_path):
+def test_load_refuses_a_local_path(tmp_path):
     path = tmp_path / "report.pdf"
     path.write_bytes(PDF)
-    assert load(str(path)) == PDF
+    for source in (str(path), f"file://{path}"):
+        with pytest.raises(ValueError):
+            load(source, resolve=PUBLIC)
 
 
 def resolver(ip):
@@ -141,18 +143,15 @@ def test_public_redirects_are_followed():
 
 
 @pytest.mark.parametrize("value", ["-1", "0"])
-def test_main_rejects_non_positive_max_chars(value, tmp_path):
-    path = tmp_path / "report.pdf"
-    path.write_bytes(PDF)
+def test_main_rejects_non_positive_max_chars(value):
     with pytest.raises(SystemExit) as exc:
-        pdf_text.main([str(path), "--max-chars", value])
+        pdf_text.main(["https://example.com/r.pdf", "--max-chars", value])
     assert exc.value.code == 2
 
 
-def test_main_prints_text(tmp_path, capsys):
-    path = tmp_path / "report.pdf"
-    path.write_bytes(PDF)
-    assert pdf_text.main([str(path), "--pages", "2"]) == 0
+def test_main_prints_text(monkeypatch, capsys):
+    monkeypatch.setattr(pdf_text, "load", lambda source: PDF)
+    assert pdf_text.main(["https://example.com/r.pdf", "--pages", "2"]) == 0
     out = capsys.readouterr().out
     assert "Second page" in out and "First page" not in out
 
@@ -160,3 +159,13 @@ def test_main_prints_text(tmp_path, capsys):
 def test_main_reports_errors_without_a_traceback(capsys):
     assert pdf_text.main(["/no/such/file.pdf"]) == 1
     assert "ERROR" in capsys.readouterr().err
+
+
+def test_oversized_download_is_refused(monkeypatch):
+    import io
+    import scripts.pdf_text as module
+    monkeypatch.setattr(module, "MAX_DOWNLOAD_BYTES", 10)
+    opener = lambda req, timeout: io.BytesIO(b"x" * 11)
+    public = lambda host, port, **kw: [(2, 1, 6, "", ("93.184.216.34", 0))]
+    with pytest.raises(ValueError, match="larger than 10"):
+        module.load("https://example.com/a.pdf", opener=opener, resolve=public)

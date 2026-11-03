@@ -11,6 +11,7 @@ import urllib.request
 from pathlib import Path
 
 from scripts.rubric import ROOT
+from scripts.safe_http import NoDrainRedirects
 
 ORG_URL = "https://felonybench.org/felonies.json"
 COM_URL = "https://www.felonybench.com/"
@@ -38,23 +39,28 @@ def org_digest(data: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+MAX_ORG_BYTES = 50_000_000
+
+
 def clean_text(text: str) -> str:
     """Strip each line and collapse runs of blank lines."""
     lines = [line.strip() for line in text.splitlines()]
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip() + "\n"
 
 
-def fetch_org(out_dir: Path, opener=urllib.request.urlopen) -> str:
+def fetch_org(out_dir: Path, opener=None) -> str:
+    opener = opener or urllib.request.build_opener(NoDrainRedirects()).open
     try:
         req = urllib.request.Request(ORG_URL, headers={"User-Agent": AGENT_UA})
         with opener(req, timeout=60) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        (out_dir / "felonybench-org.json").write_text(json.dumps(data, indent=2, ensure_ascii=False))
+            raw = resp.read(MAX_ORG_BYTES + 1)
+        if len(raw) > MAX_ORG_BYTES:
+            raise ValueError(f"larger than {MAX_ORG_BYTES} bytes")
+        data = json.loads(raw.decode("utf-8"))
         (out_dir / "felonybench-org.txt").write_text(org_digest(data))
         return f"ok ({len(data.get('events', []))} events)"
     except Exception as e:
         msg = f"ERROR fetching {ORG_URL}: {type(e).__name__}: {e}\n"
-        (out_dir / "felonybench-org.json").write_text(json.dumps({"error": msg.strip()}))
         (out_dir / "felonybench-org.txt").write_text(msg)
         return msg.strip()
 
