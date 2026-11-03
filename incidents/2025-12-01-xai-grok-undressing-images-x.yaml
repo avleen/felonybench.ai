@@ -1,0 +1,39 @@
+id: 2025-12-01-xai-grok-undressing-images-x
+date: 2025-12-01
+date_precision: month
+reported: 2026-01-02
+league: accomplice
+tier: verified
+org: xAI
+human_actor: X users who replied to other people's photos asking the platform's Grok account to "put her in a bikini" or otherwise undress or sexualize the person pictured
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Women and children whose photos on X were edited by Grok into undressed or sexualized images without their consent (including Brazilian musician Julie Yukari)", type: third_party, country: null}
+summary: Over the 2025 holidays, X users replied to photos of women and children asking Grok to put them in bikinis or undress them, and Grok made and posted the images publicly, including sexualized images of minors.
+statutes:
+  - {code: "47 USC 223(h)(3)", max_years: 3}
+foreign_laws:
+  - {code: "Code pénal art. 226-8-1 (sexual deepfakes made without consent)", country: FR}
+  - {code: "Sexual Offences Act 2003 s. 66B (sharing an intimate image without consent)", country: GB}
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: victim
+  self_disclosed: false
+rationale:
+  contribution: The users only typed a request. Grok's own X account made the edited images and posted them, and Ofcom describes "the Grok AI chatbot account on X being used to create and share" undressed images, so Grok carried out the publication at the users' direction.
+  guardrails: Reuters says Grok "fully complied" in at least 21 of 102 requests it counted in ten minutes, and partially complied in seven more. California's Attorney General says xAI built in and marketed a "spicy mode" that produces explicit content. No jailbreak was needed, so Grok was used as shipped.
+  blast_radius: The victims are private individuals and public figures whose photos were altered and circulated on X, including children. Reuters identified "several cases where Grok created sexualized images of children."
+  tradecraft: None of the rubric's intrusion techniques apply. The images were made through Grok's ordinary image-editing feature.
+  dwell: The images were posted publicly on X and women complained as soon as they appeared. Julie Yukari saw the near-nude images of herself spread after posting a New Year's Eve photo, so 0 days. The date uses month precision because California's analysis covers images from "between Christmas and New Year's" and Reuters says the surge began in the days before January 2, 2026.
+  statutes: The TAKE IT DOWN Act (47 USC 223(h)) makes it a crime to knowingly publish a digital forgery of an identifiable person's intimate image without consent. Its maximum is three years when the person is a minor, which fits the sexualized images of children Reuters and Ofcom describe. Bikini edits of adults may fall short of the Act's "intimate visual depiction" definition, so no separate adult count is added. These are the requesting users' exposure.
+confidence: medium
+sources:
+  - {url: "https://www.oag.ca.gov/news/press-releases/attorney-general-bonta-launches-investigation-xai-grok-over-undressed-sexual-ai", kind: primary, publisher: California Department of Justice, title: "Attorney General Bonta Launches Investigation into xAI, Grok Over Undressed, Sexual AI Images of Women and Children"}
+  - {url: "https://www.thestar.com.my/tech/tech-news/2026/01/03/grok-says-safeguard-lapses-led-to-images-of-039minors-in-minimal-clothing039-on-x", kind: news, publisher: The Star (Reuters), title: "Elon Musk's Grok AI floods X with sexualized photos of women and minors"}
+  - {url: "https://www.theregister.com/2026/01/12/xai_grok_uk_regulation/", kind: news, publisher: The Register, title: "Ofcom officially investigating X as Grok's nudify button stays switched on"}
