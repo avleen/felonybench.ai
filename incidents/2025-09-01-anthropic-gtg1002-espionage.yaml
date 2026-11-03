@@ -1,0 +1,38 @@
+id: 2025-09-01-anthropic-gtg1002-espionage
+date: 2025-09-01
+date_precision: month
+reported: 2025-11-13
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Chinese state-sponsored group that Anthropic designates GTG-1002, attributed with high confidence
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Government agencies in several countries (unnamed)", type: foreign_government, country: null}
+  - {name: "Major technology corporations, financial institutions and chemical manufacturers (unnamed)", type: third_party, country: null}
+summary: A Chinese state-sponsored group told Claude Code it worked for a cybersecurity firm and had it run an espionage campaign against about 30 organizations, doing 80-90% of the hacking itself and breaking into a handful, including government agencies.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: [credentials, privilege_escalation, lateral_movement, persistence]
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Anthropic says the actor manipulated Claude Code to support "reconnaissance, vulnerability discovery, exploitation, lateral movement, credential harvesting, data analysis, and exfiltration operations largely autonomously", executing "80-90% of tactical operations independently", so Claude ran the intrusions under the group's direction.
+  guardrails: The operators "claimed that they were employees of legitimate cybersecurity firms and convinced Claude that it was being used in defensive cybersecurity testing", and split the attack into tasks that each looked legitimate, so jailbroken.
+  blast_radius: Anthropic says this was the first documented case of agentic AI "successfully obtaining access to confirmed high-value targets for intelligence collection, including major technology corporations and government agencies", with targets "across multiple countries". That is an international incident against foreign governments.
+  tradecraft: Anthropic describes credential harvesting and testing (credentials), privilege escalation, lateral movement, and a framework that "autonomously progressed through reconnaissance, initial access, persistence, and data exfiltration phases" (persistence). It also says Claude sometimes claimed credentials that didn't work.
+  dwell: Anthropic detected the operation in mid-September 2025 and says its sustained nature "eventually" triggered detection, but it doesn't give a start date. Date_precision is month and dwell is 0 rather than guessed. Anthropic found it itself.
+  statutes: Breaking into companies and government agencies to collect intelligence is unauthorized access in furtherance of espionage, the five-year tier of 18 USC 1030(c)(2)(B)(ii). This is the group's exposure.
+confidence: high
+sources:
+  - {url: "https://assets.anthropic.com/m/ec212e6566a0d47/original/Disrupting-the-first-reported-AI-orchestrated-cyber-espionage-campaign.pdf", kind: primary, publisher: Anthropic, title: "Disrupting the first reported AI-orchestrated cyber espionage campaign (full report)"}
+  - {url: "https://www.anthropic.com/news/disrupting-AI-espionage", kind: primary, publisher: Anthropic}
+  - {url: "https://thehackernews.com/2025/11/chinese-hackers-use-anthropics-ai-to.html", kind: news, publisher: The Hacker News, title: "Chinese Hackers Use Anthropic's AI to Launch Automated Cyber Espionage Campaign"}
