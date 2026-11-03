@@ -40,7 +40,7 @@ def test_modifier_is_not_charged_twice_when_it_is_the_lab(make_accomplice, rubri
 def test_modified_model_row(make_accomplice, rubric):
     models = build_scores([make_accomplice()], rubric, "now")["boards"]["accomplice"]["all"]["models"]
     assert [(m["slug"], m["org"], m["base_org"]) for m in models] == [
-        ("orcarouter-qwen3-8-27b-uncensored", "OrcaRouter", "Alibaba")]
+        ("orcarouter-alibaba-qwen3-8-27b-uncensored", "OrcaRouter", "Alibaba")]
 
 
 def test_unmodified_model_row_base_org_is_org(make_accomplice, make_incident, rubric):
@@ -117,5 +117,28 @@ def test_modified_model_from_another_lab(make_accomplice, rubric):
     inc["models"][1].update(modified_by="OrcaRouter", modification="abliterated")
     board = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]
     row = next(m for m in board["models"] if m["name"] == "Kimi K2")
-    assert (row["slug"], row["org"], row["base_org"]) == ("orcarouter-kimi-k2", "OrcaRouter", "Moonshot AI")
+    assert (row["slug"], row["org"], row["base_org"]) == ("orcarouter-moonshot-ai-kimi-k2", "OrcaRouter", "Moonshot AI")
     assert {o["name"] for o in board["orgs"]} == {"Alibaba", "Moonshot AI", "OrcaRouter"}
+
+
+def test_same_modifier_and_name_from_different_labs_keep_separate_rows(make_accomplice, rubric):
+    inc = make_accomplice()
+    shared = {"name": "Undisclosed model", "codename": None, "family": None, "share": 0.5,
+              "modified_by": "OrcaRouter", "modification": "abliterated"}
+    inc["models"] = [dict(shared), {**shared, "org": "Moonshot AI"}]
+    models = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["models"]
+    assert {(m["slug"], m["org"], m["base_org"], m["score"], tuple(m["incidents"])) for m in models} == {
+        ("orcarouter-alibaba-undisclosed-model", "OrcaRouter", "Alibaba", 21, (inc["id"],)),
+        ("orcarouter-moonshot-ai-undisclosed-model", "OrcaRouter", "Moonshot AI", 21, (inc["id"],))}
+
+
+def test_same_modified_model_shares_a_row_across_incidents(make_accomplice, rubric):
+    models = build_scores([make_accomplice(id="a"), make_accomplice(id="b")], rubric, "now")["boards"]["accomplice"]["all"]["models"]
+    assert [(m["incidents"], m["score"]) for m in models] == [(["a", "b"], 84)]
+
+
+def test_model_modified_by_its_own_lab_repeats_no_name_in_the_slug(make_accomplice, rubric):
+    inc = make_accomplice()
+    inc["models"][0]["modified_by"] = "Alibaba"
+    models = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["models"]
+    assert [m["slug"] for m in models] == ["alibaba-qwen3-8-27b-uncensored"]

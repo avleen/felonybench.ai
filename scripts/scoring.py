@@ -11,8 +11,10 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
-def model_slug(org: str, name: str) -> str:
-    return slugify(f"{org} {name}")
+def model_slug(incident: dict, model: dict) -> str:
+    """A model's identity: its modifier, if any, then its lab and name, so labs never share a row."""
+    parts = (model.get("modified_by"), model_lab(incident, model), model["name"])
+    return slugify(" ".join(dict.fromkeys(filter(None, parts))))
 
 
 def dwell_points(scoring: dict, rubric: dict) -> int:
@@ -150,7 +152,7 @@ def score_all(incidents: list[dict], rubric: dict) -> list[dict]:
     for incident in incidents:
         item = {
             **incident,
-            "models": [{**m, "slug": model_slug(model_org(incident, m), m["name"])} for m in incident["models"]],
+            "models": [{**m, "slug": model_slug(incident, m)} for m in incident["models"]],
             "breakdown": breakdown(incident, rubric, incident["id"] in repeat),
         }
         item["badges"] = sorted(badges_for(item))
