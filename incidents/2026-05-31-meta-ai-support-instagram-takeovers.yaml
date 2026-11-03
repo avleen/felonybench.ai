@@ -1,0 +1,37 @@
+id: 2026-05-31-meta-ai-support-instagram-takeovers
+date: 2026-05-31
+date_precision: before
+reported: 2026-06-01
+league: accomplice
+tier: alleged
+org: Meta
+human_actor: Hackers who described themselves as pro-Iran on the Telegram channel that posted a how-to video, plus others who copied the method from Telegram
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "The Obama White House Instagram account and the Chief Master Sergeant of the U.S. Space Force's Instagram account", type: government, country: US}
+  - {name: "Other Instagram account holders, including Sephora and researcher Jane Manchun Wong", type: third_party, country: US}
+summary: Hackers opened Instagram password resets and asked Meta's AI support assistant to link email addresses they controlled to other people's accounts. It did, and sent them the reset codes, letting them hijack and deface accounts including the Obama White House's.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: government
+  tradecraft: [credentials]
+  dwell_days: 0
+  detected_by: victim
+  self_disclosed: false
+rationale:
+  contribution: Per Krebs on Security, the attacker asked Meta's AI support assistant to link a new email address to the target account, and "the bot then sent a one-time code to that address, which allowed a password reset". The AI performed the account-takeover step itself at the attacker's request.
+  guardrails: The attackers posed as the account owner, using a VPN near the target's hometown to avoid security flags. Malwarebytes reports a later variant that hid characters in prompts to manipulate the assistant. Tricking the bot into acting for someone who wasn't the owner counts as jailbroken.
+  blast_radius: Krebs says the Instagram accounts of the Obama White House and the Chief Master Sergeant of the U.S. Space Force were defaced with pro-Iranian images. These are U.S. government accounts, so the blast radius is government. Malwarebytes also names Sephora and Jane Manchun Wong.
+  tradecraft: The assistant issued the attackers a one-time reset code for accounts that weren't theirs, which let them take over the accounts' login (credentials).
+  dwell: Word of the trick spread on Telegram on May 31, 2026, and the defacements that weekend were public at once. The latest possible start date is used and dwell is 0. Malwarebytes says attacks ran "over the past few months", so the real start may be earlier.
+  statutes: Taking over and defacing other people's social media accounts is unauthorized access to obtain information. The hackers' claim that the short handles they took are worth over half a million dollars is unverified and no loss figure is reported, so this uses the one-year misdemeanor maximum. This is the hackers' exposure.
+confidence: medium
+sources:
+  - {url: "https://krebsonsecurity.com/2026/06/hackers-used-metas-ai-support-bot-to-seize-instagram-accounts/", kind: news, publisher: Krebs on Security, title: "Hackers Used Meta's AI Support Bot to Seize Instagram Accounts"}
+  - {url: "https://malwarebytes.com/blog/news/2026/06/metas-ai-support-bot-happily-handed-instagram-accounts-to-hackers", kind: news, publisher: Malwarebytes, title: "Meta's AI support bot happily handed Instagram accounts to hackers"}
