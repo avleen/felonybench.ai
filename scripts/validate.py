@@ -103,7 +103,8 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
             seen.setdefault(incident_id, path.name)
         if errors:
             results[path.name] = errors
-        else:
+        # Other rule errors, like a missing news source, must not hide a misfiled model.
+        if validator.is_valid(_jsonable(incident)):
             for m in incident["models"]:
                 if m.get("family"):
                     families.setdefault(m["family"], {}).setdefault(model_lab(incident, m), []).append(path.name)

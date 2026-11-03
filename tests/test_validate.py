@@ -1,6 +1,6 @@
 import yaml
 
-from scripts.validate import load_validator, validate_dir, validate_incident
+from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir, validate_incident
 
 STEM = "2026-07-16-openai-exploitgym-huggingface"
 
@@ -200,3 +200,35 @@ def test_family_under_its_own_lab_in_another_incident_is_fine(make_accomplice, t
     for inc in (lead, own):
         (tmp_path / f"{inc['id']}.yaml").write_text(yaml.safe_dump(inc))
     assert validate_dir(tmp_path, rubric, load_validator()) == {}
+
+
+def _conflicting_family(make_incident, tmp_path, **second):
+    first = make_incident(id="2026-07-16-openai-a", org="OpenAI")
+    other = make_incident(id="2026-07-17-anthropic-b", org="Anthropic", **second)
+    for inc in (first, other):
+        for m in inc["models"]:
+            m["family"] = "gpt"
+        (tmp_path / f"{inc['id']}.yaml").write_text(yaml.safe_dump(inc))
+    return "2026-07-17-anthropic-b.yaml"
+
+
+def test_family_check_covers_an_incident_awaiting_news(make_incident, tmp_path, rubric):
+    name = _conflicting_family(make_incident, tmp_path, sources=[
+        {"url": "https://example.com/a", "kind": "primary", "publisher": "Example", "title": "Report"}])
+    errors = validate_dir(tmp_path, rubric, load_validator())[name]
+    assert NEWS_REQUIRED in errors and any("family 'gpt'" in e for e in errors)
+
+
+def test_family_check_covers_an_incident_with_other_rule_errors(make_incident, tmp_path, rubric):
+    name = _conflicting_family(make_incident, tmp_path, reported="2020-01-01")
+    errors = validate_dir(tmp_path, rubric, load_validator())[name]
+    assert any("earlier than date" in e for e in errors) and any("family 'gpt'" in e for e in errors)
+
+
+def test_family_check_skips_an_incident_with_malformed_models(make_incident, tmp_path, rubric):
+    good = make_incident()
+    (tmp_path / f"{good['id']}.yaml").write_text(yaml.safe_dump(good))
+    bad = make_incident(id="2026-07-17-anthropic-b", models="not a list")
+    (tmp_path / "2026-07-17-anthropic-b.yaml").write_text(yaml.safe_dump(bad))
+    results = validate_dir(tmp_path, rubric, load_validator())
+    assert list(results) == ["2026-07-17-anthropic-b.yaml"]
