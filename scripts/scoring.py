@@ -12,14 +12,8 @@ def slugify(text: str) -> str:
 
 
 def model_slug(incident: dict, model: dict) -> str:
-    """A model's identity: its lab and name, after its modifier if someone else altered it.
-
-    Slugs never contain "--", so that separator can't be confused with part of a name.
-    """
-    lab = model_lab(incident, model)
-    slug = slugify(f"{lab} {model['name']}")
-    modifier = model.get("modified_by")
-    return f"{slugify(modifier)}--{slug}" if modifier and modifier != lab else slug
+    """A model's identity: its lab and name."""
+    return slugify(f"{model_lab(incident, model)} {model['name']}")
 
 
 def dwell_points(scoring: dict, rubric: dict) -> int:
@@ -123,19 +117,9 @@ def model_lab(incident: dict, model: dict) -> str:
     return model.get("org") or incident["org"]
 
 
-def model_org(incident: dict, model: dict) -> str:
-    """Whose model it is on the model board: the modifier's, if someone altered it."""
-    return model.get("modified_by") or model_lab(incident, model)
-
-
 def defendants(incident: dict) -> list[str]:
-    """Orgs charged with an incident: every distinct lab and modifier, jointly and severally."""
-    orgs = [incident["org"]]
-    for m in incident["models"]:
-        for org in (model_lab(incident, m), m.get("modified_by")):
-            if org and org not in orgs:
-                orgs.append(org)
-    return orgs
+    """Orgs charged with an incident: every distinct lab, jointly and severally, lead lab first."""
+    return list(dict.fromkeys([incident["org"], *(model_lab(incident, m) for m in incident["models"])]))
 
 
 def badges_for(incident: dict) -> set[str]:
@@ -159,6 +143,7 @@ def score_all(incidents: list[dict], rubric: dict) -> list[dict]:
             **incident,
             "models": [{**m, "slug": model_slug(incident, m)} for m in incident["models"]],
             "breakdown": breakdown(incident, rubric, incident["id"] in repeat),
+            "charged": defendants(incident),
         }
         item["badges"] = sorted(badges_for(item))
         scored.append(item)
@@ -169,8 +154,8 @@ def _select(scored: list[dict], league: str, tier: str) -> list[dict]:
     return [i for i in scored if i["league"] == league and i["tier"] in TIERS[tier]]
 
 
-def _new_row(slug: str, name: str, org: str, base_org: str | None = None) -> dict:
-    return {"slug": slug, "name": name, "org": org, "base_org": base_org or org, "score": 0.0, "sentence_years": 0.0,
+def _new_row(slug: str, name: str, org: str) -> dict:
+    return {"slug": slug, "name": name, "org": org, "score": 0.0, "sentence_years": 0.0,
             "incidents": [], "alleged": 0, "peak_blast": -1, "badges": set()}
 
 
@@ -204,7 +189,7 @@ def board(scored: list[dict], rubric: dict, league: str, tier: str) -> dict:
             _add(org, incident, 1, blast_rank)
         for m in incident["models"]:
             row = models.setdefault(
-                m["slug"], _new_row(m["slug"], m["name"], model_org(incident, m), model_lab(incident, m)))
+                m["slug"], _new_row(m["slug"], m["name"], model_lab(incident, m)))
             _add(row, incident, m["share"], blast_rank)
     return {"models": _finish(models, blast_order), "orgs": _finish(orgs, blast_order)}
 

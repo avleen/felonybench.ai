@@ -28,7 +28,7 @@ const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
             <td class="who">
               {byModel ? <a href={`/model/${r.slug}/`}>{r.name}</a> : <strong>{r.name}</strong>}
               {r.alleged > 0 && <span title={`${r.alleged} alleged incident(s)`}>*</span>}
-              {byModel && <span class="org">{r.base_org && r.base_org !== r.org ? `${r.base_org}, modified by ${r.org}` : r.org}</span>}
+              {byModel && <span class="org">{r.org}</span>}
             </td>
             <td class="fbs"><div>
               <span class={`bar${r.rank <= 3 ? " hot" : ""}`} aria-hidden="true"><span style={`width: ${pct(r.score)}%`}></span></span>
@@ -45,7 +45,7 @@ const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
   </div>
 )}
 {rows.length > 0 && league === "accomplice" && !byModel && (
-  <p class="muted joint">Co-defendants are liable jointly and severally: the lab and whoever modified its model are each charged the full score.</p>
+  <p class="muted joint">Co-defendants are liable jointly and severally: each lab whose model was used is charged the full score.</p>
 )}
 
 <style>

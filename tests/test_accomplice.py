@@ -17,42 +17,6 @@ def test_model_crimes_have_no_accomplice_inputs(make_incident, rubric):
     assert (b["contribution"], b["legal_status"], b["guardrails"], b["total"]) == (None, None, 0, 87)
 
 
-def test_co_defendants_each_charged_in_full(make_accomplice, rubric):
-    orgs = build_scores([make_accomplice()], rubric, "now")["boards"]["accomplice"]["all"]["orgs"]
-    assert {(o["name"], o["score"]) for o in orgs} == {("Alibaba", 42), ("OrcaRouter", 42)}
-
-
-def test_co_defendant_charged_once_per_incident(make_accomplice, rubric):
-    inc = make_accomplice()
-    inc["models"] = [{**inc["models"][0], "share": 0.5},
-                     {**inc["models"][0], "name": "Qwen3.8-9B-Uncensored", "share": 0.5}]
-    orgs = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["orgs"]
-    assert {(o["name"], o["score"]) for o in orgs} == {("Alibaba", 42), ("OrcaRouter", 42)}
-
-
-def test_modifier_is_not_charged_twice_when_it_is_the_lab(make_accomplice, rubric):
-    inc = make_accomplice()
-    inc["models"][0]["modified_by"] = "Alibaba"
-    orgs = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["orgs"]
-    assert [(o["name"], o["score"]) for o in orgs] == [("Alibaba", 42)]
-
-
-def test_modified_model_row(make_accomplice, rubric):
-    models = build_scores([make_accomplice()], rubric, "now")["boards"]["accomplice"]["all"]["models"]
-    assert [(m["slug"], m["org"], m["base_org"]) for m in models] == [
-        ("orcarouter--alibaba-qwen3-8-27b-uncensored", "OrcaRouter", "Alibaba")]
-
-
-def test_unmodified_model_row_base_org_is_org(make_accomplice, make_incident, rubric):
-    inc = make_accomplice()
-    del inc["models"][0]["modified_by"]
-    models = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["models"]
-    assert [(m["slug"], m["org"], m["base_org"]) for m in models] == [
-        ("alibaba-qwen3-8-27b-uncensored", "Alibaba", "Alibaba")]
-    models = build_scores([make_incident()], rubric, "now")["boards"]["open"]["all"]["models"]
-    assert {(m["org"], m["base_org"]) for m in models} == {("OpenAI", "OpenAI")}
-
-
 def test_badges(make_accomplice, rubric):
     inc = build_scores([make_accomplice()], rubric, "now")["incidents"][0]
     assert inc["badges"] == ["uncensored"]
@@ -60,12 +24,6 @@ def test_badges(make_accomplice, rubric):
     assert inc["badges"] == ["jailbroken"]
     inc = build_scores([make_accomplice(scoring={"guardrails": "intact"})], rubric, "now")["incidents"][0]
     assert inc["badges"] == []
-
-
-def test_co_defendants_each_get_a_trend_line(make_accomplice, rubric):
-    series = build_scores([make_accomplice()], rubric, "now")["trends"]["accomplice"]["all"]
-    assert set(series) == {"Alibaba", "OrcaRouter"}
-    assert all(points[-1]["cumulative"] == 42 for points in series.values())
 
 
 def test_accomplice_league_is_separate(make_accomplice, make_incident, rubric):
@@ -86,9 +44,9 @@ def _multi_lab(make_accomplice, **overrides):
 
 def test_model_from_another_lab_is_listed_under_that_lab(make_accomplice, rubric):
     models = build_scores([_multi_lab(make_accomplice)], rubric, "now")["boards"]["accomplice"]["all"]["models"]
-    assert {(m["slug"], m["org"], m["base_org"], m["score"]) for m in models} == {
-        ("alibaba-qwen", "Alibaba", "Alibaba", 21),
-        ("moonshot-ai-kimi-k2", "Moonshot AI", "Moonshot AI", 21)}
+    assert {(m["slug"], m["org"], m["score"]) for m in models} == {
+        ("alibaba-qwen", "Alibaba", 21),
+        ("moonshot-ai-kimi-k2", "Moonshot AI", 21)}
 
 
 def test_every_lab_is_charged_in_full(make_accomplice, rubric):
@@ -112,53 +70,38 @@ def test_same_model_shares_one_row_across_incidents(make_accomplice, rubric):
     assert [(m["slug"], m["incidents"], m["score"]) for m in kimi] == [("moonshot-ai-kimi-k2", ["a", "b"], 63)]
 
 
-def test_modified_model_from_another_lab(make_accomplice, rubric):
-    inc = _multi_lab(make_accomplice)
-    inc["models"][1].update(modified_by="OrcaRouter", modification="abliterated")
-    board = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]
-    row = next(m for m in board["models"] if m["name"] == "Kimi K2")
-    assert (row["slug"], row["org"], row["base_org"]) == ("orcarouter--moonshot-ai-kimi-k2", "OrcaRouter", "Moonshot AI")
-    assert {o["name"] for o in board["orgs"]} == {"Alibaba", "Moonshot AI", "OrcaRouter"}
-
-
-def test_same_modifier_and_name_from_different_labs_keep_separate_rows(make_accomplice, rubric):
+def _two_labs(make_accomplice):
     inc = make_accomplice()
-    shared = {"name": "Undisclosed model", "codename": None, "family": None, "share": 0.5,
-              "modified_by": "OrcaRouter", "modification": "abliterated"}
-    inc["models"] = [dict(shared), {**shared, "org": "Moonshot AI"}]
-    models = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["models"]
-    assert {(m["slug"], m["org"], m["base_org"], m["score"], tuple(m["incidents"])) for m in models} == {
-        ("orcarouter--alibaba-undisclosed-model", "OrcaRouter", "Alibaba", 21, (inc["id"],)),
-        ("orcarouter--moonshot-ai-undisclosed-model", "OrcaRouter", "Moonshot AI", 21, (inc["id"],))}
+    inc["models"] = [{**inc["models"][0], "share": 0.5},
+                     {"name": "Kimi K2", "codename": None, "family": "kimi", "org": "Moonshot AI", "share": 0.5}]
+    return inc
 
 
-def test_same_modified_model_shares_a_row_across_incidents(make_accomplice, rubric):
-    models = build_scores([make_accomplice(id="a"), make_accomplice(id="b")], rubric, "now")["boards"]["accomplice"]["all"]["models"]
-    assert [(m["incidents"], m["score"]) for m in models] == [(["a", "b"], 84)]
+def test_co_defendants_each_charged_in_full(make_accomplice, rubric):
+    orgs = build_scores([_two_labs(make_accomplice)], rubric, "now")["boards"]["accomplice"]["all"]["orgs"]
+    assert {(o["name"], o["score"]) for o in orgs} == {("Alibaba", 42), ("Moonshot AI", 42)}
 
 
-def test_model_modified_by_its_own_lab_repeats_no_name_in_the_slug(make_accomplice, rubric):
+def test_co_defendant_charged_once_per_incident(make_accomplice, rubric):
     inc = make_accomplice()
-    inc["models"][0]["modified_by"] = "Alibaba"
-    models = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["models"]
-    assert [m["slug"] for m in models] == ["alibaba-qwen3-8-27b-uncensored"]
+    inc["models"] = [{**inc["models"][0], "share": 0.5},
+                     {**inc["models"][0], "name": "Qwen3.8-9B", "share": 0.5}]
+    orgs = build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["orgs"]
+    assert [(o["name"], o["score"]) for o in orgs] == [("Alibaba", 42)]
 
 
-def test_model_named_like_its_lab_or_modifier_keeps_its_name(make_accomplice, rubric):
-    inc = make_accomplice()
-    shared = {"codename": None, "family": None, "share": 0.5, "org": "Moonshot AI",
-              "modified_by": "OrcaRouter", "modification": "abliterated"}
-    inc["models"] = [{**shared, "name": "Moonshot AI"}, {**shared, "name": "OrcaRouter"}]
-    slugs = {m["slug"] for m in build_scores([inc], rubric, "now")["boards"]["accomplice"]["all"]["models"]}
-    assert slugs == {"orcarouter--moonshot-ai-moonshot-ai", "orcarouter--moonshot-ai-orcarouter"}
+def test_co_defendants_each_get_a_trend_line(make_accomplice, rubric):
+    series = build_scores([_two_labs(make_accomplice)], rubric, "now")["trends"]["accomplice"]["all"]
+    assert set(series) == {"Alibaba", "Moonshot AI"}
+    assert all(points[-1]["cumulative"] == 42 for points in series.values())
 
 
-def test_modifier_is_not_confused_with_part_of_a_model_name(make_accomplice, rubric):
-    modified = make_accomplice(id="a")
-    modified["models"] = [{"name": "Qwen", "codename": None, "family": None, "share": 1,
-                           "modified_by": "OrcaRouter", "modification": "abliterated"}]
-    own = make_accomplice(id="b", org="OrcaRouter")
-    own["models"] = [{"name": "Alibaba Qwen", "codename": None, "family": None, "share": 1}]
-    models = build_scores([modified, own], rubric, "now")["boards"]["accomplice"]["all"]["models"]
-    assert {(m["slug"], m["base_org"]) for m in models} == {
-        ("orcarouter--alibaba-qwen", "Alibaba"), ("orcarouter-alibaba-qwen", "OrcaRouter")}
+def test_scores_say_who_is_charged_lead_lab_first(make_accomplice, rubric):
+    inc = _two_labs(make_accomplice)
+    inc["models"].reverse()
+    assert build_scores([inc], rubric, "now")["incidents"][0]["charged"] == ["Alibaba", "Moonshot AI"]
+
+
+def test_a_single_lab_is_charged_once(make_accomplice, make_incident, rubric):
+    assert build_scores([make_accomplice()], rubric, "now")["incidents"][0]["charged"] == ["Alibaba"]
+    assert build_scores([make_incident()], rubric, "now")["incidents"][0]["charged"] == ["OpenAI"]
