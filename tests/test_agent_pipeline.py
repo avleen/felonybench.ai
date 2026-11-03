@@ -1,3 +1,4 @@
+import html
 import json
 from pathlib import Path
 
@@ -240,6 +241,21 @@ def test_neutralize_keeps_links_working_by_encoding_the_at(text):
     "https://x.com/&#32;@owner",
     "<div>\nhttps://x.com/@owner\n</div>",
     "HTTPS://X.COM/@owner",
+    "&#64;owner",
+    "&#064;owner",
+    "&#0064;owner",
+    "&#x40;owner",
+    "&#X40;owner",
+    "&#x0040;owner",
+    "&commat;owner",
+    "<div>&#64owner</div>",
+    "> &#64;owner",
+    "https://x.com/&#64;owner",
 ])
 def test_neutralize_leaves_no_bare_mention(text):
-    assert "@owner" not in neutralize(text)
+    assert "@owner" not in html.unescape(neutralize(text))
+
+
+@pytest.mark.parametrize("text", ["&#640;", "&#x401;", "&amp;#64;", "AT&T"])
+def test_neutralize_leaves_other_entities_alone(text):
+    assert neutralize(text) == text

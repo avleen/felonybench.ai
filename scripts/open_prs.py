@@ -167,19 +167,26 @@ def main(argv: list[str] | None = None) -> int:
     if not files:
         print("No incident changes.")
         return 1 if skipped else 0
-    contents = {p: (ROOT / p).read_text() for p in files}
+    failed = bool(skipped)
+    contents = {}
+    for path in files:
+        try:
+            contents[path] = (ROOT / path).read_text()
+        except (OSError, ValueError) as e:  # ValueError: not UTF-8
+            failed = True
+            print(f"Failed to read {path}: {e!r}", file=sys.stderr)
     new_files = {p for s, p in changes if s in ("??", "A")}
 
     _run("git", "reset", "--hard", args.base)
     _run("git", "clean", "-fd", "incidents")
     rubric, validator = load_rubric(), load_validator()
     before = build_scores(load_incidents(ROOT / "incidents"), rubric, "base")
-    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--limit", "200", "--json", "number,headRefName,isDraft,labels"))
-    open_heads = {pr["headRefName"]: pr for pr in open_prs}
+    open_prs = json.loads(_run("gh", "pr", "list", "--state", "open", "--limit", "200", "--json", "number,headRefName,isDraft,labels,isCrossRepository"))
+    # A fork can name its branch agent/<id> too, and must not be mistaken for the agent's PR.
+    open_heads = {pr["headRefName"]: pr for pr in open_prs if not pr.get("isCrossRepository")}
     closed_prs = json.loads(_run("gh", "pr", "list", "--label", "agent", "--state", "closed", "--limit", "200", "--json", "number,headRefName,mergedAt"))
     closed_heads = {pr["headRefName"]: pr["number"] for pr in sorted(closed_prs, key=lambda pr: pr["number"]) if not pr.get("mergedAt")}
 
-    failed = bool(skipped)
     for path, text in contents.items():
         stem = Path(path).stem
         branch = f"agent/{stem}"

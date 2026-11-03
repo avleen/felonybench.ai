@@ -473,6 +473,31 @@ def test_an_existing_pr_is_never_given_the_agent_label(tmp_path, make_incident):
     assert ["pr", "edit", "9", "--add-label", "agent"] not in _gh_calls(sandbox)
 
 
+def test_a_fork_pr_with_the_same_branch_name_is_left_alone(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": True, "labels": [], "isCrossRepository": True}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert _calls(calls, "pr", "create")
+    assert not [c for c in calls if "9" in c]
+
+
+def test_a_file_that_isnt_utf8_doesnt_cost_the_run_its_other_prs(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    (sandbox["work"] / "incidents" / "2026-06-02-openai-y.yaml").write_bytes(b"org: \xff\n")
+
+    assert _run_open_prs(sandbox).returncode == 1
+
+    assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
+    assert f"agent/{incident['id']}" in _remote_branches(sandbox["origin"])
+
+
 def test_a_resubmitted_rejected_incident_is_flagged(tmp_path, make_incident):
     sandbox = _make_sandbox(tmp_path)
     incident = make_incident(id="2026-06-01-openai-x")
