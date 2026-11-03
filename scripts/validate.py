@@ -89,6 +89,9 @@ def _identity_errors(incident: dict) -> list[str]:
             errors.append(f"models: org '{m['org']}' has no letters or digits in a-z0-9 to build a URL from")
         if re.search(r"undisclosed|unnamed|unknown", m["name"], re.I) and m["name"] != UNDISCLOSED_NAME:
             errors.append(f"models: '{m['name']}' must be exactly '{UNDISCLOSED_NAME}' when the model isn't named")
+        # Without a known model, nothing shows it's the same line as an earlier offense.
+        if m["name"] == UNDISCLOSED_NAME and m.get("family") is not None:
+            errors.append(f"models: '{UNDISCLOSED_NAME}' must have family null, so it can't count as a repeat offense")
     slugs = [model_slug(incident, m) for m in incident["models"]]
     if len(slugs) != len(set(slugs)):
         errors.append("models: the same model is listed twice; give it one entry with the combined share")

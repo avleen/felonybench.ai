@@ -496,3 +496,9 @@ def test_alleged_cant_apply_when_a_lab_publishes_under_its_short_name(make_incid
         {"url": "https://example.com/b", "kind": "news", "publisher": "Wired"},
     ])
     assert any("can't apply when the lab" in e for e in validate_incident(incident, incident["id"], rubric, load_validator()))
+
+
+def test_an_undisclosed_model_cant_have_a_family(make_incident, rubric):
+    incident = make_incident(models=[{"name": "Undisclosed model", "codename": None, "family": "gemini", "share": 1}])
+    errors = validate_incident(incident, incident["id"], rubric, load_validator())
+    assert any("must have family null" in e for e in errors)

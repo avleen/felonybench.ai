@@ -115,8 +115,11 @@ def test_page_structure_problems_are_found(tmp_path, html, error):
     assert f"index.html: {error}" in structure_errors(tmp_path)
 
 
+SITEMAP_INDEX = "<sitemapindex><sitemap><loc>https://felonybench.ai/sitemap-0.xml</loc></sitemap></sitemapindex>"
+
+
 def _sitemap(dist, *paths):
-    (dist / "sitemap-index.xml").write_text("<sitemapindex></sitemapindex>")
+    (dist / "sitemap-index.xml").write_text(SITEMAP_INDEX)
     if not (dist / "index.html").exists():
         (dist / "index.html").write_text("<html></html>")
     paths = ("/", *paths)
@@ -145,11 +148,21 @@ def test_sitemap_cannot_list_a_missing_page(tmp_path):
 
 
 def test_a_missing_sitemap_is_an_error(tmp_path):
-    errors = sitemap_errors(tmp_path)
-    assert "sitemap-index.xml is missing, but robots.txt points at it" in errors
+    assert sitemap_errors(tmp_path) == ["sitemap-index.xml is missing, but robots.txt points at it"]
 
 
 def test_a_sitemap_without_the_homepage_is_an_error(tmp_path):
-    (tmp_path / "sitemap-index.xml").write_text("<sitemapindex></sitemapindex>")
+    (tmp_path / "sitemap-index.xml").write_text(SITEMAP_INDEX)
     (tmp_path / "sitemap-0.xml").write_text("<urlset></urlset>")
+    assert sitemap_errors(tmp_path) == ["the sitemap doesn't list the homepage"]
+
+
+def test_an_index_pointing_at_a_missing_sitemap_is_an_error(tmp_path):
+    (tmp_path / "sitemap-index.xml").write_text(SITEMAP_INDEX)
+    assert "sitemap-index.xml: sitemap-0.xml is missing" in sitemap_errors(tmp_path)
+
+
+def test_a_homepage_in_a_sitemap_the_index_doesnt_link_doesnt_count(tmp_path):
+    _sitemap(tmp_path)
+    (tmp_path / "sitemap-index.xml").write_text("<sitemapindex></sitemapindex>")
     assert sitemap_errors(tmp_path) == ["the sitemap doesn't list the homepage"]
