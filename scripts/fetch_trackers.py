@@ -55,12 +55,10 @@ def fetch_org(out_dir: Path, opener=urllib.request.urlopen) -> str:
         if len(raw) > MAX_ORG_BYTES:
             raise ValueError(f"larger than {MAX_ORG_BYTES} bytes")
         data = json.loads(raw.decode("utf-8"))
-        (out_dir / "felonybench-org.json").write_text(json.dumps(data, indent=2, ensure_ascii=False))
         (out_dir / "felonybench-org.txt").write_text(org_digest(data))
         return f"ok ({len(data.get('events', []))} events)"
     except Exception as e:
         msg = f"ERROR fetching {ORG_URL}: {type(e).__name__}: {e}\n"
-        (out_dir / "felonybench-org.json").write_text(json.dumps({"error": msg.strip()}))
         (out_dir / "felonybench-org.txt").write_text(msg)
         return msg.strip()
 
