@@ -7,6 +7,9 @@ inputs:
   expect_output:
     description: Whether the agent ran, so its output must exist ("true" or "false")
     required: true
+  dead_feeds:
+    description: Names of dead feeds if too many died, or "none". Empty when feeds weren't checked.
+    default: ""
   github_token:
     description: Token that can open PRs and issues
     required: true
@@ -62,7 +65,8 @@ runs:
         GH_TOKEN: ${{ inputs.github_token }}
         AGENT_RESULT: ${{ inputs.agent_result }}
         PUBLISH_OUTCOME: ${{ steps.open_prs.outcome }}
+        DEAD_FEEDS: ${{ inputs.dead_feeds }}
       run: |
         python3 -m scripts.run_report --agent "$AGENT_RESULT" --publish "$PUBLISH_OUTCOME" \
           --transcript "$RUNNER_TEMP/agent-transcript/claude-execution-output.json" \
-          --sweep-report .agent-out/sweep-report.md
+          --sweep-report .agent-out/sweep-report.md --dead-feeds "$DEAD_FEEDS"

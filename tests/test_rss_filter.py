@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -200,7 +201,7 @@ def test_main_keeps_going_when_a_feed_raises_and_counts_it_dead(tmp_path, monkey
 
     code, output, summary = _run_main(tmp_path, monkeypatch, fetch)
     assert code == 0
-    assert "has_candidates=true" in output and "too_many_dead=true" in output
+    assert "has_candidates=true" in output and "dead_feeds=A\n" in output
     assert "| A | 0 |" in summary
     assert "::warning::Feed returned nothing: A" in capsys.readouterr().out
     assert [c["link"] for c in json.loads((tmp_path / "out.json").read_text())] == ["https://b/1"]
@@ -209,4 +210,28 @@ def test_main_keeps_going_when_a_feed_raises_and_counts_it_dead(tmp_path, monkey
 def test_main_reports_healthy_feeds(tmp_path, monkeypatch):
     fetch = lambda feed: [{"feed": feed["name"], "title": "nothing", "link": f"{feed['url']}/1", "summary": ""}]
     _, output, _ = _run_main(tmp_path, monkeypatch, fetch)
-    assert "has_candidates=false" in output and "too_many_dead=false" in output
+    assert "has_candidates=false" in output and "dead_feeds=none\n" in output
+
+
+def test_time_limit_stops_a_feed_that_never_finishes():
+    with pytest.raises(TimeoutError):
+        with rss_filter.time_limit(1):
+            time.sleep(5)
+
+
+def test_time_limit_clears_itself():
+    with rss_filter.time_limit(1):
+        pass
+    time.sleep(1.1)  # would raise here if the alarm were still set
+
+
+def test_main_counts_a_timed_out_feed_as_dead(tmp_path, monkeypatch):
+    monkeypatch.setattr(rss_filter, "FEED_TOTAL_SECONDS", 1)
+
+    def fetch(feed):
+        if feed["name"] == "A":
+            time.sleep(5)
+        return [{"feed": feed["name"], "title": "x", "link": f"{feed['url']}/1", "summary": ""}]
+
+    _, output, _ = _run_main(tmp_path, monkeypatch, fetch)
+    assert "dead_feeds=A\n" in output

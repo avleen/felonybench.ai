@@ -3,10 +3,12 @@ import argparse
 import json
 import os
 import re
+import signal
 import socket
 import sys
 import time
 from calendar import timegm
+from contextlib import contextmanager
 from pathlib import Path
 
 import feedparser
@@ -17,7 +19,8 @@ from scripts.rubric import ROOT
 MAX_SEEN = 5000
 MAX_AGE_DAYS = 7  # skip older items: already-seen news, or a newly added feed's backlog
 USER_AGENT = "felonybench-watch/1.0 (+https://felonybench.ai/how-it-works)"
-FEED_TIMEOUT_SECONDS = 60  # feedparser has no timeout of its own, and a hung feed would stall the run
+FEED_IDLE_SECONDS = 60  # feedparser has no timeout of its own, and a hung feed would stall the run
+FEED_TOTAL_SECONDS = 120  # the idle limit never fires on a server that drips a byte at a time
 MAX_DEAD_SHARE = 0.2  # one feed down is normal; more than this means we're going blind
 
 
@@ -63,6 +66,20 @@ def fetch(feed: dict) -> list[dict]:
     ]
 
 
+@contextmanager
+def time_limit(seconds: int):
+    def expired(signum, frame):
+        raise TimeoutError(f"took longer than {seconds}s")
+
+    previous = signal.signal(signal.SIGALRM, expired)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, previous)
+
+
 def load_seen(path: Path) -> list[str]:
     """Losing this only means re-reading a week of news, so a corrupt file shouldn't stop the run."""
     try:
@@ -101,12 +118,13 @@ def main(argv: list[str] | None = None) -> int:
     lab_re, trigger_re = compile_patterns(config["labs"], config["triggers"])
     seen_list = load_seen(args.seen)
     seen = set(seen_list)
-    socket.setdefaulttimeout(FEED_TIMEOUT_SECONDS)
+    socket.setdefaulttimeout(FEED_IDLE_SECONDS)
 
     entries, counts = [], {}
     for feed in config["feeds"]:
         try:
-            got = fetch(feed)
+            with time_limit(FEED_TOTAL_SECONDS):
+                got = fetch(feed)
         except Exception as e:  # one bad feed must not stop the run
             print(f"warning: {feed['name']}: {e}", file=sys.stderr)
             got = []
@@ -131,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
     if output := os.environ.get("GITHUB_OUTPUT"):
         with open(output, "a") as f:
             f.write(f"has_candidates={'true' if candidates else 'false'}\n")
-            f.write(f"too_many_dead={'true' if too_many_dead(counts) else 'false'}\n")
+            f.write(f"dead_feeds={', '.join(dead_feeds(counts)) if too_many_dead(counts) else 'none'}\n")
     if summary := os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(summary, "a") as f:
             f.write(feed_summary(counts))

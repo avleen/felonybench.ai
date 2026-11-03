@@ -7,6 +7,7 @@ import yaml
 from scripts.apply_agent_output import apply_output
 from scripts.closed_prs import closing_reason, rejected, render, snapshot_name
 from scripts.open_prs import labels_for, pr_body
+from scripts import run_report
 from scripts.run_report import agent_result, describe, failed, failure_body, neutralize
 from scripts.validate import NEWS_REQUIRED
 
@@ -180,3 +181,36 @@ def test_the_agent_cannot_edit_outside_its_output():
     assert "--permission-mode dontAsk" in claude
     assert "acceptEdits" not in claude
     assert "Read(./.git/**)" in claude
+
+
+def _record_issues(monkeypatch, open_issue=None):
+    calls = []
+    monkeypatch.setattr(run_report, "_find_issue", lambda title: open_issue)
+    monkeypatch.setattr(run_report, "_gh", lambda *args: calls.append(args) or "")
+    return calls
+
+
+def test_dead_feeds_open_their_own_issue(monkeypatch):
+    calls = _record_issues(monkeypatch)
+    run_report.report_feeds("URL", "A, B")
+    assert calls[0][:2] == ("issue", "create") and run_report.FEEDS_ISSUE in calls[0]
+    assert "A, B" in calls[0][-1]
+
+
+def test_healthy_feeds_close_the_issue(monkeypatch):
+    calls = _record_issues(monkeypatch, open_issue=7)
+    run_report.report_feeds("URL", "none")
+    assert calls[0][:3] == ("issue", "close", "7")
+
+
+def test_a_workflow_that_did_not_check_feeds_leaves_the_issue_alone(monkeypatch):
+    calls = _record_issues(monkeypatch, open_issue=7)
+    run_report.report_feeds("URL", "")
+    assert calls == []
+
+
+def test_a_feed_outage_does_not_fail_the_watch_job():
+    jobs = yaml.safe_load((ROOT / ".github/workflows/watch.yml").read_text())["jobs"]
+    assert not any("dead_feeds" in str(s.get("if", "")) for s in jobs["agent"]["steps"])
+    publish = next(s for s in jobs["publish"]["steps"] if "publish-run" in s.get("uses", ""))
+    assert "dead_feeds" in publish["with"]

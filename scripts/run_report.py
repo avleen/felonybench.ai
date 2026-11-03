@@ -12,6 +12,7 @@ from pathlib import Path
 
 COMMENT_LIMIT = 60000
 SWEEP_ISSUE = "Sweep reports"
+FEEDS_ISSUE = "Too many feeds are returning nothing"
 
 
 def neutralize(text: str) -> str:
@@ -72,6 +73,16 @@ def failed(agent: str, publish: str) -> bool:
     return agent in ("failure", "cancelled") or publish != "success"
 
 
+def report_feeds(url: str, dead_feeds: str) -> None:
+    """Separate from run failures: a run can do all its work while feeds are down, and its seen leads should still save."""
+    if not dead_feeds:  # this workflow doesn't check feeds
+        return
+    if dead_feeds != "none":
+        _post(FEEDS_ISSUE, neutralize(f"Run: {url}\n\nMore than a fifth of the feeds returned nothing: {dead_feeds}"))
+    elif existing := _find_issue(FEEDS_ISSUE):
+        _gh("issue", "close", str(existing), "--comment", f"Recovered: {url}")
+
+
 def report(workflow: str, url: str, agent: str, publish: str, result: dict | None, sweep_report: str) -> None:
     title = f"Agent run failed: {workflow}"
     if failed(agent, publish):
@@ -90,6 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--publish", required=True, help="outcome of opening PRs")
     parser.add_argument("--transcript", type=Path)
     parser.add_argument("--sweep-report", type=Path)
+    parser.add_argument("--dead-feeds", default="", help="dead feed names, 'none', or empty if not checked")
     args = parser.parse_args(argv)
 
     result = agent_result(args.transcript)
@@ -100,6 +112,7 @@ def main(argv: list[str] | None = None) -> int:
         with open(summary, "a") as f:
             f.write(f"{describe(result)}\n\n{neutralize(sweep)[:COMMENT_LIMIT]}\n")
     report(os.environ["GITHUB_WORKFLOW"], url, args.agent, args.publish, result, sweep)
+    report_feeds(url, args.dead_feeds)
     return 1 if failed(args.agent, args.publish) else 0
 
 
