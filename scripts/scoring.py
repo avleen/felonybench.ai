@@ -77,7 +77,7 @@ def breakdown(incident: dict, rubric: dict, recidivist: bool = False) -> dict:
 
 
 def _families(incident: dict) -> set:
-    return {(incident["org"], m["family"]) for m in incident["models"] if m.get("family")}
+    return {(model_lab(incident, m), m["family"]) for m in incident["models"] if m.get("family")}
 
 
 def _exact_date(incident: dict) -> bool:
@@ -111,17 +111,23 @@ TIERS = {"verified": ("verified",), "all": ("verified", "alleged")}
 GUARDRAIL_BADGES = {"removed": "uncensored", "jailbroken": "jailbroken"}
 
 
+def model_lab(incident: dict, model: dict) -> str:
+    """The lab that made the model: its own `org` if set, otherwise the incident's."""
+    return model.get("org") or incident["org"]
+
+
 def model_org(incident: dict, model: dict) -> str:
     """Whose model it is on the model board: the modifier's, if someone altered it."""
-    return model.get("modified_by") or incident["org"]
+    return model.get("modified_by") or model_lab(incident, model)
 
 
 def defendants(incident: dict) -> list[str]:
-    """Orgs charged with an incident: the lab plus every distinct modifier, jointly and severally."""
+    """Orgs charged with an incident: every distinct lab and modifier, jointly and severally."""
     orgs = [incident["org"]]
     for m in incident["models"]:
-        if m.get("modified_by") and m["modified_by"] not in orgs:
-            orgs.append(m["modified_by"])
+        for org in (model_lab(incident, m), m.get("modified_by")):
+            if org and org not in orgs:
+                orgs.append(org)
     return orgs
 
 
@@ -191,7 +197,7 @@ def board(scored: list[dict], rubric: dict, league: str, tier: str) -> dict:
             _add(org, incident, 1, blast_rank)
         for m in incident["models"]:
             row = models.setdefault(
-                m["slug"], _new_row(m["slug"], m["name"], model_org(incident, m), incident["org"]))
+                m["slug"], _new_row(m["slug"], m["name"], model_org(incident, m), model_lab(incident, m)))
             _add(row, incident, m["share"], blast_rank)
     return {"models": _finish(models, blast_order), "orgs": _finish(orgs, blast_order)}
 

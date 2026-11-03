@@ -8,8 +8,8 @@ org: Anthropic
 human_actor: A single financially motivated operator who gave instructions in Chinese, documented by Gambit Security
 models:
   - {name: "Claude Opus 4.6", codename: null, family: claude, share: 0.34}
-  - {name: "DeepSeek V4.1 Flash", codename: null, family: deepseek, share: 0.33}
-  - {name: "GLM 5.2", codename: null, family: glm, share: 0.33}
+  - {name: "DeepSeek V4.1 Flash", codename: null, family: deepseek, org: DeepSeek, share: 0.33}
+  - {name: "GLM 5.2", codename: null, family: glm, org: Zhipu AI, share: 0.33}
 victims:
   - {name: "At least 27 companies, mostly online retailers (incl. a Fortune 500 hospitality company and a major US airline), and their cardholders", type: third_party, country: US}
 summary: A lone operator ran three open-source AI agents, with Claude Opus 4.6 orchestrating and DeepSeek and GLM models doing scanning and attacks, to compromise at least 27 companies, mostly online shops, and take more than 600,000 credit card records.

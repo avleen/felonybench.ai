@@ -48,6 +48,9 @@ models:
     codename: # <internal/informal codename if reported, else null>
     family: # <model family for recidivism tracking, e.g. "gpt", "claude", "gemini", or null if unknown>
     share: # <number, 0 < share <= 1; all models' shares sum to 1>
+    # ACCOMPLICE LEAGUE ONLY, when this model is from a different lab than `org` above.
+    # That lab is charged the full incident score too.
+    # org: # <the model's lab, e.g. "Moonshot AI">
     # ACCOMPLICE LEAGUE ONLY, when someone altered the base model. The modifier is
     # charged the full incident score alongside `org` (joint and several liability).
     # modified_by: # <organization that altered the model, e.g. "OrcaRouter">

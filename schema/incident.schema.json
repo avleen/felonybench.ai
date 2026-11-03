@@ -23,6 +23,7 @@
           "codename": {"type": ["string", "null"]},
           "family": {"type": ["string", "null"]},
           "share": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+          "org": {"type": "string", "minLength": 1},
           "modified_by": {"type": "string", "minLength": 1},
           "modification": {"type": "string", "minLength": 1}
         },

@@ -162,3 +162,12 @@ def test_public_victims_are_allowed(make_accomplice, rubric):
     inc = make_accomplice(scoring={"blast_radius": "public"})
     inc["victims"] = [{"name": "The public", "type": "public", "country": "US"}]
     assert _errors(inc, rubric, stem=ACC) == []
+
+
+def test_model_org_only_in_accomplice_league(make_incident, make_accomplice, rubric):
+    inc = make_incident()
+    inc["models"][0]["org"] = "Moonshot AI"
+    assert any("models: org" in e for e in _errors(inc, rubric))
+    inc = make_accomplice()
+    inc["models"][0]["org"] = "Moonshot AI"
+    assert _errors(inc, rubric, stem=ACC) == []

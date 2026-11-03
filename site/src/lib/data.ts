@@ -39,12 +39,16 @@ export const allModels = () => {
   return [...models.values()];
 };
 
-// Everyone charged with an incident, jointly and severally: the lab, then each distinct modifier.
+// Everyone charged with an incident, jointly and severally: the lab, then each other lab and modifier.
 // e.g. "Alibaba, with OrcaRouter (abliterated)".
 export const coDefendants = (i: any) => {
   const seen = new Set([i.org]);
   const extra: string[] = [];
   for (const m of i.models) {
+    if (m.org && !seen.has(m.org)) {
+      seen.add(m.org);
+      extra.push(m.org);
+    }
     if (!m.modified_by || seen.has(m.modified_by)) continue;
     seen.add(m.modified_by);
     extra.push(m.modification ? `${m.modified_by} (${m.modification})` : m.modified_by);
@@ -54,10 +58,10 @@ export const coDefendants = (i: any) => {
 
 // The same orgs as a plain list: "Alibaba and OrcaRouter".
 export const chargedOrgs = (i: any) => {
-  const orgs = [...new Set([i.org, ...i.models.map((m: any) => m.modified_by).filter(Boolean)])] as string[];
+  const orgs = [...new Set([i.org, ...i.models.flatMap((m: any) => [m.org, m.modified_by]).filter(Boolean)])] as string[];
   return orgs.length > 2 ? `${orgs.slice(0, -1).join(", ")} and ${orgs.at(-1)}` : orgs.join(" and ");
 };
-export const hasCoDefendants = (i: any) => i.models.some((m: any) => m.modified_by && m.modified_by !== i.org);
+export const hasCoDefendants = (i: any) => i.models.some((m: any) => [m.org, m.modified_by].some((org) => org && org !== i.org));
 
 export const incidentsFor = (slug: string) =>
   (scores as any).incidents.filter((i: any) => i.models.some((m: any) => m.slug === slug));
