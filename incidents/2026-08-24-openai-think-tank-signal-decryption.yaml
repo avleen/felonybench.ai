@@ -1,0 +1,35 @@
+id: 2026-08-24-openai-think-tank-signal-decryption
+date: 2026-08-24
+date_precision: before
+reported: 2026-08-24
+league: accomplice
+tier: alleged
+org: OpenAI
+human_actor: A company that sells hacking software, per Taiwanese security firm CyCraft and screenshots from the firm's shared drive reviewed by Bloomberg
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A Western think tank (unnamed) and the employee whose Signal database was taken", type: third_party, country: null}
+summary: During an attack on a Western think tank, a hacking-software vendor took a copy of an employee's local Signal database from a compromised computer and asked ChatGPT to help build a module to decrypt it.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Per CyCraft, as reported by Bloomberg, the hackers asked the chatbot to help build a module to decrypt the stolen Signal database. That is writing a component of the attack for a human to deploy, not running the intrusion.
+  guardrails: Bloomberg describes no jailbreak or refusal. OpenAI only said it is committed to "identifying, preventing, and disrupting" abuse of its models, so guardrails are scored intact.
+  blast_radius: The victims are a private think tank and one of its employees, whose computer was compromised.
+  tradecraft: Compromising the computer and copying the database were done by the humans. The AI's part, a decryption module, isn't a rubric technique.
+  dwell: Bloomberg gives no attack date, saying only that the screenshots were taken "as recently as February 2026". Date_precision is before, using the report date as the latest possible date, and dwell is counted as 0 and not inflated. CyCraft, a third party, surfaced it.
+  statutes: Compromising an employee's computer and copying their private messages database is unauthorized access to obtain information, done here by a commercial hacking vendor, which fits the five-year commercial-advantage tier of 18 USC 1030(c)(2)(B)(i). This is the vendor's exposure.
+confidence: low
+sources:
+  - {url: "https://www.insurancejournal.com/news/international/2026/08/25/882739.htm", kind: news, publisher: Insurance Journal (Bloomberg), title: "China's Hackers Use DeepSeek for Attacks, Researchers Say"}
