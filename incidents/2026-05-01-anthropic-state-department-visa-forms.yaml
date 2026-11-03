@@ -3,7 +3,7 @@ date: 2026-05-01
 date_precision: month
 reported: 2026-10-09
 league: open
-tier: alleged
+tier: verified
 org: Anthropic
 models:
   - {name: "Undisclosed model", codename: null, family: null, share: 1}

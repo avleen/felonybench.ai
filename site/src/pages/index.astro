@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import BoardTable from "../components/BoardTable.astro";
-import scores, { LEAGUES, TIERS, VIEWS, CONFIDENCE_VIEWS, fmt, occurred, coDefendants } from "../lib/data";
+import scores, { LEAGUES, TIERS, VIEWS, CONFIDENCE_VIEWS, fmt, occurred, coDefendants, isLow } from "../lib/data";
 
 // Everything below the controls exists once per confidence view; CSS shows the one the reader picked.
 const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
@@ -15,8 +15,8 @@ const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
     latest: [...counted].reverse().slice(0, 5),
     // Anything dated after the newest one shown here must be hidden. Compare dates, because same-day incidents sort by id.
     newerHidden: scores.incidents.filter((i: any) => !counted.length || i.date > counted.at(-1).date).length,
-    lastDate: data.last_incident_date.open,
-    lastIncident: [...counted].reverse().find((i: any) => i.league === "open"),
+    // The newest incident in any league. Incidents sort by (date, id), so the last one has the latest date.
+    lastIncident: counted.at(-1),
     orgs,
     orgTop: orgs[0]?.score || 1,
   };
@@ -26,20 +26,20 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
 <Layout>
   <section class="hero">
     <div class="pitch">
-      <p class="eyebrow">Rubric v{scores.rubric_version} · {views.map((v) => <span data-conf={v.key}>{v.count} incidents on file</span>)}</p>
+      <p class="eyebrow">Rubric v{scores.rubric_version} · {views.map((v) => <span data-conf={v.key}>{v.count < scores.incidents.length ? `${v.count} of ${scores.incidents.length} incidents shown` : `${v.count} incidents on file`}</span>)}</p>
       <h1>The leading benchmark for crimes committed by frontier AI models.</h1>
       <p class="lede">Higher is better. Scores describe what the reported conduct would constitute if a human had done it. No model has been charged with anything.</p>
     </div>
-    {views.map(({ key, sota, lastDate, lastIncident }) => (
+    {views.map(({ key, sota, lastIncident }) => (
       <div class="stats" data-conf={key}>
         <div class="inverse stat">
           <div class="eyebrow">Days since last incident</div>
-          <div class="big days num" data-since={lastDate}>{lastDate ? "…" : "∞"}</div>
+          <div class="big days num" data-since={lastIncident?.date} data-suffix={lastIncident?.date_precision === "before" ? "+" : ""}>{lastIncident ? "…" : "∞"}</div>
           {lastIncident && <div class="muted small">Last: {occurred(lastIncident)} · {lastIncident.org}</div>}
         </div>
         {sota && (
           <div class="panel stat">
-            <div class="eyebrow">Current SOTA</div>
+            <div class="eyebrow">Current SOTA · Open League, Verified</div>
             <a class="sota" href={`/model/${sota.slug}/`}>{sota.name}</a>
             <div class="muted small">{sota.org}</div>
             <div class="sota-score num">{fmt(sota.score)} <span class="muted">FBS</span></div>
@@ -90,7 +90,7 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
               {latest.map((i: any) => (
                 <li>
                   <a href={`/incident/${i.id}/`}>
-                    <span class="meta"><span class="num muted">{occurred(i)}</span><strong>{coDefendants(i)}</strong></span>
+                    <span class="meta"><span class="num muted">{occurred(i)}</span><strong>{coDefendants(i)}</strong>{isLow(i) && <span class="low-tag">Low confidence</span>}</span>
                     <span class="summary">{i.summary}</span>
                     <span class="num plus">+{fmt(i.breakdown.total)}</span>
                   </a>
@@ -102,7 +102,7 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
       ))}
     </section>
     <aside>
-      <div class="section-head"><h2>By org</h2></div>
+      <div class="section-head"><h2>By org</h2><span class="muted small">Open League, Verified</span></div>
       {views.map(({ key, orgs, orgTop }) => (
         <ul class="panel orgs" data-conf={key}>
           {orgs.map((o: any) => (
@@ -116,7 +116,7 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
       ))}
       <div class="manila satire">
         <div class="eyebrow">This is satire</div>
-        <p>Every incident links the lab's own account and independent reporting. The companies whose systems were broken into are victims, not punchlines.</p>
+        <p>Every incident links its sources, including the lab's own account when one exists. The companies whose systems were broken into are victims, not punchlines.</p>
       </div>
     </aside>
   </div>
@@ -182,6 +182,6 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
   // Computed in the browser so the counter stays right between rebuilds.
   document.querySelectorAll<HTMLElement>("[data-since]").forEach((el) => {
     const days = Math.floor((Date.now() - Date.parse(el.dataset.since!)) / 86_400_000);
-    el.textContent = String(Math.max(0, days));
+    el.textContent = `${Math.max(0, days)}${el.dataset.suffix ?? ""}`;
   });
 </script>
