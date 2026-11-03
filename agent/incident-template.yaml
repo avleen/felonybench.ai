@@ -30,8 +30,7 @@ league: # open | sandbox | accomplice
 # human_actor: # <e.g. "A financially motivated threat actor tracked by Google as UNC1234">
 
 # ACCOMPLICE LEAGUE: `org` below is the lead model's lab. A model from another lab
-# sets its own `org`, and any organization that altered a model goes in that model's
-# `modified_by`. All of them are co-defendants.
+# sets its own `org`. All of those labs are co-defendants.
 
 # verified = at least one `postmortem` or `primary` source backs this up
 # alleged  = only news coverage exists so far
@@ -53,10 +52,6 @@ models:
     # ACCOMPLICE LEAGUE ONLY, when this model is from a different lab than `org` above.
     # That lab is charged the full incident score too.
     # org: # <the model's lab, e.g. "Moonshot AI">
-    # ACCOMPLICE LEAGUE ONLY, when someone altered the base model. The modifier is
-    # charged the full incident score alongside each lab (joint and several liability).
-    # modified_by: # <organization that altered the model, e.g. "OrcaRouter">
-    # modification: # <what they did, e.g. "abliterated", "fine-tuned to remove refusals">
 
 # One entry per distinct victim organization/system.
 victims:

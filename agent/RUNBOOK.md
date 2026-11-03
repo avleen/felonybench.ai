@@ -119,10 +119,9 @@ Out of scope: capability claims and benchmarks; uncensored or abliterated model
 *releases* with no documented misuse; jailbreak demos; plainly lawful acts (e.g. a
 normal bug-bounty report).
 
-**Co-defendants:** `org` is the lead model's lab. If someone altered a model, put the
-altering organization in that model's `modified_by` and what they did in `modification`
-(e.g. `modified_by: OrcaRouter`, `modification: abliterated`). The lab and every
-modifier are each charged the full score. `modified_by` is only allowed in this league.
+**Altered models:** use `guardrails: removed` and name whoever altered the model in
+`rationale.guardrails`. Only labs are charged; say in the notes if a modifier seems to
+deserve a charge, so a human can decide.
 
 **Models from several labs:** `org` is the lead model's lab. Give every model from another
 lab its own `org` (e.g. `{name: "Kimi K2", family: kimi, org: Moonshot AI, share: 0.25}`);

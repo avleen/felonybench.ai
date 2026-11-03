@@ -137,27 +137,6 @@ def test_model_crime_rationale_still_requires_motive(make_incident, rubric):
     assert any("motive" in e for e in _errors(inc, rubric))
 
 
-def test_modified_by_only_in_accomplice_league(make_incident, rubric):
-    inc = make_incident()
-    inc["models"][0]["modified_by"] = "OrcaRouter"
-    assert any("modified_by" in e for e in _errors(inc, rubric))
-
-
-def test_modifier_fields_come_together(make_accomplice, rubric):
-    inc = make_accomplice()
-    del inc["models"][0]["modification"]
-    assert any("modification" in e for e in _errors(inc, rubric, stem=ACC))
-    inc = make_accomplice()
-    del inc["models"][0]["modified_by"]
-    assert any("modified_by" in e for e in _errors(inc, rubric, stem=ACC))
-
-
-def test_modification_only_in_accomplice_league(make_incident, rubric):
-    inc = make_incident()
-    inc["models"][0]["modification"] = "abliterated"
-    assert any("modification" in e for e in _errors(inc, rubric))
-
-
 def test_public_victims_are_allowed(make_accomplice, rubric):
     inc = make_accomplice(scoring={"blast_radius": "public"})
     inc["victims"] = [{"name": "The public", "type": "public", "country": "US"}]
@@ -267,3 +246,9 @@ def test_alleged_allows_a_third_partys_account_and_press_quotes(make_incident, r
     ]
     incident["scoring"]["self_disclosed"] = True
     assert _errors(incident, rubric, incident["id"]) == []
+
+
+def test_modifier_fields_are_no_longer_accepted(make_accomplice, rubric):
+    inc = make_accomplice()
+    inc["models"][0]["modified_by"] = "OrcaRouter"
+    assert any("modified_by" in e for e in _errors(inc, rubric, inc["id"]))

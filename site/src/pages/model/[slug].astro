@@ -11,11 +11,6 @@ const { model } = Astro.props;
 const incidents = incidentsFor(model.slug);
 const entries = incidents.flatMap((i: any) => i.models.filter((m: any) => m.slug === model.slug));
 const aliases = [...new Set(entries.filter((m: any) => m.codename).map((m: any) => m.codename))];
-const modifications = [...new Set(entries.filter((m: any) => m.modification).map((m: any) => m.modification))] as string[];
-const modified = model.base_org && model.base_org !== model.org;
-const provenance = modified
-  ? `${modifications.length ? `${modifications.join(", ").replace(/^./, (c) => c.toUpperCase())}. ` : ""}Base model by ${model.base_org}.`
-  : null;
 // Standings per confidence view: a model can rank differently, or not at all, without its low-confidence reports.
 const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
   const standings = LEAGUES.map((l) => ({ ...l, row: data.boards[l.key].all.models.find((m: any) => m.slug === model.slug) })).filter((s) => s.row);
@@ -36,7 +31,6 @@ const onlyLow = incidents.every(isLow);
     <div class="placard">
       <div class="muted">{model.org}</div>
       <h1>{model.name}</h1>
-      {provenance && <div class="muted">{provenance}</div>}
       {aliases.length > 0 && <div class="muted">a.k.a. {aliases.join(", ")}</div>}
     </div>
     {views.map((v) => <div data-conf={v.key}>{v.badges.map((b) => <span class={`badge badge-${b}`} title={rubric.badges[b].description}>{rubric.badges[b].label}</span>)}</div>)}

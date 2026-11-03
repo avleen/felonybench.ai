@@ -5,10 +5,10 @@
 Passing tests and a clean build on today's data don't show a change is correct. Do all of this before opening a PR or saying it's ready:
 
 1. **Review your own diff as a skeptic.** For each changed function, ask what input would break it, then try that input. Run `/code-review` as well.
-2. **Test cases the data doesn't contain.** The incidents exercise very little: no incident uses `modified_by`, for example, so checking the real site says nothing about that path. Build the case by hand.
+2. **Test cases the data doesn't contain.** The incidents exercise very little: only one is a repeat offense, for example, so checking the real site says nothing about that path. Build the case by hand.
 3. **Read the whole sort key before relying on an order.** Incidents sort by `(date, id)`, so a later position doesn't mean a later date.
 4. **When adding a schema field, list the rules it could break, and enforce them in `scripts/validate.py`.** A rule that lives only in the runbook isn't enforced. Check your tests too: they shouldn't build a record the rules forbid and call it valid.
-5. **When a value can play two roles, test both at once.** An org can be both a model's lab and another model's modifier. Sharing one "seen" set between the roles loses information.
+5. **When a value can play two roles, test both at once.** Sharing one "seen" set between the roles loses information.
 6. **Test site helpers directly.** `site/src/lib/data.ts` has no tests, so its output is easy to skip. Check it with hand-built incidents, not only by reading the built pages.
 7. **Run Cloudflare behavior locally rather than asking the user to check it after merging.** Copy `wrangler.jsonc` and the build to a scratch directory, keeping the build at `<scratch>/site/dist` because the config expects that path, then run `wrangler dev` from there. This keeps `.wrangler/` out of the repo. For URL changes, try each path with and without a trailing slash.
 

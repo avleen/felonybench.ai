@@ -48,25 +48,17 @@ export const defaultStanding = (slug: string) => {
   return rows.sort((a, b) => b.row.score - a.row.score)[0] ?? null;
 };
 
-// Everyone charged with an incident, jointly and severally: the lab, then each other lab and modifier.
-// e.g. "Alibaba, with OrcaRouter (abliterated)".
+// Everyone charged with an incident, jointly and severally. The scorer decides who: this only formats it.
+// e.g. "Anthropic, with Moonshot AI".
 export const coDefendants = (i: any) => {
-  // An org can be both a model's lab and a modifier, so keep what it did even if it was seen first as a lab.
-  const roles = new Map<string, string | undefined>([[i.org, undefined]]);
-  for (const m of i.models) {
-    if (m.org && !roles.has(m.org)) roles.set(m.org, undefined);
-    if (m.modified_by && !roles.get(m.modified_by)) roles.set(m.modified_by, m.modification);
-  }
-  const [lead, ...extra] = [...roles].map(([org, did]) => (did ? `${org} (${did})` : org));
-  return extra.length ? `${lead}, with ${extra.join(", ")}` : lead;
+  const [lead, ...others] = i.charged;
+  return others.length ? `${lead}, with ${others.join(", ")}` : lead;
 };
 
-// The same orgs as a plain list: "Alibaba and OrcaRouter".
-export const chargedOrgs = (i: any) => {
-  const orgs = [...new Set([i.org, ...i.models.flatMap((m: any) => [m.org, m.modified_by]).filter(Boolean)])] as string[];
-  return orgs.length > 2 ? `${orgs.slice(0, -1).join(", ")} and ${orgs.at(-1)}` : orgs.join(" and ");
-};
-export const hasCoDefendants = (i: any) => i.models.some((m: any) => [m.org, m.modified_by].some((org) => org && org !== i.org));
+// The same orgs as a plain list: "Anthropic and Moonshot AI".
+export const chargedOrgs = (i: any) =>
+  i.charged.length > 2 ? `${i.charged.slice(0, -1).join(", ")} and ${i.charged.at(-1)}` : i.charged.join(" and ");
+export const hasCoDefendants = (i: any) => i.charged.length > 1;
 
 export const incidentsFor = (slug: string) =>
   (scores as any).incidents.filter((i: any) => i.models.some((m: any) => m.slug === slug));

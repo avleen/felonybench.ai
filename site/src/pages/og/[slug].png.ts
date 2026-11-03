@@ -30,7 +30,7 @@ export async function GET({ props }: { props: { model: any } }) {
     ? `#${standing.row.rank} ${standing.league} · ${fmt(standing.row.score)} FBS · ${incidents} ${incidents === 1 ? "incident" : "incidents"}`
     : "Low-confidence reports only";
   const lines = m
-    ? [el("div", { fontSize: 28, opacity: 0.7 }, m.base_org && m.base_org !== m.org ? `${m.org}, base model by ${m.base_org}` : m.org), el("div", { fontSize: 72 }, m.name),
+    ? [el("div", { fontSize: 28, opacity: 0.7 }, m.org), el("div", { fontSize: 72 }, m.name),
        el("div", { fontSize: 36, color: "#ff6b5e" }, line)]
     : [el("div", { fontSize: 80, letterSpacing: 2 }, "FELONYBENCH.ai"),
        el("div", { fontSize: 34, color: "#ff6b5e" }, "The leading benchmark for AI crime. Higher is better.")];
