@@ -6,6 +6,7 @@ job summary and a rolling issue, because a 30-day artifact is easy to never read
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -15,9 +16,15 @@ SWEEP_ISSUE = "Sweep reports"
 FEEDS_ISSUE = "Too many feeds are returning nothing"
 
 
+# A URL GitHub will link, where an @ in the path can't notify anyone. It has to start where a link
+# can, and have a real domain, so https://@owner and x|@owner stay outside it.
+_LINKED_URL = r"""(?<![^\s(<*_~])https?://[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()\[\]"'`|\\]*)?"""
+_URL_OR_AT = re.compile(f"{_LINKED_URL}|@", re.I)
+
+
 def neutralize(text: str) -> str:
     """Agent text is untrusted: stop it notifying people when it's posted to GitHub."""
-    return text.replace("@", "@​")
+    return _URL_OR_AT.sub(lambda m: "@​" if m[0] == "@" else m[0], text)
 
 
 def agent_result(transcript: Path | None) -> dict | None:

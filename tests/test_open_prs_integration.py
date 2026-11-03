@@ -392,6 +392,35 @@ def test_a_ready_pr_that_loses_its_only_news_source_is_awaiting_news(tmp_path, m
     assert ["pr", "edit", "9", "--add-label", "needs-review"] not in calls
 
 
+def test_a_draft_that_gets_news_but_is_low_confidence_becomes_ready_with_needs_review(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x", confidence="low")
+    _write_incident(sandbox["work"], incident)
+    labels = [{"name": "agent"}, {"name": "awaiting-news"}]
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": True, "labels": labels}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert ["pr", "ready", "9"] in calls
+    assert ["pr", "edit", "9", "--add-label", "needs-review"] in calls
+    assert ["pr", "edit", "9", "--remove-label", "awaiting-news"] in calls
+    assert ["pr", "edit", "9", "--remove-label", "needs-review"] not in calls
+
+
+def test_a_ready_pr_revised_to_low_confidence_gets_needs_review_and_stays_ready(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x", confidence="low")
+    _write_incident(sandbox["work"], incident)
+    open_list = json.dumps([{"number": 9, "headRefName": f"agent/{incident['id']}", "isDraft": False, "labels": [{"name": "agent"}]}])
+
+    assert _run_open_prs(sandbox, fake_pr_list=open_list).returncode == 0
+
+    calls = _gh_calls(sandbox)
+    assert ["pr", "edit", "9", "--add-label", "needs-review"] in calls
+    assert ["pr", "ready", "9", "--undo"] not in calls
+
+
 def test_a_resubmitted_rejected_incident_is_flagged(tmp_path, make_incident):
     sandbox = _make_sandbox(tmp_path)
     incident = make_incident(id="2026-06-01-openai-x")
