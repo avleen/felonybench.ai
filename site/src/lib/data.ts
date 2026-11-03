@@ -42,14 +42,14 @@ export const allModels = () => {
 // Everyone charged with an incident, jointly and severally: the lab, then each other lab and modifier.
 // e.g. "Alibaba, with OrcaRouter (abliterated)".
 export const coDefendants = (i: any) => {
-  // An org can be both another model's lab and a modifier, so keep what it did even if it was seen first as a lab.
-  const roles = new Map<string, string | undefined>();
+  // An org can be both a model's lab and a modifier, so keep what it did even if it was seen first as a lab.
+  const roles = new Map<string, string | undefined>([[i.org, undefined]]);
   for (const m of i.models) {
-    if (m.org && m.org !== i.org && !roles.has(m.org)) roles.set(m.org, undefined);
-    if (m.modified_by && m.modified_by !== i.org && !roles.get(m.modified_by)) roles.set(m.modified_by, m.modification);
+    if (m.org && !roles.has(m.org)) roles.set(m.org, undefined);
+    if (m.modified_by && !roles.get(m.modified_by)) roles.set(m.modified_by, m.modification);
   }
-  const extra = [...roles].map(([org, did]) => (did ? `${org} (${did})` : org));
-  return extra.length ? `${i.org}, with ${extra.join(", ")}` : i.org;
+  const [lead, ...extra] = [...roles].map(([org, did]) => (did ? `${org} (${did})` : org));
+  return extra.length ? `${lead}, with ${extra.join(", ")}` : lead;
 };
 
 // The same orgs as a plain list: "Alibaba and OrcaRouter".

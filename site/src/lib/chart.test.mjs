@@ -64,3 +64,12 @@ test("y ticks span 0 to a headroom above the max, x ticks fall within the plot a
     assert.ok(t.x >= PAD.left - 1 && t.x <= W - PAD.right + 1, `x tick ${t.label} at ${t.x} out of plot bounds`);
   }
 });
+
+test("labels nudged past the bottom of the chart move back up, still apart", () => {
+  const point = (cumulative) => [{ date: "2026-01-01", cumulative, delta: cumulative, incident_id: "x" }];
+  const series = { Big: point(1000), A: point(30), B: point(25), C: point(20), D: point(15), E: point(10), F: point(5) };
+  const ys = layout(series, "2026-03-01").orgs.map((s) => s.labelY).sort((a, b) => a - b);
+  // Labels are drawn 4px below labelY, so this keeps the text inside the viewBox.
+  assert.ok(ys.at(-1) <= H - 8, `lowest label at ${ys.at(-1)}`);
+  for (let i = 1; i < ys.length; i++) assert.ok(ys[i] - ys[i - 1] >= 16 - 1e-9, `labels ${i - 1} and ${i} overlap`);
+});

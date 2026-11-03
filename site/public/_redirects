@@ -9,3 +9,8 @@
 /model/anthropic-kimi-k2/ /model/moonshot-ai-kimi-k2/ 301
 /model/anthropic-kimi-k3 /model/moonshot-ai-kimi-k3/ 301
 /model/anthropic-kimi-k3/ /model/moonshot-ai-kimi-k3/ 301
+/og/anthropic-deepseek-v4-1-flash.png /og/deepseek-deepseek-v4-1-flash.png 301
+/og/anthropic-gemini-2-5-flash.png /og/google-deepmind-gemini-2-5-flash.png 301
+/og/anthropic-glm-5-2.png /og/zhipu-ai-glm-5-2.png 301
+/og/anthropic-kimi-k2.png /og/moonshot-ai-kimi-k2.png 301
+/og/anthropic-kimi-k3.png /og/moonshot-ai-kimi-k3.png 301
