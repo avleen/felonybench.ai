@@ -87,6 +87,9 @@ test("every real trend chart has finite coordinates", () => {
           assert.ok(!s.path.includes("NaN"), `${league}/${tier}/${s.org} path`);
           assert.ok(Number.isFinite(s.labelY), `${league}/${tier}/${s.org} label`);
           assert.ok(s.labelY >= 0 && s.labelY <= H, `${league}/${tier}/${s.org} label inside the chart`);
+          // Labels start 22 units into the padding, and 13px mono is about 8 units per character.
+          const label = `${s.org} ${s.final.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+          assert.ok(22 + label.length * 8 <= PAD.right, `"${label}" fits in the right margin`);
         }
       }
     }

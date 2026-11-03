@@ -1,7 +1,7 @@
 export interface Point { date: string; cumulative: number; delta: number; incident_id: string }
 
 export const W = 960, H = 420;
-export const PAD = { top: 16, right: 160, bottom: 32, left: 56 };
+export const PAD = { top: 16, right: 216, bottom: 32, left: 56 };
 
 // Minimum vertical gap between two end-of-line labels before we nudge them apart.
 const LABEL_GAP = 16;

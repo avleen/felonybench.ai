@@ -1,12 +1,15 @@
 import pytest
 
-from scripts.check_site import broken_values, main, redirect_errors
+from scripts.check_site import broken_values, main, redirect_errors, structure_errors
+
+
+GOOD_PAGE = "<main><h1>ok</h1></main>"
 
 
 def _site(tmp_path, redirects=""):
-    (tmp_path / "index.html").write_text("<p>ok</p>")
+    (tmp_path / "index.html").write_text(GOOD_PAGE)
     (tmp_path / "model" / "new").mkdir(parents=True)
-    (tmp_path / "model" / "new" / "index.html").write_text("<p>ok</p>")
+    (tmp_path / "model" / "new" / "index.html").write_text(GOOD_PAGE)
     (tmp_path / "og").mkdir()
     (tmp_path / "og" / "new.png").write_bytes(b"png")
     (tmp_path / "_redirects").write_text(redirects)
@@ -92,3 +95,20 @@ def test_cli_fails_on_a_problem_and_passes_without_one(tmp_path):
 
 def test_cli_fails_with_no_build(tmp_path):
     assert main(["--dist", str(tmp_path)]) == 1
+
+
+def test_good_page_has_no_structure_errors(tmp_path):
+    _site(tmp_path)
+    assert structure_errors(tmp_path) == []
+
+
+@pytest.mark.parametrize("html, error", [
+    ("<noscript><style>x</style><main><h1>ok</h1></main>", "unclosed <noscript>"),  # swallowed the whole page once
+    ("<script>x()<main><h1>ok</h1></main>", "unclosed <script>"),
+    ("<main><p>no heading</p></main>", "no <h1> inside <main>"),
+    ("<noscript><main><h1>only here</h1></main></noscript>", "no <h1> inside <main>"),
+])
+def test_page_structure_problems_are_found(tmp_path, html, error):
+    _site(tmp_path)
+    (tmp_path / "index.html").write_text(html)
+    assert f"index.html: {error}" in structure_errors(tmp_path)

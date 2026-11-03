@@ -1,18 +1,18 @@
 ---
-import { fmt, occurred, leagueLabel, isLow } from "../lib/data";
+import { fmt, occurred, leagueLabel, isLow, viewsOf } from "../lib/data";
 const { incidents } = Astro.props;
 ---
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="region" aria-label="Table">
   <table class="wide">
-    <thead><tr><th>Date</th><th>Incident</th><th>League</th><th>Tier</th><th class="num">Score</th></tr></thead>
+    <thead><tr><th scope="col">Date</th><th scope="col">Incident</th><th scope="col" class="optional">League</th><th scope="col" class="optional">Tier</th><th scope="col" class="num">Score</th></tr></thead>
     <tbody>
       {incidents.map((i: any) => (
         <tr data-low={isLow(i) ? "" : undefined}>
           <td class="when">{occurred(i)}</td>
           <td class="what"><a href={`/incident/${i.id}/`}>{i.summary}</a>{isLow(i) && <span class="low-tag">Low confidence</span>}</td>
-          <td class="nowrap">{leagueLabel(i.league)}</td>
-          <td>{i.tier}</td>
-          <td class="num score">{fmt(i.breakdown.total)}</td>
+          <td class="nowrap optional">{leagueLabel(i.league)}</td>
+          <td class="optional">{i.tier}</td>
+          <td class="num score">{viewsOf(i).map((v) => <span data-conf={v.key}>{fmt(v.breakdown.total)}</span>)}</td>
         </tr>
       ))}
     </tbody>
@@ -23,4 +23,10 @@ const { incidents } = Astro.props;
   .when { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .nowrap { white-space: nowrap; }
   .what { min-width: 16rem; }
+  @media (max-width: 640px) {
+    table.wide { min-width: 0; }
+    .optional { display: none; }
+    .when { white-space: normal; }
+    .what { min-width: 0; }
+  }
 </style>

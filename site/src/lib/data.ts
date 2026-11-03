@@ -1,5 +1,7 @@
 import scores from "../data/scores.json";
 
+import { scoreViews } from "./incidents.ts";
+
 export * from "./incidents.ts";
 
 export default scores as any;
@@ -28,7 +30,7 @@ export const CONFIDENCE_VIEWS = [
   { key: "confident", data: (scores as any).confident },
   { key: "all", data: scores as any },
 ];
-export const isLow = (i: any) => !(scores as any).confident.incident_ids.includes(i.id);
+export const viewsOf = (i: any) => scoreViews(i, (scores as any).confident.scores);
 
 export const blastLabel = (key: string) => rubric.blast_radius[key]?.label ?? key;
 // Every model on any board, once; model pages and OG images are built from this.

@@ -12,13 +12,13 @@ const pct = (score: number) => Math.max(2, Math.round((score / top) * 100));
     <p class="panel muted">No convictions yet. Suspiciously clean.</p>
   )
 ) : (
-  <div class="table-wrap">
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Table">
     <table class="board">
       <thead>
         <tr>
-          <th class="num">Rank</th><th>{byModel ? "Model" : "Org"}</th>
-          <th class="fbs">FBS</th><th class="num">Sentence-yrs</th><th>Peak blast radius</th>
-          <th class="num">Incidents</th><th>Badges</th>
+          <th scope="col" class="num">Rank</th><th scope="col">{byModel ? "Model" : "Org"}</th>
+          <th scope="col" class="fbs">FBS</th><th scope="col" class="num">Sentence-yrs</th><th scope="col">Peak blast radius</th>
+          <th scope="col" class="num">Incidents</th><th scope="col">Badges</th>
         </tr>
       </thead>
       <tbody>

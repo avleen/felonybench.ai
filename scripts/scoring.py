@@ -236,5 +236,10 @@ def build_scores(incidents: list[dict], rubric: dict, generated_at: str) -> dict
         "rubric": rubric,
         "incidents": scored,
         **_views(scored, rubric),
-        "confident": {"incident_ids": [i["id"] for i in confident], **_views(confident, rubric)},
+        "confident": {
+            "incident_ids": [i["id"] for i in confident],
+            # A hidden prior can't count against an incident in this view, so it can score differently here.
+            "scores": {i["id"]: {"breakdown": i["breakdown"], "badges": i["badges"]} for i in confident},
+            **_views(confident, rubric),
+        },
     }

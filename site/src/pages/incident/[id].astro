@@ -1,20 +1,19 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import scores, { isLow, fmt, rubric, CORRECTIONS_EMAIL, occurred, leagueLabel, coDefendants, chargedOrgs, hasCoDefendants } from "../../lib/data";
+import scores, { isLow, fmt, rubric, CORRECTIONS_EMAIL, occurred, leagueLabel, coDefendants, chargedOrgs, hasCoDefendants, incidentTitle, incidentDescription, viewsOf } from "../../lib/data";
 
 export function getStaticPaths() {
   return scores.incidents.map((incident: any) => ({ params: { id: incident.id }, props: { incident } }));
 }
 
 const { incident: i } = Astro.props;
-const b = i.breakdown;
 const s = i.scoring;
 const byKind = (kind: string) => i.sources.filter((src: any) => src.kind === kind);
 const accomplice = i.league === "accomplice";
 const low = isLow(i);
 const acc = rubric.accomplice;
 const why = (key: string) => i.rationale[key] ? `: ${i.rationale[key]}` : ".";
-const rows = [
+const rowsFor = (b: any) => [
   ["Sentence-Years", fmt(b.sentence_years), `${i.statutes.map((st: any) => st.code).join(", ")}${i.rationale.statutes ? `. ${i.rationale.statutes}` : ""}`],
   ...(accomplice ? [
     ["× Contribution", fmt(b.contribution), `${acc.contribution[s.contribution].label}${why("contribution")}`],
@@ -31,18 +30,22 @@ const rows = [
   ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
   ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
 ];
-const product = accomplice
+const formulaFor = (b: any) => {
+  const product = accomplice
   ? `${fmt(b.sentence_years)} × ${fmt(b.contribution)} × ${fmt(b.blast_radius)} × ${fmt(b.legal_status)} + ${fmt(b.tradecraft)} + ${fmt(b.guardrails)} + ${fmt(b.dwell)}`
   : `${fmt(b.sentence_years)} × ${fmt(b.autonomy)} × ${fmt(b.blast_radius)} + ${fmt(b.tradecraft)} + ${fmt(b.pettiness)} + ${fmt(b.dwell)}`;
-const formula = `(${product})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
+  return `(${product})${b.recidivist ? ` × ${fmt(b.recidivism_multiplier)}` : ""}`;
+};
+const views = viewsOf(i);
 const charged = coDefendants(i);
 const joint = accomplice && hasCoDefendants(i);
 const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news"], ["Other primary sources", "primary"]];
 ---
-<Layout title={low ? `Low-confidence report: ${i.summary}` : i.summary} description={low ? `Low-confidence report: ${i.summary}` : i.summary}>
+<Layout title={incidentTitle(i)} description={incidentDescription(i)} revealWithoutJs={low}>
   {low && (
     <div class="panel low-notice" data-conf="confident">
-      <p class="eyebrow">Low-confidence report</p>
+      <p class="eyebrow">Low-confidence report · Case No. FB-{i.id}</p>
+      <h1>{i.summary}</h1>
       <p>This report is hidden because you're viewing high- and medium-confidence reports only. It isn't counted in the scores you're seeing.</p>
       <button type="button" class="show-low-button" data-show-low>Show low-confidence reports</button>
     </div>
@@ -55,30 +58,34 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
       <p class="tags">
         <span class="stamp">{i.tier}</span>
         {low && <span class="badge">Low confidence</span>}
-        {i.badges.map((k: string) => <span class={`badge badge-${k}`}>{rubric.badges[k].label}</span>)}
+        {views.map((v) => v.badges.map((k: string) => <span data-conf={v.key} class={`badge badge-${k}`}>{rubric.badges[k].label}</span>))}
         <span class="badge">{leagueLabel(i.league)}</span>
       </p>
     </div>
-    <div class="inverse scorecard">
-      <div class="eyebrow">FelonyBench Score</div>
-      <div class="total num">{fmt(b.total)}</div>
-      <div class="formula num">{formula}</div>
-      <div class="muted small">Confidence: {i.confidence} · <a href="/rubric/">How this is scored</a></div>
-    </div>
+    {views.map((v) => (
+      <div class="inverse scorecard" data-conf={v.key}>
+        <div class="eyebrow">FelonyBench Score</div>
+        <div class="total num">{fmt(v.breakdown.total)}</div>
+        <div class="formula num">{formulaFor(v.breakdown)}</div>
+        <div class="muted small">Confidence: {i.confidence} · <a href="/rubric/">How this is scored</a></div>
+      </div>
+    ))}
   </section>
 
   <div class="case-body">
     <div>
       <h2>Score breakdown</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Component</th><th class="num">Value</th><th>Reasoning</th></tr></thead>
-          <tbody>
-            {rows.map(([k, v, why]) => <tr><td class="comp">{k}</td><td class="num score">{v}</td><td class="why">{why}</td></tr>)}
-            <tr class="total-row"><td class="comp">Total</td><td class="num score">{fmt(b.total)}</td><td></td></tr>
-          </tbody>
-        </table>
-      </div>
+      {views.map((view) => (
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Table" data-conf={view.key}>
+          <table>
+            <thead><tr><th scope="col">Component</th><th scope="col" class="num">Value</th><th scope="col">Reasoning</th></tr></thead>
+            <tbody>
+              {rowsFor(view.breakdown).map(([k, v, why]) => <tr><td class="comp">{k}</td><td class="num score">{v}</td><td class="why">{why}</td></tr>)}
+              <tr class="total-row"><td class="comp">Total</td><td class="num score">{fmt(view.breakdown.total)}</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      ))}
 
       <h2>{accomplice ? "Charges the human could face" : "Charges, had a human done it"}</h2>
       <ul class="charges">
@@ -101,7 +108,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
       </div>
 
       {joint && (
-        <p class="joint muted">Charged jointly and severally: {chargedOrgs(i)} are each liable for the full {fmt(b.total)}. <a href="/rubric/#accomplice-league">Why</a></p>
+        views.map((v) => <p class="joint muted" data-conf={v.key}>Charged jointly and severally: {chargedOrgs(i)} are each liable for the full {fmt(v.breakdown.total)}. <a href="/rubric/#accomplice-league">Why</a></p>)
       )}
 
       <div class="panel sources">
@@ -122,6 +129,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
 <style>
   .low-notice { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
   .low-notice p { margin: 0; }
+  .low-notice h1 { font-size: clamp(24px, 3vw, 34px); line-height: 1.15; text-transform: none; }
   .case-head { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
   .crumb { margin: 0 0 16px; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; overflow-wrap: anywhere; }
   .crumb a { color: var(--muted); }
@@ -159,7 +167,7 @@ const sourceGroups = [["Post-Incident Review", "postmortem"], ["Coverage", "news
   .report:hover { background: var(--ink); color: var(--paper); }
 
   @media (max-width: 900px) {
-    .case-head, .case-body { grid-template-columns: 1fr; }
+    .case-head, .case-body { grid-template-columns: minmax(0, 1fr); }
     .case-body aside { margin-top: 0; }
   }
   @media (max-width: 640px) {
