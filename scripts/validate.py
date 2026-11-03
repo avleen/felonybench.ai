@@ -61,19 +61,23 @@ def _date_errors(incident: dict) -> list[str]:
     return errors
 
 
-def _dates_in(value, path: str = "") -> list[str]:
+def _non_text_values(value, path: str = "") -> list[str]:
     if isinstance(value, dict):
-        return [e for k, v in value.items() for e in _dates_in(v, f"{path}{k}/")]
+        return [e for k, v in value.items() for e in _non_text_values(v, f"{path}{k}/")]
     if isinstance(value, list):
-        return [e for i, v in enumerate(value) for e in _dates_in(v, f"{path}{i}/")]
+        return [e for i, v in enumerate(value) for e in _non_text_values(v, f"{path}{i}/")]
     if isinstance(value, date):
         return [f"{path.rstrip('/')}: '{value}' must be quoted, or YAML reads it as a date"]
-    return []
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return []
+    return [f"{path.rstrip('/')}: YAML reads this as {type(value).__name__}, not as plain data"]
 
 
-def _stray_date_errors(incident: dict) -> list[str]:
-    """YAML reads a bare 2026-07-16 as a date. The schema sees text, but the checks below would crash."""
-    return _dates_in({k: v for k, v in incident.items() if k not in ("date", "reported")})
+def _yaml_type_errors(incident: dict) -> list[str]:
+    """The schema sees everything as text, so a bare 2026-07-16 or a !!binary would crash the checks below."""
+    return _non_text_values(
+        {k: v for k, v in incident.items() if k not in ("date", "reported") or not isinstance(v, (date, str))}
+    )
 
 
 def _identity_errors(incident: dict) -> list[str]:
@@ -104,7 +108,7 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     ]
     if errors:
         return errors
-    errors = _stray_date_errors(incident)
+    errors = _yaml_type_errors(incident)
     if errors:
         return errors
 
@@ -202,7 +206,7 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
         if errors:
             results[path.name] = errors
         # Other rule errors, like a missing news source, must not hide a misfiled model.
-        if validator.is_valid(_jsonable(incident)) and not _stray_date_errors(incident):
+        if validator.is_valid(_jsonable(incident)) and not _yaml_type_errors(incident):
             for name in {incident["org"], *(model_lab(incident, m) for m in incident["models"])}:
                 org_names.setdefault(slugify(name), {}).setdefault(name, []).append(path.name)
             for m in incident["models"]:
