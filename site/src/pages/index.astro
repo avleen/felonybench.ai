@@ -26,7 +26,7 @@ const controls = [["league", "League", LEAGUES], ["tier", "Evidence", TIERS], ["
 <Layout>
   <section class="hero">
     <div class="pitch">
-      <p class="eyebrow">Rubric v{scores.rubric_version} · {views.map((v) => <span data-conf={v.key}>{v.count < scores.incidents.length ? `${v.count} of ${scores.incidents.length} incidents shown` : `${v.count} incidents on file`}</span>)}</p>
+      <p class="eyebrow">Rubric v{scores.rubric.version} · {views.map((v) => <span data-conf={v.key}>{v.count < scores.incidents.length ? `${v.count} of ${scores.incidents.length} incidents shown` : `${v.count} incidents on file`}</span>)}</p>
       <h1>The leading benchmark for crimes committed by frontier AI models.</h1>
       <p class="lede">Higher is better. Scores describe what the reported conduct would constitute if a human had done it. No model has been charged with anything.</p>
     </div>

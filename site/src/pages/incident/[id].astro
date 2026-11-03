@@ -28,7 +28,7 @@ const rowsFor = (b: any) => [
     ["+ Pettiness", fmt(b.pettiness), `${rubric.pettiness.motives[s.motive].label}: ${i.rationale.motive}`],
   ]),
   ["+ Dwell Time", fmt(b.dwell), i.rationale.dwell],
-  ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), "Same model family offended within 90 days."]] : []),
+  ...(b.recidivist ? [["× Recidivism", fmt(b.recidivism_multiplier), `Same model family offended within ${rubric.recidivism.window_days} days.`]] : []),
 ];
 const formulaFor = (b: any) => {
   const product = accomplice

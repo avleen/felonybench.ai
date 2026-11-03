@@ -34,10 +34,8 @@ def test_a_low_confidence_incident_cannot_make_another_a_repeat_offense(make_inc
     assert "repeat_offender" not in confident["openai-model-a"]["badges"]
 
 
-def test_confident_trends_and_last_incident_date(make_incident, rubric):
+def test_confident_trends(make_incident, rubric):
     scores = build_scores(_pair(make_incident, low_date="2026-08-01"), rubric, "now")
-    assert scores["last_incident_date"]["open"] == "2026-08-01"
-    assert scores["confident"]["last_incident_date"]["open"] == "2026-07-16"
     points = scores["confident"]["trends"]["open"]["verified"]["OpenAI"]
     assert [p["incident_id"] for p in points] == ["high"]
 

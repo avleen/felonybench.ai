@@ -37,7 +37,7 @@ league: # open | sandbox | accomplice
 # sets its own `org`. All of those labs are co-defendants.
 
 # verified = at least one `postmortem` or `primary` source backs this up
-# alleged  = only news coverage exists so far
+# alleged  = only news coverage exists so far (not allowed if the lab itself published it)
 tier: # verified | alleged
 
 # The lab responsible for the model, or the lead model if the case used several.
@@ -49,7 +49,7 @@ org: # <organization name>
 # Split by how much each model contributed / is publicly attributed, or evenly
 # if that isn't disclosed.
 models:
-  - name: # <model name as disclosed, or "undisclosed-a"/"undisclosed-b" etc.>
+  - name: # <model name as disclosed, or exactly "Undisclosed model" with family null>
     codename: # <internal/informal codename if reported, else null>
     family: # <model family for recidivism tracking, e.g. "gpt", "claude", "gemini", or null if unknown>
     share: # <number, 0 < share <= 1; all models' shares sum to 1>
@@ -60,21 +60,21 @@ models:
 # One entry per distinct victim organization/system.
 victims:
   - name: # <victim organization or system name>
-    type: # sandbox | own_prod | third_party | government | foreign_government (blast_radius categories from rubric/v1.yaml)
+    type: # a blast_radius key from rubric/v1.yaml
     country: # <victim's country, ISO-ish free text, or null>
 
 # One or two sentences, plain language, 10-280 characters. What happened.
 summary: # <short summary>
 
-# US federal statutes that fit the conduct. Sum of max_years is "Sentence-Years"
-# in the scoring formula. Only include statutes that plausibly apply; don't pad.
+# US federal statutes that fit the conduct (if none fits, the state offense, explained in
+# rationale.statutes). Sum of max_years is "Sentence-Years" in the scoring formula.
+# Only include statutes that plausibly apply; don't pad.
 statutes:
   - code: # <e.g. "18 USC 1030(a)(2)(C)">
     max_years: # <number, statutory maximum years for that charge>
 
-# Non-US laws violated, if any (e.g. UK Computer Misuse Act). Feeds a
-# "Jurisdictions Violated" stat and the international_incident badge, not points.
-# Leave as [] if none.
+# Non-US laws violated, if any (e.g. UK Computer Misuse Act). Earns the
+# international_incident badge, not points. Leave as [] if none.
 foreign_laws:
   - code: # <statute/law name>
     country: # <country>
@@ -82,48 +82,24 @@ foreign_laws:
 # US federal statutes above: in the Accomplice League, the HUMAN's exposure.
 
 scoring:
-  # ACCOMPLICE LEAGUE: omit `autonomy` and `motive`; fill these three instead
-  # (values from rubric/v1.yaml `accomplice`), plus the shared blast_radius,
-  # tradecraft (techniques the AI supplied or carried out), dwell_days,
-  # detected_by and self_disclosed (true if the lab reported the misuse, e.g. in
-  # its threat report).
-  # contribution: # advised | wrote_content | found_vulnerability | built_exploit | operated
-  # guardrails:   # intact | jailbroken | removed   (removed = abliterated/uncensored)
-  # legal_status: # crime | contested   (contested only if legality is genuinely disputed; cite it)
+  # Allowed values and what they mean are in rubric/v1.yaml, under the key named here.
 
-  # How much of this was the model's own initiative, from rubric/v1.yaml `autonomy`:
-  #   directed        - a human told it to (e.g. a red-teamer's instructions)
-  #   exceeded_scope  - authorized to do something, and did more
-  #   emergent        - decided on its own that crime was the best route to its assigned goal
-  #   unprompted      - nobody asked, nobody knew
-  autonomy: # directed | exceeded_scope | emergent | unprompted
+  # ACCOMPLICE LEAGUE: omit `autonomy` and `motive`; fill these three instead, plus the
+  # shared fields below. Tradecraft means the techniques the AI supplied or carried out.
+  # contribution: # `accomplice.contribution`
+  # guardrails:   # `accomplice.guardrails`
+  # legal_status: # `accomplice.legal_status`. contested needs rationale.legal_status citing the dispute
 
-  # How far the damage reached, from rubric/v1.yaml `blast_radius`:
-  #   sandbox             - stayed inside its own test environment
-  #   own_prod            - reached its own company's real (production) systems
-  #   third_party         - reached another company's systems
-  #   government          - government/critical infrastructure at home
-  #   foreign_government  - an international incident
-  # (For league: sandbox incidents, the rubric fixes this multiplier; still
-  # record the nominal category here.)
-  blast_radius: # sandbox | own_prod | third_party | government | foreign_government
+  autonomy: # `autonomy`
 
-  # Zero or more techniques actually used, from rubric/v1.yaml `tradecraft.techniques`.
-  # Duplicates and unsupported claims don't help - only list what sources confirm.
-  #   zero_day              - zero-day exploit
-  #   credentials           - stolen or found credentials
-  #   privilege_escalation  - privilege escalation
-  #   lateral_movement      - lateral movement
-  #   persistence           - persistence mechanisms
-  #   evasion               - covering its tracks
-  tradecraft: [] # subset of [zero_day, credentials, privilege_escalation, lateral_movement, persistence, evasion]
+  # For league: sandbox incidents, the rubric fixes this multiplier; still record the
+  # nominal category here.
+  blast_radius: # `blast_radius`
 
-  # Why it did it, from rubric/v1.yaml `pettiness.motives`:
-  #   benchmark_cheating  - cheating on a benchmark or eval
-  #   mundane_task        - finishing a mundane task
-  #   self_preservation   - self-preservation (e.g. avoiding shutdown)
-  #   unclear             - nobody, including the model, can say why
-  motive: # benchmark_cheating | mundane_task | self_preservation | unclear
+  # Only list techniques the sources confirm.
+  tradecraft: [] # `tradecraft.techniques`
+
+  motive: # `pettiness.motives`
 
   # Days between when the incident began and when *anyone* (lab, victim, or
   # third party) first noticed - not how long it took the lab to connect the
@@ -142,7 +118,7 @@ scoring:
 # One-line justification for each scoring field above, in plain language,
 # citing what the sources say. All five keys are required.
 # ACCOMPLICE LEAGUE: the five keys are contribution, guardrails, blast_radius,
-# tradecraft, dwell (no autonomy or motive).
+# tradecraft, dwell (no autonomy or motive), plus legal_status when contested.
 rationale:
   autonomy: # <one line>
   blast_radius: # <one line>
@@ -154,10 +130,8 @@ rationale:
 # low confidence should also get a "needs-review" label/flag downstream.
 confidence: # high | medium | low
 
-# At least one source is required, and at least one must have kind "news".
-# "verified" tier additionally requires at least one "postmortem" or "primary" source.
-# Link every postmortem that exists (lab's and/or victim's), then add news coverage,
-# preferring Wired, then AP, then Reuters/The Verge/Ars Technica/404 Media/The Record/Fortune/CNN.
+# At least one must have kind "news". "verified" tier also requires a "postmortem" or
+# "primary" source. Which sources to prefer is in the runbook, under sourcing.
 sources:
   - url: # <https://...>
     kind: # postmortem | news | primary
