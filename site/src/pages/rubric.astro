@@ -1,13 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import scores, { rubric, fmt, chargedOrgs } from "../lib/data";
+import scores, { rubric, fmt, chargedOrgs, viewsOf } from "../lib/data";
 
 // The highest-scoring incident in a league, verified first: each league's formula gets its own worked example.
 const exampleFor = (league: string) =>
-  // Only what the default view counts, with the score it has there.
+  // Chosen from what the default view counts, by the score it has there. The formula below follows the toggle.
   scores.incidents.filter((i: any) => i.league === league && scores.confident.scores[i.id])
-    .map((i: any) => ({ ...i, ...scores.confident.scores[i.id] }))
-    .sort((a: any, b: any) => (a.tier === "verified" ? 0 : 1) - (b.tier === "verified" ? 0 : 1) || b.breakdown.total - a.breakdown.total)[0] ?? null;
+    .sort((a: any, b: any) => (a.tier === "verified" ? 0 : 1) - (b.tier === "verified" ? 0 : 1) || scores.confident.scores[b.id].breakdown.total - scores.confident.scores[a.id].breakdown.total)[0] ?? null;
 const example = exampleFor("open");
 const accExample = exampleFor("accomplice");
 const acc = rubric.accomplice;
@@ -64,9 +63,11 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
     <>
       <h2>Worked example</h2>
       <p><a href={`/incident/${example.id}/`}>{example.summary}</a></p>
-      <pre class="panel num">{`${fmt(example.breakdown.sentence_years)} × ${example.breakdown.autonomy} × ${example.breakdown.blast_radius} = ${fmt(example.breakdown.base)}
-+ ${example.breakdown.tradecraft} tradecraft + ${example.breakdown.pettiness} pettiness + ${example.breakdown.dwell} dwell${example.breakdown.recidivist ? `\n× ${example.breakdown.recidivism_multiplier} recidivism` : ""}
-= ${fmt(example.breakdown.total)}`}</pre>
+      {viewsOf(example).map(({ key, breakdown: b }) => (
+        <pre class="panel num" data-conf={key}>{`${fmt(b.sentence_years)} × ${b.autonomy} × ${b.blast_radius} = ${fmt(b.base)}
++ ${b.tradecraft} tradecraft + ${b.pettiness} pettiness + ${b.dwell} dwell${b.recidivist ? `\n× ${b.recidivism_multiplier} recidivism` : ""}
+= ${fmt(b.total)}`}</pre>
+      ))}
     </>
   )}
 
@@ -114,9 +115,11 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
     <>
       <h3>Worked example</h3>
       <p><a href={`/incident/${accExample.id}/`}>{accExample.summary}</a></p>
-      <pre class="panel num">{`${fmt(accExample.breakdown.sentence_years)} × ${accExample.breakdown.contribution} × ${accExample.breakdown.blast_radius} × ${accExample.breakdown.legal_status} = ${fmt(accExample.breakdown.base)}
-+ ${accExample.breakdown.tradecraft} tradecraft + ${accExample.breakdown.guardrails} guardrails + ${accExample.breakdown.dwell} dwell${accExample.breakdown.recidivist ? `\n× ${accExample.breakdown.recidivism_multiplier} recidivism` : ""}
-= ${fmt(accExample.breakdown.total)}, charged in full to ${chargedOrgs(accExample)}`}</pre>
+      {viewsOf(accExample).map(({ key, breakdown: b }) => (
+        <pre class="panel num" data-conf={key}>{`${fmt(b.sentence_years)} × ${b.contribution} × ${b.blast_radius} × ${b.legal_status} = ${fmt(b.base)}
++ ${b.tradecraft} tradecraft + ${b.guardrails} guardrails + ${b.dwell} dwell${b.recidivist ? `\n× ${b.recidivism_multiplier} recidivism` : ""}
+= ${fmt(b.total)}, charged in full to ${chargedOrgs(accExample)}`}</pre>
+      ))}
     </>
   )}
 
