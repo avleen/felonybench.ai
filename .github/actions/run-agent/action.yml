@@ -1,12 +1,12 @@
 name: Run FelonyBench agent
-description: Run Claude Code against agent/RUNBOOK.md, then open one PR per changed incident.
+description: Run Claude Code against agent/RUNBOOK.md and upload what it wrote. publish-run opens the PRs.
 inputs:
   mode:
     description: triage or sweep
     required: true
   max_turns:
     description: Claude Code turn limit
-    default: "60"
+    default: "120"
   model:
     description: Claude model alias to run (e.g. opus, sonnet)
     default: "opus"
@@ -17,7 +17,7 @@ inputs:
     description: Claude subscription OAuth token (from claude setup-token)
     required: true
   github_token:
-    description: Token used to fetch branches and open PRs
+    description: Read-only token, used to list PRs. The action stores it where the agent can reach it.
     required: true
 runs:
   using: composite
@@ -33,6 +33,12 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github_token }}
       run: bash scripts/pending_prs.sh
+
+    - name: Snapshot closed agent PRs
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: python -m scripts.closed_prs
 
     # pypdf for scripts.pdf_text, which the agent uses to read report PDFs (both modes).
     - name: Install agent tools
@@ -53,7 +59,7 @@ runs:
         exit 0
 
     - name: Claude Code
-      uses: anthropics/claude-code-action@v1
+      uses: anthropics/claude-code-action@4845bacbb38b3c4b15d948f035349786f678e068 # v1.0.267
       with:
         claude_code_oauth_token: ${{ inputs.claude_code_oauth_token }}
         github_token: ${{ inputs.github_token }}
@@ -63,30 +69,34 @@ runs:
           --max-turns ${{ inputs.max_turns }}
           --model ${{ inputs.model }}
           --effort ${{ inputs.effort }}
-          --permission-mode acceptEdits
+          --permission-mode dontAsk
+          --tools "Read,Glob,Grep,Edit,Write,WebFetch,WebSearch,Bash"
           --allowedTools "WebSearch,WebFetch,Read,Glob,Grep,Edit(./incidents/**),Edit(./.agent-out/**),Bash(python -m scripts.pdf_text:*)"
-          --disallowedTools "Agent"
+          --disallowedTools "Agent,Read(./.git/**),Read(//proc/**),Read(//home/runner/work/_temp/**)"
 
-    - name: Upload agent transcript and notes
+    - name: Upload the agent's transcript
       if: always()
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
-        name: agent-run-${{ inputs.mode }}-${{ github.run_id }}
+        name: agent-transcript-${{ github.run_id }}
+        path: ${{ runner.temp }}/claude-execution-output.json
+        retention-days: 30
+        if-no-files-found: ignore
+
+    # Runs even when the agent "fails", so a turn limit doesn't throw away finished incidents.
+    - name: Upload the agent's output
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: agent-output-${{ github.run_id }}
+        # context.json always exists, so the artifact keeps both directories even with no notes.
         path: |
-          ${{ runner.temp }}/claude-execution-output.json
-          .agent-out/
+          incidents/*.yaml
+          .agent-out/*.md
+          .agent-out/context.json
         retention-days: 30
         if-no-files-found: ignore
         include-hidden-files: true  # .agent-out/ is a dot-directory
-
-    - name: Open PRs
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.github_token }}
-      run: |
-        git config user.name "felonybench-agent"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        python -m scripts.open_prs
 
     # A sweep that doesn't produce its report didn't finish; fail loudly instead of
     # reporting success.
