@@ -1,0 +1,37 @@
+id: 2025-07-10-alibaba-apt28-lamehug-qwen
+date: 2025-07-10
+date_precision: before
+reported: 2025-07-17
+league: accomplice
+tier: verified
+org: Alibaba
+human_actor: Russia's APT28 (tracked by Google as FROZENLAKE and by CERT-UA as UAC-0001, attributed with moderate confidence)
+models:
+  - {name: "Qwen2.5-Coder-32B-Instruct", codename: null, family: qwen, share: 1}
+victims:
+  - {name: "Ukrainian executive authorities (government bodies sent a fake ministry document)", type: foreign_government, country: UA}
+summary: Russia's APT28 sent Ukrainian government bodies malware that asked Qwen2.5-Coder, through the Hugging Face API, to write the Windows commands it then ran to profile each machine and gather documents for theft.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws:
+  - {code: "Criminal Code of Ukraine art. 361 (unauthorized interference with computers and networks)", country: UA}
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: GTIG says the malware "uses the Hugging Face API to query the LLM Qwen2.5-Coder-32B-Instruct to generate one-line Windows commands", whose output "are then blindly executed locally by PROMPTSTEAL before the output is exfiltrated". The model chose and wrote the commands run on victims' machines, live, so it ran that part of the operation.
+  guardrails: The open-weight model was queried as published on Hugging Face, and GTIG says probably with stolen API tokens. No jailbreak or removal of safety training is described.
+  blast_radius: CERT-UA's alert, reported by Security Affairs, says the phishing campaign targeted Ukraine's executive authorities with an archive disguised as a ministry document. GTIG says APT28 used the malware "against Ukraine".
+  tradecraft: GTIG thinks the Hugging Face API tokens were probably stolen, but those were the attackers' access to the model, not a technique the model used against victims. The model's commands only gathered system information and documents, so no rubric technique is credited.
+  dwell: CERT-UA identified the campaign on July 10, 2025, and GTIG says it saw APT28 using the malware in June. July 10 is used as the latest possible date and dwell is 0. CERT-UA, a third party, found it.
+  statutes: Running a data miner on government computers to steal documents is unauthorized access to obtain information, done here for state espionage, the five-year tier of 18 USC 1030(c)(2)(B)(ii). This is APT28's exposure.
+confidence: medium
+sources:
+  - {url: "https://cloud.google.com/blog/topics/threat-intelligence/threat-actor-usage-of-ai-tools", kind: primary, publisher: Google Threat Intelligence Group, title: "GTIG AI Threat Tracker: Advances in Threat Actor Usage of AI Tools"}
+  - {url: "https://securityaffairs.com/180092/apt/lamehug-first-ai-powered-malware-linked-to-russias-apt28-group.html", kind: news, publisher: Security Affairs, title: "LameHug: first AI-Powered malware linked to Russia's APT28"}
