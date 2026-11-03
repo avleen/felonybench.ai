@@ -460,6 +460,32 @@ def test_an_unquoted_date_outside_the_date_fields_is_an_error_not_a_crash(make_i
     assert any("must be quoted" in e and "2026-07-16" in e for e in errors)
 
 
+def _write_yaml_with(tmp_path, incident, field, tagged):
+    """Write YAML by hand, because safe_dump would never produce these tags from a test's data."""
+    text = yaml.safe_dump(incident)
+    current = f"{field}: {yaml.safe_dump(incident[field]).splitlines()[0]}"
+    assert current in text
+    (tmp_path / f"{incident['id']}.yaml").write_text(text.replace(current, f"{field}: {tagged}", 1))
+
+
+@pytest.mark.parametrize("tagged", ["!!binary TW9kZWw=", "!!set {a, b}", "!!omap [a: 1]"])
+@pytest.mark.parametrize("field", ["org", "summary", "date"])
+def test_a_tagged_yaml_value_is_reported_without_crashing(make_incident, tmp_path, rubric, field, tagged):
+    incident = make_incident()
+    _write_yaml_with(tmp_path, incident, field, tagged)
+    assert validate_dir(tmp_path, rubric, load_validator())[f"{incident['id']}.yaml"]
+
+
+def test_a_binary_model_name_is_reported_without_crashing(make_incident, tmp_path, rubric):
+    incident = make_incident()
+    name = incident["models"][0]["name"]
+    text = yaml.safe_dump(incident)
+    assert f"name: {name}" in text
+    (tmp_path / f"{incident['id']}.yaml").write_text(text.replace(f"name: {name}", "name: !!binary TW9kZWw=", 1))
+    errors = validate_dir(tmp_path, rubric, load_validator())[f"{incident['id']}.yaml"]
+    assert any("models/0/name" in e and "bytes" in e for e in errors)
+
+
 def test_the_date_fields_may_stay_unquoted(make_incident, tmp_path, rubric):
     incident = make_incident(date=date(2026, 1, 1), reported=date(2026, 1, 2), id="2026-01-01-openai-a")
     (tmp_path / f"{incident['id']}.yaml").write_text(yaml.safe_dump(incident))
