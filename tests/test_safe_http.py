@@ -5,6 +5,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 
+from scripts import fetch_trackers, pdf_text
 from scripts.safe_http import NoDrainRedirects
 
 BODY_MB = 200
@@ -51,3 +52,28 @@ def test_a_huge_redirect_body_is_not_read(code):
         server.shutdown()
         server.server_close()
     assert sent["bytes"] < 50 * 1024 * 1024
+
+
+def _spy_on_openers(monkeypatch):
+    built = []
+
+    def build_opener(*handlers):
+        built.extend(handlers)
+        raise ConnectionError("stop before any network")
+
+    monkeypatch.setattr(urllib.request, "build_opener", build_opener)
+    return built
+
+
+def test_fetch_org_uses_the_no_drain_handler_by_default(monkeypatch, tmp_path):
+    built = _spy_on_openers(monkeypatch)
+    with pytest.raises(ConnectionError):
+        fetch_trackers.fetch_org(tmp_path)
+    assert any(isinstance(h, NoDrainRedirects) for h in built)
+
+
+def test_pdf_load_uses_the_no_drain_handler_by_default(monkeypatch):
+    built = _spy_on_openers(monkeypatch)
+    with pytest.raises(ConnectionError):
+        pdf_text.load("https://example.com/r.pdf", resolve=lambda *a, **k: [(2, 1, 6, "", ("93.184.216.34", 443))])
+    assert any(isinstance(h, NoDrainRedirects) for h in built)
