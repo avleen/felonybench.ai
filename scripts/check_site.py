@@ -7,14 +7,15 @@ from pathlib import Path
 from scripts.rubric import ROOT
 
 DIST = ROOT / "site" / "dist"
-BROKEN = re.compile(r"\bNaN\b|\bundefined\b|Invalid Date|\[object Object\]")
+# `undefined` only counts as a whole value: prose can fairly say "undefined behavior".
+BROKEN = re.compile(r"\bNaN\b|(?<=[>\"/])\s*undefined\s*(?=[<\"/])|Invalid Date|\[object Object\]")
 SCRIPT = re.compile(r"<script\b.*?</script>", re.S)  # scripts can legitimately say `undefined`
 
 
 def broken_values(dist: Path) -> list[str]:
     errors = []
     for page in sorted(dist.rglob("*.html")):
-        found = set(BROKEN.findall(SCRIPT.sub("", page.read_text())))
+        found = {match.strip() for match in BROKEN.findall(SCRIPT.sub("", page.read_text()))}
         if found:
             errors.append(f"{page.relative_to(dist)}: contains {sorted(found)}")
     return errors
@@ -27,15 +28,24 @@ def _target_exists(dist: Path, target: str) -> bool:
 
 def redirect_errors(dist: Path) -> list[str]:
     """Pages redirect with and without a trailing slash, because Cloudflare treats them as different paths."""
-    rules = {}
     file = dist / "_redirects"
-    for line in file.read_text().splitlines() if file.exists() else []:
-        if line.strip() and not line.startswith("#"):
-            source, target, *_ = line.split()
-            rules[source] = target
-    errors = []
+    if not file.exists():
+        return ["_redirects: missing from the build, so every old link would 404"]
+    rules, errors = {}, []
+    for line in file.read_text().splitlines():
+        fields = line.split()
+        if not fields or fields[0].startswith("#"):
+            continue
+        if len(fields) < 2:
+            errors.append(f"_redirects: '{line}' has no target")
+        elif fields[0] in rules:  # Cloudflare uses the first match, so the later rule never fires
+            errors.append(f"_redirects: {fields[0]} is listed twice")
+        else:
+            rules[fields[0]] = fields[1]
     for source, target in rules.items():
-        if not _target_exists(dist, target):
+        if "*" in source or ":" in source:
+            continue  # a pattern has no single path to check
+        if target.startswith("/") and not _target_exists(dist, target):
             errors.append(f"_redirects: {source} goes to {target}, which doesn't exist")
         if _target_exists(dist, source):
             errors.append(f"_redirects: {source} is also a real page, so it would never redirect")

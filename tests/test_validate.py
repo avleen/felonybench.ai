@@ -289,11 +289,17 @@ def test_date_precision_is_required(make_incident, rubric):
     assert "(root): 'date_precision' is a required property" in _errors(incident, rubric)
 
 
-@pytest.mark.parametrize("value", [float("inf"), float("nan")])
-def test_statute_years_must_be_finite(make_incident, rubric, value):
+def test_statute_years_must_be_finite(make_incident, rubric):
+    incident = make_incident()
+    incident["statutes"][0]["max_years"] = float("nan")
+    assert "statutes: max_years must be a finite number" in _errors(incident, rubric)
+
+
+@pytest.mark.parametrize("value", [float("inf"), 10 ** 400, 1e308])
+def test_statute_years_have_a_ceiling(make_incident, rubric, value):
     incident = make_incident()
     incident["statutes"][0]["max_years"] = value
-    assert "statutes: max_years must be a finite number" in _errors(incident, rubric)
+    assert any(e.startswith("statutes/0/max_years") for e in _errors(incident, rubric))
 
 
 def test_share_must_be_finite(make_incident, rubric):
@@ -372,6 +378,7 @@ def test_same_spelling_across_files_is_fine(make_incident, tmp_path, rubric):
 
 @pytest.mark.parametrize("content", [
     b"{", b"[1, 2]", b"", b"just text", b"\xff\xfe not utf-8", b"date: 2026-13-45\n", b"id: [a, b]\n",
+    b"2026-07-16: a date as a key\n", b"a: &a {b: *a}\n",
 ])
 def test_bad_files_are_reported_per_file_not_raised(tmp_path, rubric, make_incident, content):
     (tmp_path / "2026-01-01-bad.yaml").write_bytes(content)

@@ -45,7 +45,7 @@
         "type": "object", "additionalProperties": false, "required": ["code", "max_years"],
         "properties": {
           "code": {"type": "string", "minLength": 1},
-          "max_years": {"type": "number", "exclusiveMinimum": 0}
+          "max_years": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000}
         }
       }
     },

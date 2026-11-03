@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  # Runs the PR's npm packages, so it gets no write access.
+  # Runs the PR's code and npm packages, so it gets no write access.
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -26,17 +26,16 @@ jobs:
       - run: pip install -r requirements.txt -r requirements-agent.txt
       - run: bash scripts/check.sh
 
+  # Runs the PR's Python, so it gets no write access either. Posting is a separate job.
   diff:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
@@ -51,10 +50,28 @@ jobs:
           python -m scripts.diff "$RUNNER_TEMP/before.json" "$RUNNER_TEMP/after.json" > "$RUNNER_TEMP/diff.md"
           cat "$RUNNER_TEMP/diff.md" >> "$GITHUB_STEP_SUMMARY"
 
+      - uses: actions/upload-artifact@v7
+        with:
+          name: leaderboard-diff
+          path: ${{ runner.temp }}/diff.md
+          retention-days: 1
+
+  # The only job that can write. It checks nothing out, so it runs nothing from the PR.
+  comment:
+    needs: diff
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: leaderboard-diff
       - name: Comment diff
-        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          gh pr comment "${{ github.event.pull_request.number }}" --body-file "$RUNNER_TEMP/diff.md" --edit-last \
-            || gh pr comment "${{ github.event.pull_request.number }}" --body-file "$RUNNER_TEMP/diff.md"
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file diff.md --edit-last \
+            || gh pr comment "${{ github.event.pull_request.number }}" --body-file diff.md

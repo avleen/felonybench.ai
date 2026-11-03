@@ -7,7 +7,7 @@ python3 -m pytest -q
 python3 -m scripts.validate
 
 cd site
-[ -d node_modules ] || npm ci
+npm ci
 npm test
 npm run build
 cd ..

@@ -39,18 +39,48 @@ def test_redirect_shadowed_by_a_real_page_fails(tmp_path):
     assert len(errors) == 2 and all("real page" in e for e in errors)
 
 
-@pytest.mark.parametrize("text", ["Score: NaN", "by undefined", "Invalid Date", "[object Object]"])
-def test_broken_values_are_found(tmp_path, text):
+@pytest.mark.parametrize("html, value", [
+    ("<p>Score: NaN</p>", "NaN"),
+    ("<td>undefined</td>", "undefined"),
+    ('<a href="/model/undefined/">x</a>', "undefined"),
+    ("<p>Invalid Date</p>", "Invalid Date"),
+    ("<p>[object Object]</p>", "[object Object]"),
+])
+def test_broken_values_are_found(tmp_path, html, value):
     _site(tmp_path)
-    (tmp_path / "model" / "new" / "index.html").write_text(f"<p>{text}</p>")
-    assert broken_values(tmp_path) == [f"model/new/index.html: contains ['{text.split()[-1] if text[0] in 'Sb' else text}']"]
+    (tmp_path / "model" / "new" / "index.html").write_text(html)
+    assert broken_values(tmp_path) == [f"model/new/index.html: contains ['{value}']"]
 
 
-@pytest.mark.parametrize("text", ["<script>if (x === undefined) y();</script>", "<p>undefinedness, Nancy</p>"])
-def test_ordinary_text_and_scripts_are_not_broken_values(tmp_path, text):
+@pytest.mark.parametrize("html", [
+    "<script>if (x === undefined) y();</script>",
+    "<p>undefinedness, Nancy</p>",
+    "<p>The exploit relied on undefined behavior.</p>",
+])
+def test_ordinary_text_and_scripts_are_not_broken_values(tmp_path, html):
     _site(tmp_path)
-    (tmp_path / "index.html").write_text(text)
+    (tmp_path / "index.html").write_text(html)
     assert broken_values(tmp_path) == []
+
+
+def test_missing_redirects_file_fails(tmp_path):
+    _site(tmp_path)
+    (tmp_path / "_redirects").unlink()
+    assert "missing from the build" in redirect_errors(tmp_path)[0]
+
+
+def test_duplicate_redirect_source_fails(tmp_path):
+    errors = redirect_errors(_site(tmp_path, "/og/old.png /og/new.png 301\n/og/old.png /og/new.png 301\n"))
+    assert errors == ["_redirects: /og/old.png is listed twice"]
+
+
+def test_redirect_with_no_target_fails_without_crashing(tmp_path):
+    assert redirect_errors(_site(tmp_path, "/x\n")) == ["_redirects: '/x' has no target"]
+
+
+@pytest.mark.parametrize("rule", ["  # an indented comment", "/x.png https://example.com/ 301", "/blog/* /:splat 301", "/a/:id /b/:id 301"])
+def test_comments_external_targets_and_patterns_are_allowed(tmp_path, rule):
+    assert redirect_errors(_site(tmp_path, rule)) == []
 
 
 def test_cli_fails_on_a_problem_and_passes_without_one(tmp_path):

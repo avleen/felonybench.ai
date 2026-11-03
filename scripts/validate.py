@@ -163,6 +163,11 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
         if not isinstance(incident, dict):
             results[path.name] = ["not a YAML mapping"]
             continue
+        try:
+            _jsonable(incident)
+        except (TypeError, ValueError, RecursionError) as e:  # a date used as a key, or a YAML alias loop
+            results[path.name] = [f"YAML: not plain data: {e}"]
+            continue
         errors = validate_incident(incident, path.stem, rubric, validator)
         incident_id = incident.get("id")
         if isinstance(incident_id, str):
