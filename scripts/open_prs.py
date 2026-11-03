@@ -200,8 +200,11 @@ def main(argv: list[str] | None = None) -> int:
             # Agent PRs get no CI check, so this comes before the push: if anything after it
             # fails, an invalid revision still can't sit in a mergeable PR.
             if pr and errors and not pr.get("isDraft"):
+                # Labels first: a retry skips this block once the PR is a draft, so it couldn't add them.
+                for label in labels_for(incident, errors, previously_closed):
+                    if not has_label(pr, label):
+                        _run("gh", "pr", "edit", str(pr["number"]), "--add-label", label)
                 _run("gh", "pr", "ready", str(pr["number"]), "--undo")
-                _run("gh", "pr", "edit", str(pr["number"]), "--add-label", "needs-review")
 
             _run("git", "add", path)
             _run("git", "commit", "-m", title)
