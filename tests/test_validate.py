@@ -40,6 +40,13 @@ def test_the_unstorable_text_error_is_one_printable_line(key):
     assert error.encode() and "\0" not in error and len(error.splitlines()) == 1
 
 
+def test_a_schema_error_under_an_odd_key_stays_on_one_line(make_incident, rubric):
+    incident = make_incident()
+    incident["rationale"] = {"x\n::error::forged": 5}
+    errors = _errors(incident, rubric)
+    assert errors and all(len(e.splitlines()) == 1 for e in errors)
+
+
 def test_unstorable_text_is_reported_alongside_schema_errors(make_incident, rubric):
     incident = make_incident(org="a\0b")
     incident["summary"] = "x"

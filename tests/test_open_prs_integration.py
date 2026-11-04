@@ -654,6 +654,16 @@ def test_notes_with_only_nuls_fall_back_to_the_summary(tmp_path, make_incident):
     assert "> The summary." in create[0][create[0].index("--body") + 1]
 
 
+def test_a_skipped_filename_cant_forge_a_workflow_command_in_the_log(tmp_path):
+    sandbox = _make_sandbox(tmp_path)
+    (sandbox["work"] / "incidents" / "##[error]x.txt").write_text("x")
+
+    result = _run_open_prs(sandbox)
+
+    assert result.returncode == 1
+    assert "x.txt" in result.stderr and "##[" not in result.stderr
+
+
 def test_a_yaml_error_cant_forge_a_workflow_command_in_the_log(tmp_path, make_incident):
     sandbox = _make_sandbox(tmp_path)
     (sandbox["work"] / "incidents" / "2026-06-01-openai-x.yaml").write_text("::error title=x::forged: y: z\n")

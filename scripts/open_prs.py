@@ -183,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     bad = disallowed([p for _, p in changes])
     deletions = [p for s, p in changes if "D" in s]
     if bad or deletions:
-        print(f"Refusing: agent touched disallowed paths {bad} or deleted {deletions}", file=sys.stderr)
+        _log(f"Refusing: agent touched disallowed paths {bad} or deleted {deletions}")
         return 1
 
     incident_paths = [p for _, p in changes if p.startswith("incidents/")]
@@ -191,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
     files = [p for p in incident_paths if INCIDENT_FILE.fullmatch(p) and p == clean_arg(p)]
     skipped = [p for p in incident_paths if p not in files]
     if skipped:
-        print(f"Skipped files that aren't incidents/*.yaml with a UTF-8 name: {skipped}", file=sys.stderr)
+        _log(f"Skipped files that aren't incidents/*.yaml with a UTF-8 name: {skipped}")
     if not files:
         print("No incident changes.")
         return 1 if skipped else 0

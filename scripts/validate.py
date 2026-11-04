@@ -127,7 +127,7 @@ def _is_lab_publisher(org: str, publisher: str) -> bool:
 
 def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> list[str]:
     errors = [
-        f"{'/'.join(map(str, e.absolute_path)) or '(root)'}: {e.message}"
+        f"{ascii('/'.join(map(str, e.absolute_path)))[1:-1] or '(root)'}: {e.message}"
         for e in validator.iter_errors(_jsonable(incident))
     ] + _unstorable_text_errors(incident)
     if errors:
