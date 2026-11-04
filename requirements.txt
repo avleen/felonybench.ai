@@ -13,5 +13,5 @@ packaging==26.3
 pluggy==1.7.0
 pygments==2.21.0
 referencing==0.37.0
-rpds-py==0.30.0
+rpds-py==2026.9.1
 typing-extensions==4.16.0
