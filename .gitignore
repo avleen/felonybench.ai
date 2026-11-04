@@ -8,3 +8,10 @@ site/dist/
 site/.astro/
 site/src/data/scores.json
 .claude/worktrees/
+
+# Secrets and local Cloudflare state
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+.wrangler/
