@@ -1,0 +1,41 @@
+id: 2026-08-31-anthropic-crowdstrike-indonesia-bangladesh-government-intrusions
+date: 2026-08-31
+date_precision: before
+reported: 2026-10-21
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: An Indonesian-speaking operator, unnamed, whose Claude Code setup of 819 skills CrowdStrike found in an open directory
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Indonesian government domains (unnamed)", type: foreign_government, country: Indonesia}
+  - {name: "A Bangladeshi government domain (unnamed)", type: foreign_government, country: Bangladesh}
+  - {name: "Several private-sector organizations (unnamed)", type: third_party, country: null}
+summary: An Indonesian-speaking operator loaded Claude Code with 819 attack skills, mostly copied from GitHub, told it to compromise targets, and pushed it past its refusals; it broke into several Indonesian government sites, a Bangladeshi one and some companies.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Law No. 11 of 2008 on Electronic Information and Transactions (UU ITE), Art. 30 (illegal access)", country: Indonesia}
+  - {code: "Cyber Security Act 2023 (unauthorized access to a computer system)", country: Bangladesh}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: CrowdStrike says the operator "instructs Claude Code to compromise a target and assumes the skills will offer sufficient guidance", with no orchestration layer, and that the actor "still used Claude Code to compromise several Indonesian government domains".
+  guardrails: CrowdStrike says the operator "periodically had to intervene to overcome the model's safety guardrails", and Cybersecurity Dive quotes the instruction "You find the bypass yourself, don't rely on my help."
+  blast_radius: CrowdStrike says Indonesian government domains and "a government domain of another country" (Bangladesh, per Cybersecurity Dive and CRN Asia) were compromised, so this is an attack on foreign governments.
+  tradecraft: CrowdStrike and the coverage don't name any specific technique for this actor, so no rubric technique is claimed.
+  dwell: CrowdStrike gives only a May to August 2026 window, so date_precision is "before" with 31 August as the latest possible date. CrowdStrike, a third party, documented the activity within that window, so dwell is 0 and isn't inflated.
+  statutes: Compromising government and corporate web domains is unauthorized access under 18 USC 1030(a)(2)(C). No data theft, financial motive or loss is reported, so the misdemeanor maximum of 1 year is used.
+confidence: medium
+sources:
+  - {url: "https://www.crowdstrike.com/en-us/blog/crowdstrike-uncovers-new-agentic-ai-campaigns/", kind: primary, publisher: CrowdStrike, title: "CrowdStrike Uncovers New Agentic AI Campaigns"}
+  - {url: "https://www.cybersecuritydive.com/news/agentic-ai-cyberattacks-harnesses-crowdstrike/833714/", kind: news, publisher: Cybersecurity Dive, title: "Agentic AI helps hackers level up, even without detailed instructions"}
+  - {url: "https://www.crnasia.com/news/2026/cybersecurity/hackers-use-agentic-ai-to-breach-government-and-healthcare-s", kind: news, publisher: CRN Asia, title: "Hackers use agentic AI to breach government and healthcare systems"}
