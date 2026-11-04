@@ -1,6 +1,6 @@
 ---
-import { layout, W, H, PAD } from "../lib/chart";
-import { fmt } from "../lib/data";
+import { chartLabel, layout, W, H, PAD } from "../lib/chart";
+import { fmt, occurred } from "../lib/data";
 const { series, label } = Astro.props;
 const chart = layout(series, new Date().toISOString().slice(0, 10));
 ---
@@ -21,7 +21,7 @@ const chart = layout(series, new Date().toISOString().slice(0, 10));
           {s.markers.map((m) => (
             <a href={`/incident/${m.incident_id}/`} tabindex="-1">
               <circle cx={m.cx} cy={m.cy} r="5" fill={s.color} stroke="var(--paper)" stroke-width="1.5">
-                <title>{`${s.org} · ${m.date} · +${fmt(m.delta)} (total ${fmt(m.cumulative)})`}</title>
+                <title>{`${s.org} · ${occurred(m)} · +${fmt(m.delta)} (total ${fmt(m.cumulative)})`}</title>
               </circle>
             </a>
           ))}
@@ -30,7 +30,7 @@ const chart = layout(series, new Date().toISOString().slice(0, 10));
             <line x1={chart.labelX - 6} x2={chart.labelX + 2} y1={s.labelAnchorY} y2={s.labelY} class="leader" stroke={s.color} />
           )}
           <circle cx={chart.labelX} cy={s.labelY} r="3.5" fill={s.color} />
-          <text x={chart.labelX + 10} y={s.labelY + 4} class="label">{`${s.org} ${fmt(s.final)}`}</text>
+          <text x={chart.labelX + 10} y={s.labelY + 4} class="label">{chartLabel(s.org, fmt(s.final))}<title>{s.org}</title></text>
         </g>
       ))}
     </svg>
@@ -44,7 +44,7 @@ const chart = layout(series, new Date().toISOString().slice(0, 10));
             {chart.orgs.flatMap((s) => s.markers.map((m, idx) => (
               <tr>
                 <td>{idx === 0 ? s.org : ""}</td>
-                <td class="num"><a href={`/incident/${m.incident_id}/`}>{m.date}</a></td>
+                <td class="num"><a href={`/incident/${m.incident_id}/`}>{occurred(m)}</a></td>
                 <td class="num">+{fmt(m.delta)}</td>
                 <td class="num">{fmt(m.cumulative)}</td>
               </tr>

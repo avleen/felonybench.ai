@@ -1,6 +1,6 @@
 # FelonyBench.ai: handoff
 
-State as of 2026-09-29, written for the next agent picking this up. Read this first, then
+State as of 2026-11-03, written for the next agent picking this up. Read this first, then
 `agent/RUNBOOK.md` (how the monitoring agents work, and all the scoring and sourcing rules),
 `rubric/v1.yaml`, and the two design/plan docs in `docs/plans/`.
 
@@ -12,8 +12,8 @@ A satirical benchmark leaderboard at https://felonybench.ai. It ranks AI models 
 - **Open League:** a model's own conduct reached real systems.
 - **Sandbox League:** a model's "crimes" against fictional victims inside evaluations.
 - **Accomplice League:** a human used a named model to commit a crime, or an act of
-  genuinely contested legality. The lab and anyone who modified the model (e.g. an
-  abliterator, `models[].modified_by`) are co-defendants, each charged the full score.
+  genuinely contested legality. The lab of every model used is a co-defendant, each
+  charged the full score.
 
 Incidents are YAML files in `incidents/`, validated by `scripts/validate.py` against
 `schema/incident.schema.json` and the rubric, and scored by `scripts/scoring.py` into
@@ -26,41 +26,19 @@ GitHub Actions runs Claude Code (Opus, medium effort, on the owner's subscriptio
 - `sweep.yml`: Mondays at 10:00 UTC. A full sweep across every lab and source type, with a
   sweep report.
 
-`scripts/open_prs.py` turns the agent's edits into one PR per incident.
+The agent job has read-only access. A separate publish job runs `scripts/open_prs.py`, which
+turns the agent's edits into one PR per incident, then `scripts/run_report.py`, which opens or
+closes the issues for failed runs, sweep reports and dead feeds.
 
 ## Current state
 
-- All open PRs from the previous handoff are merged: #19 (Iran Firefox harvester, with RFE/RL
-  as its news source), #20 (Russia dual-use procurement; public victims) and #21 (the owner
-  decisions below). `python -m pytest -q` passes (167 tests) and `python -m scripts.validate`
-  is clean.
+- `bash scripts/check.sh` runs everything CI runs: see `CLAUDE.md`.
 - The site is live and deploys on merge.
 - Owner preferences: push regularly; PRs for data; the owner merges (they are often remote
   and can't read files, so put everything important in PR descriptions and messages).
-
-### Done on 2026-09-29
-
-- Moonshot (GTG-16002) and DeepSeek (GTG-16001) thinking-signature replay are Accomplice
-  incidents (score 19.5 each; both charged 17 USC 1201 via 1204, 18 USC 1832 and 1343).
-- SenseTime distillation dropped (rejected lead); OpenAI's 53 uploaded user images rejected
-  as a privacy failure.
-- The AISI Mythos 5 incident's structured fields and rationale fixed (score 17.5 → 27).
-- `scripts/pdf_text.py` lets the CI agent read PDFs (public http(s) URLs only, redirects
-  re-checked); it is the only command in the agent's `--allowedTools`.
-- `agent/known-leads.yaml` has a `handled` status; the AISI Mythos 5, Moonshot/DeepSeek and
-  GTG-34007 leads use it.
-- Actions bumped off Node 20: checkout v7, setup-python v7, cache v6, upload-artifact v7.
-
-### Still to do
-
-1. **Trigger and check a sweep** (`gh workflow run sweep.yml`). It's the first run
-   since the Accomplice League merged. Download the artifact
-   (`gh run download <id>`; it includes the transcript and `.agent-out/`) and check:
-   - `sweep-report.md` covers the Accomplice League sources (threat-intel reports);
-   - any accomplice PRs have the right score rows;
-   - failing incidents open as drafts.
-
-   A failed run opens a GitHub issue automatically.
+- The agent's only allowed command is `python -m scripts.pdf_text`. It can't run the
+  validator, so a malformed file only shows up in the publish job.
+- Actions are pinned to commits and Dependabot proposes updates.
 
 ### On hold (owner said to hold)
 

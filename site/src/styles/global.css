@@ -2,7 +2,7 @@
   --paper: #f3efe6; --ink: #17161a; --muted: #5e5a52; --rule: #dcd5c7; --rule-soft: #ece6da;
   --panel: #fffdf8; --panel-head: #f8f5ee; --track: #e7e1d5; --bar-bg: #efeae0;
   --stamp: #b3261e; --link: #1f4e8c; --focus: #1f4e8c;
-  --body: #3f3c36; --faint: #9a9488;
+  --body: #3f3c36;
   /* Inverse surface: the header stat card and the footer. */
   --inverse: #17161a; --inverse-ink: #f3efe6; --inverse-muted: #b8b2a6; --inverse-stamp: #ff6b5e;
   --manila: #eadfc8; --manila-ink: #3a3020; --manila-muted: #5a4a28;
@@ -23,7 +23,7 @@
     --paper: #151412; --ink: #ece8df; --muted: #a39e93; --rule: #34312c; --rule-soft: #2a2824;
     --panel: #1d1b18; --panel-head: #221f1c; --track: #2a2723; --bar-bg: #2e2b27;
     --stamp: #ff6b5e; --link: #8bb4ff; --focus: #8bb4ff;
-    --body: #cfcac0; --faint: #7d786f;
+    --body: #cfcac0;
     --inverse: #0c0b0a; --inverse-ink: #ece8df; --inverse-muted: #a39e93; --inverse-stamp: #ff6b5e;
     --manila: #2c261a; --manila-ink: #e6dcc4; --manila-muted: #c2b28c;
     --witness-bg: #1b2a3d; --witness-fg: #a9c8f5; --intl-bg: #3a1c19; --intl-fg: #ffb3aa;

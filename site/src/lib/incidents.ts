@@ -33,6 +33,13 @@ export const isLow = (i: any) => i.confidence === "low";
 // Whole days since a date, floored at 0 for a date later today elsewhere in the world.
 export const daysSince = (date: string, now: number) => Math.max(0, Math.floor((now - Date.parse(date)) / 86_400_000));
 
+// A "before" date is the latest possible day, so the true count is at least this. A "month" date is the
+// earliest possible day, so it's at most this.
+export const daysLabel = (date: string, precision: string | undefined, now: number) => {
+  const days = daysSince(date, now);
+  return precision === "before" ? `${days}+` : precision === "month" ? `≤${days}` : `${days}`;
+};
+
 export const clip = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`);
 
 // Whole words, so "Metamorph" from Meta keeps its lab.

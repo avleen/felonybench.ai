@@ -1,4 +1,6 @@
-export interface Point { date: string; cumulative: number; delta: number; incident_id: string }
+import { clip } from "./incidents.ts";
+
+export interface Point { date: string; date_precision?: string; cumulative: number; delta: number; incident_id: string }
 
 export const W = 960, H = 420;
 export const PAD = { top: 16, right: 216, bottom: 32, left: 56 };
@@ -7,6 +9,11 @@ export const PAD = { top: 16, right: 216, bottom: 32, left: 56 };
 const LABEL_GAP = 16;
 // Lowest a label's anchor can sit: labels are drawn 4px below it, and the viewBox clips anything past H.
 const LABEL_MAX_Y = H - 8;
+
+// Labels start 22 units into the right margin, and 13px mono is about 8 units per character.
+const LABEL_CHARS = Math.floor((PAD.right - 22) / 8);
+// The score always shows in full, and a long org name gives way so it can't run off the chart.
+export const chartLabel = (org: string, score: string) => `${clip(org, LABEL_CHARS - score.length - 1)} ${score}`;
 
 const day = (d: string) => Date.parse(d) / 86_400_000;
 

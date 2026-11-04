@@ -203,6 +203,7 @@ def trends(scored: list[dict], league: str, tier: str) -> dict:
             previous = points[-1]["cumulative"] if points else 0
             points.append({
                 "date": str(to_date(incident["date"])),
+                "date_precision": incident["date_precision"],
                 "incident_id": incident["id"],
                 "delta": total,
                 "cumulative": round(previous + total, 2),
@@ -220,10 +221,6 @@ def _views(scored: list[dict], rubric: dict) -> dict:
     return {
         "boards": {lg: {t: board(scored, rubric, lg, t) for t in TIERS} for lg in LEAGUES},
         "trends": {lg: {t: trends(scored, lg, t) for t in TIERS} for lg in LEAGUES},
-        "last_incident_date": {
-            lg: max((str(to_date(i["date"])) for i in scored if i["league"] == lg), default=None)
-            for lg in LEAGUES
-        },
     }
 
 
@@ -231,7 +228,6 @@ def build_scores(incidents: list[dict], rubric: dict, generated_at: str) -> dict
     scored = score_all(incidents, rubric)
     confident = score_all([i for i in incidents if i.get("confidence") in CONFIDENT], rubric)
     return {
-        "rubric_version": rubric["version"],
         "generated_at": generated_at,
         "rubric": rubric,
         "incidents": scored,
