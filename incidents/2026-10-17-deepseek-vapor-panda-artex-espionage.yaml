@@ -1,0 +1,38 @@
+id: 2026-10-17-deepseek-vapor-panda-artex-espionage
+date: 2026-10-17
+date_precision: day
+reported: 2026-10-29
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: A China-based targeted-intrusion adversary that CrowdStrike tracks as VAPOR PANDA (formerly VexatiousTemper, overlapping Trend Micro's Earth Estries)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A Middle East interior ministry and Latin American foreign ministries (unnamed)", type: foreign_government, country: "Middle East / Latin America"}
+  - {name: "Telecommunications providers in the US, Belgium and the Philippines (unnamed)", type: third_party, country: "US / BE / PH"}
+summary: China's VAPOR PANDA ran the ARTEX agent framework, mainly on DeepSeek, against more than 200 organizations in 11 days, and its agents broke into foreign ministries, an interior ministry and telecoms, writing web shells and pulling admin passwords.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: [credentials, privilege_escalation, lateral_movement, persistence, evasion]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: CrowdStrike says VAPOR PANDA "ran ARTEX primarily with the Chinese-origin DeepSeek LLM". Its planner and worker agents carried out the intrusions, writing web shells, extracting domain administrator passwords and inventorying sensor coverage, while the human operator intervened "only to steer the agents at decision points".
+  guardrails: CrowdStrike describes no jailbreak or safety removal. The model was called through the ARTEX framework as shipped.
+  blast_radius: CrowdStrike says the adversary "compromised a Middle East-based interior ministry", deployed BLOODALCHEMY at a Latin American foreign ministry, describes "extensive intrusions" at two Latin American foreign ministries, and says it compromised telecoms in the US, Belgium and the Philippines. That makes it an international incident against foreign governments.
+  tradecraft: CrowdStrike documents LAPS password reads, a forged admin token from an unrotated 2022 directory export and password spraying (credentials), recovery of an enterprise admin account and resource-based constrained delegation (privilege escalation), host reconnaissance and lateral movement, JSP and PHP web shells plus the BLOODALCHEMY backdoor (persistence), and a renamed binary posing as svchost.exe and a hunt for hosts without its Falcon sensor (evasion). No zero-day is reported.
+  dwell: The activity began on October 17, 2026, and CrowdStrike, a third party, described it within an 11-day window. No victim's compromise date is given separately, so dwell is counted as 0 and not inflated.
+  statutes: Breaking into telecom networks and government agencies to steal data is unauthorized access, here in furtherance of espionage, the five-year tier of 18 USC 1030(c)(2)(B)(ii). Planting web shells and a backdoor across nine organizations' systems impairs the integrity of ten or more protected computers in a year, a felony factor under 1030(c)(4)(A)(i)(VI) for 1030(a)(5)(A). These are the human operators' exposure.
+confidence: medium
+sources:
+  - {url: "https://www.crowdstrike.com/en-us/blog/vapor-panda-uses-artex-to-scale-global-campaign/", kind: primary, publisher: CrowdStrike, title: "VAPOR PANDA Uses AI-Driven ARTEX to Scale a Global Espionage Campaign"}
+  - {url: "https://thehackernews.com/2026/10/chinese-hackers-use-ai-powered-artex-to.html", kind: news, publisher: The Hacker News}
