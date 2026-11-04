@@ -32,13 +32,18 @@ def neutralize(text: str) -> str:
     return _URL.sub(lambda m: m[0].replace("@", "%40"), text).replace("@", "@\u200b")
 
 
+def clean_arg(text: str) -> str:
+    """A subprocess argument can't hold a NUL or a lone surrogate, and YAML and JSON can produce both."""
+    return text.replace("\0", "").encode("utf-8", "replace").decode()
+
+
 def postable(text: str, max_chars: int = COMMENT_LIMIT) -> str:
-    """Agent text made safe to hand to gh: no mentions, no NUL bytes, and short enough to be an argument."""
-    text = neutralize(text.replace("\0", ""))
-    if len(text) <= max_chars and len(text.encode("utf-8", "replace")) <= MAX_ARG_BYTES:
+    """Agent text ready to post: no mentions, and short enough to be a single command argument."""
+    text = neutralize(clean_arg(text))
+    if len(text) <= max_chars and len(text.encode()) <= MAX_ARG_BYTES:
         return text
     suffix = "\n\n_…truncated._"
-    kept = text[: max_chars - len(suffix)].encode("utf-8", "replace")[: MAX_ARG_BYTES - len(suffix.encode())]
+    kept = text[: max_chars - len(suffix)].encode()[: MAX_ARG_BYTES - len(suffix.encode())]
     return kept.decode("utf-8", "ignore") + suffix
 
 
@@ -62,7 +67,7 @@ def describe(result: dict | None) -> str:
     turns = result.get("num_turns")
     turns = turns if isinstance(turns, int) else "unknown"
     subtype = result.get("subtype") if isinstance(result.get("subtype"), str) else "unknown"
-    return f"Agent result: `{neutralize(subtype)[:60]}` after {turns} turns."
+    return f"Agent result: `{postable(subtype)[:60]}` after {turns} turns."
 
 
 def failure_body(url: str, agent: str, publish: str, result: dict | None) -> str:
@@ -74,7 +79,7 @@ def failure_body(url: str, agent: str, publish: str, result: dict | None) -> str
 
 
 def _gh(*args: str) -> str:
-    return subprocess.run(["gh", *args], check=True, text=True, capture_output=True).stdout
+    return subprocess.run(["gh", *map(clean_arg, args)], check=True, text=True, capture_output=True).stdout
 
 
 def _find_issue(title: str) -> int | None:
@@ -100,7 +105,7 @@ def report_feeds(url: str, dead_feeds: str) -> None:
     if not dead_feeds:  # this workflow doesn't check feeds
         return
     if dead_feeds != "none":
-        _post(FEEDS_ISSUE, neutralize(f"Run: {url}\n\nMore than a fifth of the feeds returned nothing: {dead_feeds}"))
+        _post(FEEDS_ISSUE, postable(f"Run: {url}\n\nMore than a fifth of the feeds returned nothing: {dead_feeds}"))
     elif existing := _find_issue(FEEDS_ISSUE):
         _gh("issue", "close", str(existing), "--comment", f"Recovered: {url}")
 
@@ -113,7 +118,7 @@ def report(workflow: str, url: str, agent: str, publish: str, result: dict | Non
         existing = _find_issue(title)
         if existing:
             _gh("issue", "close", str(existing), "--comment", f"Recovered: {url}")
-    if sweep_report.strip():
+    if clean_arg(sweep_report).strip():
         _post(SWEEP_ISSUE, postable(f"Run: {url}\n\n{sweep_report}"))
 
 

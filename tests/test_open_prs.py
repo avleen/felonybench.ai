@@ -1,3 +1,4 @@
+import sys
 import subprocess
 
 import pytest
@@ -101,3 +102,7 @@ def test_draft_becomes_ready_once_news_arrives():
     assert becomes_ready({"isDraft": True}, [NEWS_REQUIRED]) is False
     assert becomes_ready({"isDraft": True}, ["something else"]) is False
     assert becomes_ready({"isDraft": False}, []) is False
+
+
+def test_run_cleans_arguments_the_os_would_refuse():
+    assert _run(sys.executable, "-c", "import sys; print(sys.argv[1])", "a\0b\ud800c").strip() == "ab?c"

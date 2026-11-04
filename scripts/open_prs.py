@@ -12,7 +12,7 @@ from pathlib import Path
 
 from scripts.diff import render
 from scripts.rubric import ROOT, load_rubric, load_incident_yaml
-from scripts.run_report import postable
+from scripts.run_report import clean_arg, postable
 from scripts.score import load_incidents
 from scripts.scoring import build_scores
 from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir
@@ -20,6 +20,7 @@ from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir
 ALLOWED_PREFIXES = ("incidents/", ".agent-out/", ".agent-state/")
 INCIDENT_FILE = re.compile(r"incidents/[^/]+\.yaml")
 PR_BODY_LIMIT = 65000
+PR_TITLE_LIMIT = 256  # GitHub refuses a longer title, which would leave a pushed branch with no PR
 
 
 def parse_porcelain(output: str) -> list[tuple[str, str]]:
@@ -51,11 +52,18 @@ def add_missing_labels(pr: dict, labels: list[str]) -> None:
             pr.setdefault("labels", []).append({"name": label})
 
 
+def _one_line_title(text: str) -> str:
+    title = " ".join(postable(text).split())
+    return title if len(title) <= PR_TITLE_LIMIT else title[: PR_TITLE_LIMIT - 1] + "…"
+
+
 def pr_title(incident: dict, is_new: bool) -> str:
+    """Runs on invalid incidents too, so they can open as drafts that list their errors."""
     if not is_new:
-        return postable(f"Update: {incident['id']}")
-    victims = ", ".join(v.get("name", "?") for v in incident.get("victims") or [])
-    return postable(f"New felony: {incident.get('org', '?')} — {victims}")
+        return _one_line_title(f"Update: {incident.get('id', '?')}")
+    victims = incident.get("victims")
+    names = [str(v.get("name", "?")) if isinstance(v, dict) else str(v) for v in victims] if isinstance(victims, list) else []
+    return _one_line_title(f"New felony: {incident.get('org', '?')} — {', '.join(names)}")
 
 
 def awaiting_news(errors: list[str]) -> bool:
@@ -132,7 +140,7 @@ def pr_body(
 
 def _run(*cmd: str) -> str:
     try:
-        return subprocess.run(cmd, check=True, text=True, capture_output=True, cwd=ROOT).stdout
+        return subprocess.run([clean_arg(arg) for arg in cmd], check=True, text=True, capture_output=True, cwd=ROOT).stdout
     except subprocess.CalledProcessError as e:
         print(f"Command failed: {' '.join(cmd)}", file=sys.stderr)
         if e.stderr:
@@ -198,7 +206,7 @@ def main(argv: list[str] | None = None) -> int:
                 breakdown = next(i["breakdown"] for i in after["incidents"] if i["id"] == incident["id"])
                 diff_md = render(before, after)
 
-            title = pr_title(incident, is_new=path in new_files)
+            title = pr_title({"id": stem, **incident}, is_new=path in new_files)
             notes_path = args.notes / f"{stem}.md"
             notes = notes_path.read_text(errors="replace") if notes_path.exists() else ""
             previously_closed = closed_heads.get(branch)
@@ -233,7 +241,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{title} -> {branch}")
         except Exception as e:  # one bad file must not cost the rest of the run its PRs
             failed = True
-            print(f"Failed to process {path} (branch {branch}): {e!r}", file=sys.stderr)
+            print(f"Failed to process {path} (branch {branch}): {type(e).__name__}: {e}", file=sys.stderr)
             _run("git", "reset", "--hard")
             _run("git", "clean", "-fd", "incidents")
     return 1 if failed else 0
