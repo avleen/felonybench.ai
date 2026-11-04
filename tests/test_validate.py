@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 from scripts.rubric import ROOT
-from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir, validate_incident
+from scripts.validate import NEWS_REQUIRED, _unstorable_text_errors, load_validator, validate_dir, validate_incident
 
 STEM = "2026-07-16-openai-exploitgym-huggingface"
 
@@ -17,6 +17,25 @@ def _errors(incident, rubric, stem=STEM):
 
 def test_valid_incident(make_incident, rubric):
     assert _errors(make_incident(), rubric) == []
+
+
+@pytest.mark.parametrize("text", ["a\0b", "\ud800x", "\udc80", "\ud83d\ude00"])
+def test_rejects_text_that_cant_be_stored(make_incident, rubric, text):
+    errors = _errors(make_incident(org=text), rubric)
+    assert any(e.startswith("org: ") and "surrogate" in e for e in errors)
+    incident = make_incident()
+    incident["victims"][0]["name"] = text
+    assert any(e.startswith("victims/0/name: ") for e in _errors(incident, rubric))
+
+
+def test_a_real_emoji_is_fine(make_incident, rubric):
+    incident = make_incident()
+    incident["summary"] += " 😀"
+    assert _errors(incident, rubric) == []
+
+
+def test_the_unstorable_text_error_can_itself_be_printed():
+    assert _unstorable_text_errors({"\ud800": "x"})[0].encode()
 
 
 def test_requires_news_source(make_incident, rubric):

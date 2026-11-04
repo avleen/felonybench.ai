@@ -67,7 +67,7 @@ def describe(result: dict | None) -> str:
     turns = result.get("num_turns")
     turns = turns if isinstance(turns, int) else "unknown"
     subtype = result.get("subtype") if isinstance(result.get("subtype"), str) else "unknown"
-    return f"Agent result: `{postable(subtype)[:60]}` after {turns} turns."
+    return f"Agent result: `{neutralize(clean_arg(subtype))[:60]}` after {turns} turns."
 
 
 def failure_body(url: str, agent: str, publish: str, result: dict | None) -> str:

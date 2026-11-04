@@ -369,6 +369,34 @@ def test_a_title_is_one_line_and_a_short_one_is_left_alone():
     assert len(pr_title({"id": "x" * 500}, is_new=False)) == PR_TITLE_LIMIT
 
 
+@pytest.mark.parametrize("incident, title", [
+    ({"org": None, "victims": [{"name": None}]}, "New felony: ? — ?"),
+    ({"org": "", "victims": [{}]}, "New felony: ? — ?"),
+    ({"org": "A", "victims": []}, "New felony: A — ?"),
+    ({"org": "A", "victims": None}, "New felony: A — ?"),
+    ({"org": "A", "victims": "foo"}, "New felony: A — foo"),
+    ({"org": "A", "victims": {"name": "foo"}}, "New felony: A — foo"),
+    ({"org": 0, "victims": [0]}, "New felony: 0 — 0"),
+    ({"org": "A\x1b[31mB\x07", "victims": ["C"]}, "New felony: A[31mB — C"),
+])
+def test_a_title_says_what_it_can_and_marks_the_rest_unknown(incident, title):
+    assert pr_title(incident, is_new=True) == title
+
+
+def test_an_update_title_marks_a_missing_id_unknown():
+    assert pr_title({"id": None}, is_new=False) == "Update: ?"
+
+
+def test_a_cut_title_has_no_space_before_the_ellipsis():
+    prefix = "Update: "
+    title = pr_title({"id": "x" * (PR_TITLE_LIMIT - 2 - len(prefix)) + " " + "y" * 50}, is_new=False)
+    assert title.endswith("x…") and len(title) < PR_TITLE_LIMIT
+
+
+def test_the_longest_title_fits_githubs_byte_limit():
+    assert len(pr_title({"id": "😀" * 500}, is_new=False).encode()) <= 1024
+
+
 @pytest.mark.parametrize("incident", [
     {"org": "A", "victims": [{"name": 5}]},
     {"org": "A", "victims": [{"name": None}]},

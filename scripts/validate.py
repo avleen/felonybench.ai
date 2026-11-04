@@ -9,6 +9,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+from scripts.run_report import clean_arg
 from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric, load_incident_yaml
 from scripts.scoring import model_lab, model_slug, slugify, to_date
 
@@ -77,6 +78,18 @@ def _dates_in(value, path: str = "") -> list[str]:
     return []
 
 
+def _unstorable_text_errors(value, path: str = "") -> list[str]:
+    """YAML escapes can produce text that can't be written as UTF-8 or passed to a command."""
+    if isinstance(value, dict):
+        return [e for k, v in value.items() for e in _unstorable_text_errors(k, f"{path}{k}/") + _unstorable_text_errors(v, f"{path}{k}/")]
+    if isinstance(value, list):
+        return [e for i, v in enumerate(value) for e in _unstorable_text_errors(v, f"{path}{i}/")]
+    if isinstance(value, str) and clean_arg(value) != value:
+        where = path.rstrip("/").encode("utf-8", "backslashreplace").decode()  # the path can hold a bad key
+        return [f"{where}: contains a NUL or a surrogate escape, which can't be stored as text"]
+    return []
+
+
 def _stray_date_errors(incident: dict) -> list[str]:
     """YAML reads a bare 2026-07-16 as a date. The schema sees text, but the checks below would crash."""
     return _dates_in({k: v for k, v in incident.items() if k not in ("date", "reported")})
@@ -115,7 +128,7 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     ]
     if errors:
         return errors
-    errors = _stray_date_errors(incident)
+    errors = _stray_date_errors(incident) + _unstorable_text_errors(incident)
     if errors:
         return errors
 
