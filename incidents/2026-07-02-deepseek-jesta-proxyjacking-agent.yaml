@@ -1,0 +1,39 @@
+id: 2026-07-02-deepseek-jesta-proxyjacking-agent
+date: 2026-07-02
+date_precision: day
+reported: 2026-08-03
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: An unidentified operator, which Jesta Security believes is Chinese, running an autonomous agent from rented US cloud infrastructure
+models:
+  - {name: "DeepSeek V4 Flash", codename: null, family: deepseek, share: 1}
+victims:
+  - {name: "Jesta Security (its internet-exposed research lab)", type: third_party, country: Israel}
+  - {name: "About 1,283 weakly secured servers on the agent's target list (unnamed)", type: third_party, country: null}
+summary: An agent running on DeepSeek V4 Flash's free tier logged into Jesta Security's exposed lab server with weak credentials, installed a SOCKS5 proxy, and used stored passwords to reach other servers from a list of 1,283, turning them into relays.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws:
+  - {code: "Computers Law, 5755-1995 (unlawful penetration into computer material)", country: Israel}
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, evasion]
+  dwell_days: 0
+  detected_by: victim
+  self_disclosed: false
+rationale:
+  contribution: Jesta says the agent ran the intrusion itself over 871 short sessions, profiling the host with a script it wrote, decoding and launching a MicroSocks proxy on port 1080, and running a connect script that used sshpass and stored credentials to reach and stage other victims. Jesta's CEO told Dark Reading a human "deliberately weaponized an AI model".
+  guardrails: Jesta says the agent ran on "deepseek-v4-flash-free", the public free tier. Neither Jesta nor Dark Reading reports a jailbreak or a modified model.
+  blast_radius: The victims are Jesta's own lab server and other privately rented servers on the agent's target list. No government system is reported.
+  tradecraft: The agent reused stored working credential pairs through sshpass to log into victims (credentials). It ran one command per session, paused between actions and routed its connections through the proxies it planted, which Jesta says was to hide where later attacks came from (evasion).
+  dwell: Jesta noticed the agent's first 90-second check-in on "a quiet Thursday", and the first session was Thursday 2 July 2026, so the intrusion was spotted the day it started (0 days), by the victim.
+  statutes: Installing proxy software on servers without authorization damages their integrity under 18 USC 1030(a)(5)(A). Jesta says over 1,000 servers had already been hit the same way, which meets the ten-or-more-computers factor in 1030(c)(4)(B) for the ten-year maximum. No data theft is reported, so 1030(a)(2)(C) is left out.
+confidence: low
+sources:
+  - {url: "https://jesta.ai/blog/darkreasoning", kind: primary, publisher: Jesta Security, title: "DarkReasoning: A Chinese LLM attacked our lab, so we made it work for us"}
+  - {url: "https://www.darkreading.com/cyberattacks-data-breaches/chinese-actor-deepseek-ai-agent-attack-security-firm", kind: news, publisher: Dark Reading, title: "Chinese Actor Weaponizes DeepSeek AI Agent to Attack Security Firm"}
+  - {url: "https://threatbeat.com/attacks-and-incidents/chinese-actor-weaponizes-deepseek-ai-agent-to-attack-security-firm/", kind: news, publisher: Dark Reading (via Threat Beat), title: "Chinese actor weaponizes DeepSeek AI agent to attack security firm"}
