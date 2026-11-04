@@ -3,12 +3,14 @@ import json
 import os
 from pathlib import Path
 
+import subprocess
+import sys
 import pytest
 import yaml
 
 from scripts.apply_agent_output import apply_output
 from scripts.closed_prs import closing_reason, rejected, render, snapshot_name
-from scripts.open_prs import labels_for, pr_body, pr_title
+from scripts.open_prs import PR_TITLE_LIMIT, labels_for, pr_body, pr_title
 from scripts.rubric import load_incident_yaml
 from scripts import run_report
 from scripts.run_report import agent_result, describe, failed, failure_body, neutralize
@@ -315,3 +317,115 @@ def test_postable_cuts_on_a_character_boundary_and_leaves_short_text_alone():
     assert "\ufffd" not in run_report.postable("😀" * 59000)
     assert run_report.postable("short") == "short"
     assert run_report.postable("a\0b @x") == "ab @\u200bx"
+
+
+def _report_env(tmp_path, monkeypatch):
+    for key, value in {"GITHUB_SERVER_URL": "s", "GITHUB_REPOSITORY": "r", "GITHUB_RUN_ID": "1", "GITHUB_WORKFLOW": "w", "GITHUB_STEP_SUMMARY": str(tmp_path / "summary")}.items():
+        monkeypatch.setenv(key, value)
+
+
+@pytest.mark.parametrize("subtype", ["a\0b", "a\ud800b"])
+def test_an_odd_transcript_subtype_still_opens_the_failure_issue(tmp_path, monkeypatch, subtype):
+    log = _real_gh_stub(tmp_path, monkeypatch)
+    _report_env(tmp_path, monkeypatch)
+    transcript = tmp_path / "t.json"
+    transcript.write_text(json.dumps([{"type": "result", "subtype": subtype, "num_turns": 1}]))
+
+    assert run_report.main(["--agent", "failure", "--publish", "success", "--transcript", str(transcript)]) == 1
+
+    assert "issue create" in log.read_text()
+
+
+def test_a_sweep_report_of_only_nuls_posts_nothing(tmp_path, monkeypatch):
+    log = _real_gh_stub(tmp_path, monkeypatch)
+    _report_env(tmp_path, monkeypatch)
+    report = tmp_path / "sweep.md"
+    report.write_bytes(b"\0\0 \n")
+
+    assert run_report.main(["--agent", "success", "--publish", "success", "--sweep-report", str(report)]) == 0
+
+    assert "issue create" not in log.read_text()
+
+
+@pytest.mark.parametrize("text", ["a\0b", "a\ud800b", "a\udc80b"])
+def test_postable_output_can_be_an_argument(text):
+    out = run_report.postable(text)
+    assert subprocess.run([sys.executable, "-c", "pass", out], check=True).returncode == 0
+    assert out.startswith("a") and out.endswith("b")
+
+
+@pytest.mark.parametrize("incident", [
+    {"org": "A" * 300, "victims": [{"name": "B"}]},
+    {"org": "A", "victims": [{"name": "B" * 90}] * 9},
+    {"org": "A" * 70000},
+])
+def test_a_long_title_is_cut_to_what_github_accepts(incident):
+    title = pr_title(incident, is_new=True)
+    assert len(title) == PR_TITLE_LIMIT and title.endswith("…") and "\n" not in title
+
+
+def test_a_title_is_one_line_and_a_short_one_is_left_alone():
+    assert pr_title({"org": "A\nB", "victims": [{"name": "C\tD"}]}, is_new=True) == "New felony: A B — C D"
+    assert len(pr_title({"id": "x" * 500}, is_new=False)) == PR_TITLE_LIMIT
+
+
+@pytest.mark.parametrize("incident, title", [
+    ({"org": None, "victims": [{"name": None}]}, "New felony: ? — ?"),
+    ({"org": "", "victims": [{}]}, "New felony: ? — ?"),
+    ({"org": "A", "victims": []}, "New felony: A — ?"),
+    ({"org": "A", "victims": None}, "New felony: A — ?"),
+    ({"org": "A", "victims": "foo"}, "New felony: A — foo"),
+    ({"org": "A", "victims": {"name": "foo"}}, "New felony: A — foo"),
+    ({"org": 0, "victims": [0]}, "New felony: 0 — 0"),
+    ({"org": "A\x1b[31mB\x07", "victims": ["C"]}, "New felony: A[31mB — C"),
+    ({"org": "\0", "victims": [{"name": "\x07"}]}, "New felony: ? — ?"),
+    ({"org": "   ", "victims": ["\u202e"]}, "New felony: ? — ?"),
+    ({"org": "A \x07 B\u202eC", "victims": ["D"]}, "New felony: A BC — D"),
+])
+def test_a_title_says_what_it_can_and_marks_the_rest_unknown(incident, title):
+    assert pr_title(incident, is_new=True) == title
+
+
+def test_an_update_title_marks_a_missing_id_unknown():
+    assert pr_title({"id": None}, is_new=False) == "Update: ?"
+
+
+@pytest.mark.parametrize("incident", [{}, {"id": None}, {"id": ""}, {"id": "\0"}, {"id": " \x07"}])
+def test_an_update_title_falls_back_to_the_filename(incident):
+    assert pr_title(incident, is_new=False, stem="the-file") == "Update: the-file"
+
+
+@pytest.mark.parametrize("org", ["&#\x0764;user", "&#\u200b64;user", "@\x07user", "&#x\x0740;user"])
+def test_a_removed_character_cant_reassemble_a_mention(org):
+    title = pr_title({"org": org, "victims": ["x"]}, is_new=True)
+    assert "@user" not in title and "&#" not in title
+
+
+def test_a_null_confidence_or_summary_doesnt_print_none():
+    body = pr_body({"confidence": None, "summary": None}, "", None, "", ["bad"])
+    assert "None" not in body and "**unknown**" in body
+
+
+def test_a_cut_title_has_no_space_before_the_ellipsis():
+    prefix = "Update: "
+    title = pr_title({"id": "x" * (PR_TITLE_LIMIT - 2 - len(prefix)) + " " + "y" * 50}, is_new=False)
+    assert title.endswith("x…") and len(title) < PR_TITLE_LIMIT
+
+
+def test_the_longest_title_fits_githubs_byte_limit():
+    assert len(pr_title({"id": "😀" * 500}, is_new=False).encode()) <= 1024
+
+
+@pytest.mark.parametrize("incident", [
+    {"org": "A", "victims": [{"name": 5}]},
+    {"org": "A", "victims": [{"name": None}]},
+    {"org": "A", "victims": "foo"},
+    {"org": "A", "victims": ["x"]},
+    {"org": "A", "victims": {"name": "x"}},
+    {"org": "A", "victims": None},
+    {"org": 5},
+    {},
+])
+def test_a_title_can_be_built_for_any_invalid_incident(incident):
+    assert pr_title(incident, is_new=True).startswith("New felony:")
+    assert pr_title(incident, is_new=False).startswith("Update:")

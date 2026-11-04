@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 from scripts.rubric import ROOT
-from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir, validate_incident
+from scripts.validate import NEWS_REQUIRED, _unstorable_text_errors, load_validator, validate_dir, validate_incident
 
 STEM = "2026-07-16-openai-exploitgym-huggingface"
 
@@ -17,6 +17,51 @@ def _errors(incident, rubric, stem=STEM):
 
 def test_valid_incident(make_incident, rubric):
     assert _errors(make_incident(), rubric) == []
+
+
+@pytest.mark.parametrize("text", ["a\0b", "\ud800x", "\udc80", "\ud83d\ude00"])
+def test_rejects_text_that_cant_be_stored(make_incident, rubric, text):
+    errors = _errors(make_incident(org=text), rubric)
+    assert any(e.startswith("org: ") and "surrogate" in e for e in errors)
+    incident = make_incident()
+    incident["victims"][0]["name"] = text
+    assert any(e.startswith("victims/0/name: ") for e in _errors(incident, rubric))
+
+
+def test_a_real_emoji_is_fine(make_incident, rubric):
+    incident = make_incident()
+    incident["summary"] += " 😀"
+    assert _errors(incident, rubric) == []
+
+
+@pytest.mark.parametrize("key", ["\ud800", "a\0b", "x\n::error::forged\n\n## Validation"])
+def test_the_unstorable_text_error_is_one_printable_line(key):
+    error = _unstorable_text_errors({key: "\0"})[0]
+    assert error.encode() and "\0" not in error and len(error.splitlines()) == 1
+
+
+def test_a_schema_error_under_an_odd_key_stays_on_one_line(make_incident, rubric):
+    incident = make_incident()
+    incident["rationale"] = {"x\n::error::forged": 5}
+    errors = _errors(incident, rubric)
+    assert errors and all(len(e.splitlines()) == 1 for e in errors)
+
+
+def test_unstorable_text_is_reported_alongside_schema_errors(make_incident, rubric):
+    incident = make_incident(org="a\0b")
+    incident["summary"] = "x"
+    errors = _errors(incident, rubric)
+    assert any(e.startswith("summary: ") for e in errors) and any(e.startswith("org: ") for e in errors)
+
+
+def test_a_family_error_can_be_printed_when_the_family_cant_be_stored(make_incident, rubric, tmp_path):
+    for org in ("Aorg", "Borg"):
+        incident = make_incident(id=f"2026-06-01-{org.lower()}-x", org=org)
+        incident["models"][0]["family"] = "\ud800"
+        (tmp_path / f"{incident['id']}.yaml").write_text(yaml.safe_dump(incident))
+    errors = [e for found in validate_dir(tmp_path, rubric, load_validator()).values() for e in found]
+    assert any("more than one lab" in e for e in errors)
+    assert all(e.encode() for e in errors)
 
 
 def test_requires_news_source(make_incident, rubric):

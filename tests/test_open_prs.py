@@ -1,8 +1,9 @@
+import sys
 import subprocess
 
 import pytest
 
-from scripts.open_prs import _run, disallowed, labels_for, main, parse_porcelain, pr_body, pr_title
+from scripts.open_prs import _log, _run, disallowed, labels_for, main, parse_porcelain, pr_body, pr_title
 
 
 def test_parse_porcelain():
@@ -63,7 +64,7 @@ def test_body_is_capped_at_65000_chars(make_incident):
 def test_run_prints_command_and_stderr_on_failure(capsys, monkeypatch, tmp_path):
     monkeypatch.setattr("scripts.open_prs.ROOT", tmp_path)
 
-    def fake_run(cmd, check, text, capture_output, cwd):
+    def fake_run(cmd, **kwargs):
         raise subprocess.CalledProcessError(
             1, cmd, output="stdout stuff", stderr="boom: something went wrong"
         )
@@ -101,3 +102,24 @@ def test_draft_becomes_ready_once_news_arrives():
     assert becomes_ready({"isDraft": True}, [NEWS_REQUIRED]) is False
     assert becomes_ready({"isDraft": True}, ["something else"]) is False
     assert becomes_ready({"isDraft": False}, []) is False
+
+
+@pytest.mark.parametrize("separator", ["\n", "\r", "\r\n", "\n   ", "\x85", "\u2028"])
+def test_no_logged_line_can_be_read_as_a_workflow_command(capsys, separator):
+    _log(f"::error::first{separator}::add-mask::second")
+    lines = capsys.readouterr().err.splitlines()
+    assert len(lines) == 2 and "second" in lines[1]
+    assert not any(line.lstrip().startswith("::") for line in lines)
+
+
+def test_no_logged_line_holds_a_legacy_workflow_command(capsys):
+    _log("Failed: ##[add-mask]secret")
+    assert "##[" not in capsys.readouterr().err
+
+
+def test_run_reads_output_that_isnt_utf8():
+    assert _run(sys.executable, "-c", "import sys; sys.stdout.buffer.write(b'a\\xffb')") == "a\udcffb"
+
+
+def test_run_cleans_arguments_the_os_would_refuse():
+    assert _run(sys.executable, "-c", "import sys; print(sys.argv[1])", "a\0b\ud800c").strip() == "ab?c"

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
+from scripts.run_report import clean_arg
 from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric, load_incident_yaml
 from scripts.scoring import model_lab, model_slug, slugify, to_date
 
@@ -67,19 +68,35 @@ def _date_errors(incident: dict) -> list[str]:
     return errors
 
 
-def _dates_in(value, path: str = "") -> list[str]:
+def _leaves(value, path: str = ""):
+    """Every key and value below `value`, with the path to it as one line of plain text."""
     if isinstance(value, dict):
-        return [e for k, v in value.items() for e in _dates_in(v, f"{path}{k}/")]
-    if isinstance(value, list):
-        return [e for i, v in enumerate(value) for e in _dates_in(v, f"{path}{i}/")]
-    if isinstance(value, date):
-        return [f"{path.rstrip('/')}: '{value}' must be quoted, or YAML reads it as a date"]
-    return []
+        for k, v in value.items():
+            here = f"{path}/{ascii(str(k))[1:-1]}" if path else ascii(str(k))[1:-1]  # a key can hold anything
+            yield here, k
+            yield from _leaves(v, here)
+    elif isinstance(value, list):
+        for i, v in enumerate(value):
+            yield from _leaves(v, f"{path}/{i}" if path else str(i))
+    else:
+        yield path, value
+
+
+def _unstorable_text_errors(incident: dict) -> list[str]:
+    """YAML escapes can produce text that can't be written as UTF-8 or passed to a command."""
+    return [
+        f"{path}: contains a NUL or a surrogate escape, which can't be stored as text"
+        for path, leaf in _leaves(incident) if isinstance(leaf, str) and clean_arg(leaf) != leaf
+    ]
 
 
 def _stray_date_errors(incident: dict) -> list[str]:
     """YAML reads a bare 2026-07-16 as a date. The schema sees text, but the checks below would crash."""
-    return _dates_in({k: v for k, v in incident.items() if k not in ("date", "reported")})
+    return [
+        f"{path}: '{leaf}' must be quoted, or YAML reads it as a date"
+        for path, leaf in _leaves({k: v for k, v in incident.items() if k not in ("date", "reported")})
+        if isinstance(leaf, date)
+    ]
 
 
 def _identity_errors(incident: dict) -> list[str]:
@@ -110,9 +127,9 @@ def _is_lab_publisher(org: str, publisher: str) -> bool:
 
 def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> list[str]:
     errors = [
-        f"{'/'.join(map(str, e.absolute_path)) or '(root)'}: {e.message}"
+        f"{ascii('/'.join(map(str, e.absolute_path)))[1:-1] or '(root)'}: {e.message}"
         for e in validator.iter_errors(_jsonable(incident))
-    ]
+    ] + _unstorable_text_errors(incident)
     if errors:
         return errors
     errors = _stray_date_errors(incident)
@@ -224,7 +241,7 @@ def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str
     # A family is one lab's model line, so a second lab usually means a model is missing its `org`.
     for family, labs in families.items():
         if len(labs) > 1:
-            message = f"models: family '{family}' is filed under more than one lab: {sorted(labs)}"
+            message = f"models: family {family!r} is filed under more than one lab: {sorted(labs)}"
             for names in labs.values():
                 for name in names:
                     results.setdefault(name, []).append(message)

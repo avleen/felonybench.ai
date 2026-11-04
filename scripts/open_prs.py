@@ -8,11 +8,12 @@ import json
 import re
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 from scripts.diff import render
 from scripts.rubric import ROOT, load_rubric, load_incident_yaml
-from scripts.run_report import postable
+from scripts.run_report import clean_arg, neutralize, postable
 from scripts.score import load_incidents
 from scripts.scoring import build_scores
 from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir
@@ -20,6 +21,8 @@ from scripts.validate import NEWS_REQUIRED, load_validator, validate_dir
 ALLOWED_PREFIXES = ("incidents/", ".agent-out/", ".agent-state/")
 INCIDENT_FILE = re.compile(r"incidents/[^/]+\.yaml")
 PR_BODY_LIMIT = 65000
+# GitHub allows 1024 bytes, which 256 characters always fit. A longer title would leave a pushed branch with no PR.
+PR_TITLE_LIMIT = 256
 
 
 def parse_porcelain(output: str) -> list[tuple[str, str]]:
@@ -51,11 +54,38 @@ def add_missing_labels(pr: dict, labels: list[str]) -> None:
             pr.setdefault("labels", []).append({"name": label})
 
 
-def pr_title(incident: dict, is_new: bool) -> str:
+def _for_log(message: str) -> str:
+    """Agent text can be in any message. The runner reads a line starting ::command:: and ##[command] anywhere in a line."""
+    return "\n".join(f"| {line}" for line in message.replace("##[", "## [").splitlines())
+
+
+def _log(message: str) -> None:
+    print(_for_log(message), file=sys.stderr)
+
+
+def _title_text(text: str) -> str:
+    """Control and invisible characters could reassemble a mention or disguise a title, so they go before neutralizing."""
+    return " ".join("".join(c for c in clean_arg(text) if c.isspace() or unicodedata.category(c) not in ("Cc", "Cf")).split())
+
+
+def _one_line_title(text: str) -> str:
+    title = neutralize(_title_text(text))
+    return title if len(title) <= PR_TITLE_LIMIT else title[: PR_TITLE_LIMIT - 1].rstrip() + "…"
+
+
+def _or_unknown(value, unknown: str = "?") -> str:
+    return str(value) if value is not None and _title_text(str(value)) else unknown
+
+
+def pr_title(incident: dict, is_new: bool, stem: str = "?") -> str:
+    """Runs on invalid incidents too, so they can open as drafts that list their errors."""
     if not is_new:
-        return postable(f"Update: {incident['id']}")
-    victims = ", ".join(v.get("name", "?") for v in incident.get("victims") or [])
-    return postable(f"New felony: {incident.get('org', '?')} — {victims}")
+        return _one_line_title(f"Update: {_or_unknown(incident.get('id'), stem)}")
+    victims = incident.get("victims")
+    if not isinstance(victims, list):
+        victims = [victims]
+    names = [_or_unknown(v.get("name") if isinstance(v, dict) else v) for v in victims]
+    return _one_line_title(f"New felony: {_or_unknown(incident.get('org'))} — {', '.join(names) or '?'}")
 
 
 def awaiting_news(errors: list[str]) -> bool:
@@ -90,7 +120,7 @@ def pr_body(
     """Generated sections come first so agent notes can't bury or imitate them."""
     status = "✅ Passed" if not errors else "❌ Failed\n\n" + "\n".join(f"- {e}" for e in errors)
     parts = [f"## Validation\n\n{status}"]
-    confidence = incident.get("confidence", "unknown")
+    confidence = incident.get("confidence") or "unknown"
     if confidence == "low":
         parts.append("Confidence: **low**. Hidden by default on the site, so merging won't change the default leaderboard.")
     else:
@@ -123,8 +153,8 @@ def pr_body(
         parts.append(f"## Score\n\n| Component | Value |\n|---|---|\n{table}\n| **Total** | **{breakdown['total']:g}** |")
     if diff_md:
         parts.append(diff_md.strip())
-    summary = str(incident.get("summary", ""))
-    parts.append("## Agent notes (unverified)\n\n" + quote_notes(notes.strip() or summary))
+    summary = str(incident.get("summary") or "")
+    parts.append("## Agent notes (unverified)\n\n" + quote_notes(clean_arg(notes).strip() or summary))
     parts.append("_Opened by the FelonyBench agent. Check every source before merging._")
     # The org, victims and validation errors come from the agent too, not just its notes.
     return postable("\n\n".join(parts), PR_BODY_LIMIT)
@@ -132,11 +162,14 @@ def pr_body(
 
 def _run(*cmd: str) -> str:
     try:
-        return subprocess.run(cmd, check=True, text=True, capture_output=True, cwd=ROOT).stdout
+        # surrogateescape: git prints filenames as raw bytes, and one that isn't UTF-8 mustn't stop the run.
+        return subprocess.run(
+            [clean_arg(arg) for arg in cmd], check=True, text=True, errors="surrogateescape", capture_output=True, cwd=ROOT,
+        ).stdout
     except subprocess.CalledProcessError as e:
-        print(f"Command failed: {' '.join(cmd)}", file=sys.stderr)
+        _log(f"Command failed: {' '.join(cmd)}")
         if e.stderr:
-            print(e.stderr, file=sys.stderr)
+            _log(e.stderr)
         raise
 
 
@@ -150,14 +183,15 @@ def main(argv: list[str] | None = None) -> int:
     bad = disallowed([p for _, p in changes])
     deletions = [p for s, p in changes if "D" in s]
     if bad or deletions:
-        print(f"Refusing: agent touched disallowed paths {bad} or deleted {deletions}", file=sys.stderr)
+        _log(f"Refusing: agent touched disallowed paths {bad} or deleted {deletions}")
         return 1
 
     incident_paths = [p for _, p in changes if p.startswith("incidents/")]
-    files = [p for p in incident_paths if INCIDENT_FILE.fullmatch(p)]
+    # A name that isn't clean text can't be passed to git, or become a branch.
+    files = [p for p in incident_paths if INCIDENT_FILE.fullmatch(p) and p == clean_arg(p)]
     skipped = [p for p in incident_paths if p not in files]
     if skipped:
-        print(f"Skipped files that aren't incidents/*.yaml: {skipped}", file=sys.stderr)
+        _log(f"Skipped files that aren't incidents/*.yaml with a UTF-8 name: {skipped}")
     if not files:
         print("No incident changes.")
         return 1 if skipped else 0
@@ -168,7 +202,7 @@ def main(argv: list[str] | None = None) -> int:
             contents[path] = (ROOT / path).read_text()
         except (OSError, ValueError) as e:  # ValueError: not UTF-8
             failed = True
-            print(f"Failed to read {path}: {e!r}", file=sys.stderr)
+            _log(f"Failed to read {path}: {e!r}")
     new_files = {p for s, p in changes if s in ("??", "A")}
 
     _run("git", "reset", "--hard", args.base)
@@ -198,7 +232,7 @@ def main(argv: list[str] | None = None) -> int:
                 breakdown = next(i["breakdown"] for i in after["incidents"] if i["id"] == incident["id"])
                 diff_md = render(before, after)
 
-            title = pr_title(incident, is_new=path in new_files)
+            title = pr_title(incident, is_new=path in new_files, stem=stem)
             notes_path = args.notes / f"{stem}.md"
             notes = notes_path.read_text(errors="replace") if notes_path.exists() else ""
             previously_closed = closed_heads.get(branch)
@@ -230,10 +264,10 @@ def main(argv: list[str] | None = None) -> int:
                 label_args = [x for label in labels for x in ("--label", label)]
                 draft = ["--draft"] if errors else []  # agent PRs get no CI check; a draft can't be merged by accident
                 _run("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title, "--body", body, *draft, *label_args)
-            print(f"{title} -> {branch}")
+            print(_for_log(f"{title} -> {branch}"))
         except Exception as e:  # one bad file must not cost the rest of the run its PRs
             failed = True
-            print(f"Failed to process {path} (branch {branch}): {e!r}", file=sys.stderr)
+            _log(f"Failed to process {path} (branch {branch}): {type(e).__name__}: {e}")
             _run("git", "reset", "--hard")
             _run("git", "clean", "-fd", "incidents")
     return 1 if failed else 0

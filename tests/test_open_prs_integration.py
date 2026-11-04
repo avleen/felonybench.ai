@@ -557,7 +557,9 @@ def test_a_file_of_yaml_aliases_fails_alone_without_expanding(tmp_path, make_inc
     bomb = f"a0: &a0 [x, x]\n{levels}org: *a40\nsummary: *a40\n"
     (sandbox["work"] / "incidents" / "2026-06-02-openai-y.yaml").write_text(bomb)
 
-    assert _run_open_prs(sandbox).returncode == 1
+    result = _run_open_prs(sandbox)
+    assert result.returncode == 1
+    assert "ComposerError" in result.stderr and "line 2" in result.stderr  # says where, not a memory address
 
     assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
 
@@ -576,3 +578,126 @@ def test_bad_notes_dont_cost_the_incident_its_pr(tmp_path, make_incident, conten
     create = _calls(_gh_calls(sandbox), "pr", "create")
     assert len(create) == 1
     assert "caf" in create[0][create[0].index("--body") + 1]
+
+
+@pytest.mark.parametrize("change", [
+    {"victims": [{"name": 5}]},
+    {"victims": "foo"},
+    {"id": None},
+])
+def test_an_invalid_incident_opens_a_draft_listing_its_errors(tmp_path, make_incident, change):
+    sandbox = _make_sandbox(tmp_path)
+    incident = {**make_incident(id="2026-06-01-openai-x"), **change}
+    path = sandbox["work"] / "incidents" / "2026-06-01-openai-x.yaml"
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(yaml.safe_dump(incident))
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert len(create) == 1 and "--draft" in create[0]
+    assert "❌ Failed" in create[0][create[0].index("--body") + 1]
+
+
+def test_a_lone_surrogate_in_the_org_doesnt_cost_the_incident_its_pr(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x", org="\ud800x")
+    (sandbox["work"] / "incidents" / "2026-06-01-openai-x.yaml").write_text(yaml.safe_dump(incident))
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert create[0][create[0].index("--title") + 1].startswith("New felony: ?x")
+    assert "--draft" in create[0]
+    assert "surrogate" in create[0][create[0].index("--body") + 1]
+
+
+def test_a_filename_that_isnt_utf8_only_costs_itself_its_pr(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    (sandbox["work"] / "incidents" / os.fsdecode(b"\xff.yaml")).write_text("id: x\n")
+
+    result = _run_open_prs(sandbox)
+
+    assert result.returncode == 1
+    assert "Skipped" in result.stderr
+    assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
+
+
+@pytest.mark.parametrize("empty", [None, "", "\0"])
+def test_an_update_with_an_empty_id_is_titled_from_its_filename(tmp_path, make_incident, empty):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    _run_git(sandbox["work"], "add", "-A")
+    _run_git(sandbox["work"], "commit", "-m", "seed")
+    _run_git(sandbox["work"], "push", "origin", "main")
+    incident["id"] = empty
+    (sandbox["work"] / "incidents" / "2026-06-01-openai-x.yaml").write_text(yaml.safe_dump(incident))
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert create[0][create[0].index("--title") + 1] == "Update: 2026-06-01-openai-x"
+
+
+def test_notes_with_only_nuls_fall_back_to_the_summary(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x", summary="The summary.")
+    _write_incident(sandbox["work"], incident)
+    _write_notes(sandbox["work"], incident["id"], "\0\0\n")
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert "> The summary." in create[0][create[0].index("--body") + 1]
+
+
+def test_a_skipped_filename_cant_forge_a_workflow_command_in_the_log(tmp_path):
+    sandbox = _make_sandbox(tmp_path)
+    (sandbox["work"] / "incidents" / "##[error]x.txt").write_text("x")
+
+    result = _run_open_prs(sandbox)
+
+    assert result.returncode == 1
+    assert "x.txt" in result.stderr and "##[" not in result.stderr
+
+
+def test_a_yaml_error_cant_forge_a_workflow_command_in_the_log(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    (sandbox["work"] / "incidents" / "2026-06-01-openai-x.yaml").write_text("::error title=x::forged: y: z\n")
+
+    result = _run_open_prs(sandbox)
+
+    assert result.returncode == 1
+    assert "forged" in result.stderr
+    assert not any(line.lstrip().startswith("::") for line in result.stderr.splitlines())
+
+
+def test_an_update_with_no_id_is_titled_from_its_filename(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    _write_incident(sandbox["work"], incident)
+    _run_git(sandbox["work"], "add", "-A")
+    _run_git(sandbox["work"], "commit", "-m", "seed")
+    _run_git(sandbox["work"], "push", "origin", "main")
+    del incident["id"]
+    (sandbox["work"] / "incidents" / "2026-06-01-openai-x.yaml").write_text(yaml.safe_dump(incident))
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert create[0][create[0].index("--title") + 1] == "Update: 2026-06-01-openai-x"
+
+
+def test_a_long_title_opens_a_pr_with_a_title_github_accepts(tmp_path, make_incident):
+    sandbox = _make_sandbox(tmp_path)
+    incident = make_incident(id="2026-06-01-openai-x")
+    incident["victims"] = [{**incident["victims"][0], "name": f"Victim {n} " + "x" * 80} for n in range(9)]
+    _write_incident(sandbox["work"], incident)
+
+    assert _run_open_prs(sandbox).returncode == 0
+
+    create = _calls(_gh_calls(sandbox), "pr", "create")
+    assert len(create[0][create[0].index("--title") + 1]) == 256
