@@ -54,25 +54,33 @@ def add_missing_labels(pr: dict, labels: list[str]) -> None:
             pr.setdefault("labels", []).append({"name": label})
 
 
+def _for_log(message: str) -> str:
+    """Agent text can be in any message. The runner reads a line starting ::command:: and ##[command] anywhere in a line."""
+    return "\n".join(f"| {line}" for line in message.replace("##[", "## [").splitlines())
+
+
 def _log(message: str) -> None:
-    """Agent text can be in any message. Prefixing each line stops the runner reading one as a ::workflow-command::."""
-    print("\n".join(f"| {line}" for line in message.splitlines()), file=sys.stderr)
+    print(_for_log(message), file=sys.stderr)
+
+
+def _title_text(text: str) -> str:
+    """Control and invisible characters could reassemble a mention or disguise a title, so they go before neutralizing."""
+    return " ".join("".join(c for c in clean_arg(text) if c.isspace() or unicodedata.category(c) not in ("Cc", "Cf")).split())
 
 
 def _one_line_title(text: str) -> str:
-    title = " ".join(neutralize(clean_arg(text)).split())
-    title = "".join(c for c in title if unicodedata.category(c) != "Cc")
+    title = neutralize(_title_text(text))
     return title if len(title) <= PR_TITLE_LIMIT else title[: PR_TITLE_LIMIT - 1].rstrip() + "…"
 
 
-def _or_unknown(value) -> str:
-    return "?" if value in (None, "") else str(value)
+def _or_unknown(value, unknown: str = "?") -> str:
+    return str(value) if value is not None and _title_text(str(value)) else unknown
 
 
-def pr_title(incident: dict, is_new: bool) -> str:
+def pr_title(incident: dict, is_new: bool, stem: str = "?") -> str:
     """Runs on invalid incidents too, so they can open as drafts that list their errors."""
     if not is_new:
-        return _one_line_title(f"Update: {_or_unknown(incident.get('id'))}")
+        return _one_line_title(f"Update: {_or_unknown(incident.get('id'), stem)}")
     victims = incident.get("victims")
     if not isinstance(victims, list):
         victims = [victims]
@@ -112,7 +120,7 @@ def pr_body(
     """Generated sections come first so agent notes can't bury or imitate them."""
     status = "✅ Passed" if not errors else "❌ Failed\n\n" + "\n".join(f"- {e}" for e in errors)
     parts = [f"## Validation\n\n{status}"]
-    confidence = incident.get("confidence", "unknown")
+    confidence = incident.get("confidence") or "unknown"
     if confidence == "low":
         parts.append("Confidence: **low**. Hidden by default on the site, so merging won't change the default leaderboard.")
     else:
@@ -145,7 +153,7 @@ def pr_body(
         parts.append(f"## Score\n\n| Component | Value |\n|---|---|\n{table}\n| **Total** | **{breakdown['total']:g}** |")
     if diff_md:
         parts.append(diff_md.strip())
-    summary = str(incident.get("summary", ""))
+    summary = str(incident.get("summary") or "")
     parts.append("## Agent notes (unverified)\n\n" + quote_notes(clean_arg(notes).strip() or summary))
     parts.append("_Opened by the FelonyBench agent. Check every source before merging._")
     # The org, victims and validation errors come from the agent too, not just its notes.
@@ -183,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
     files = [p for p in incident_paths if INCIDENT_FILE.fullmatch(p) and p == clean_arg(p)]
     skipped = [p for p in incident_paths if p not in files]
     if skipped:
-        print(f"Skipped files that aren't incidents/*.yaml: {skipped}", file=sys.stderr)
+        print(f"Skipped files that aren't incidents/*.yaml with a UTF-8 name: {skipped}", file=sys.stderr)
     if not files:
         print("No incident changes.")
         return 1 if skipped else 0
@@ -224,7 +232,7 @@ def main(argv: list[str] | None = None) -> int:
                 breakdown = next(i["breakdown"] for i in after["incidents"] if i["id"] == incident["id"])
                 diff_md = render(before, after)
 
-            title = pr_title({**incident, "id": incident.get("id") or stem}, is_new=path in new_files)
+            title = pr_title(incident, is_new=path in new_files, stem=stem)
             notes_path = args.notes / f"{stem}.md"
             notes = notes_path.read_text(errors="replace") if notes_path.exists() else ""
             previously_closed = closed_heads.get(branch)
@@ -256,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
                 label_args = [x for label in labels for x in ("--label", label)]
                 draft = ["--draft"] if errors else []  # agent PRs get no CI check; a draft can't be merged by accident
                 _run("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title, "--body", body, *draft, *label_args)
-            print(f"{title} -> {branch}")
+            print(_for_log(f"{title} -> {branch}"))
         except Exception as e:  # one bad file must not cost the rest of the run its PRs
             failed = True
             _log(f"Failed to process {path} (branch {branch}): {type(e).__name__}: {e}")

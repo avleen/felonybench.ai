@@ -378,6 +378,9 @@ def test_a_title_is_one_line_and_a_short_one_is_left_alone():
     ({"org": "A", "victims": {"name": "foo"}}, "New felony: A — foo"),
     ({"org": 0, "victims": [0]}, "New felony: 0 — 0"),
     ({"org": "A\x1b[31mB\x07", "victims": ["C"]}, "New felony: A[31mB — C"),
+    ({"org": "\0", "victims": [{"name": "\x07"}]}, "New felony: ? — ?"),
+    ({"org": "   ", "victims": ["\u202e"]}, "New felony: ? — ?"),
+    ({"org": "A \x07 B\u202eC", "victims": ["D"]}, "New felony: A BC — D"),
 ])
 def test_a_title_says_what_it_can_and_marks_the_rest_unknown(incident, title):
     assert pr_title(incident, is_new=True) == title
@@ -385,6 +388,22 @@ def test_a_title_says_what_it_can_and_marks_the_rest_unknown(incident, title):
 
 def test_an_update_title_marks_a_missing_id_unknown():
     assert pr_title({"id": None}, is_new=False) == "Update: ?"
+
+
+@pytest.mark.parametrize("incident", [{}, {"id": None}, {"id": ""}, {"id": "\0"}, {"id": " \x07"}])
+def test_an_update_title_falls_back_to_the_filename(incident):
+    assert pr_title(incident, is_new=False, stem="the-file") == "Update: the-file"
+
+
+@pytest.mark.parametrize("org", ["&#\x0764;user", "&#\u200b64;user", "@\x07user", "&#x\x0740;user"])
+def test_a_removed_character_cant_reassemble_a_mention(org):
+    title = pr_title({"org": org, "victims": ["x"]}, is_new=True)
+    assert "@user" not in title and "&#" not in title
+
+
+def test_a_null_confidence_or_summary_doesnt_print_none():
+    body = pr_body({"confidence": None, "summary": None}, "", None, "", ["bad"])
+    assert "None" not in body and "**unknown**" in body
 
 
 def test_a_cut_title_has_no_space_before_the_ellipsis():

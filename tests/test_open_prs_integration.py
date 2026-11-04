@@ -625,7 +625,7 @@ def test_a_filename_that_isnt_utf8_only_costs_itself_its_pr(tmp_path, make_incid
     assert len(_calls(_gh_calls(sandbox), "pr", "create")) == 1
 
 
-@pytest.mark.parametrize("empty", [None, ""])
+@pytest.mark.parametrize("empty", [None, "", "\0"])
 def test_an_update_with_an_empty_id_is_titled_from_its_filename(tmp_path, make_incident, empty):
     sandbox = _make_sandbox(tmp_path)
     incident = make_incident(id="2026-06-01-openai-x")

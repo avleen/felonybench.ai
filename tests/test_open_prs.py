@@ -112,6 +112,11 @@ def test_no_logged_line_can_be_read_as_a_workflow_command(capsys, separator):
     assert not any(line.lstrip().startswith("::") for line in lines)
 
 
+def test_no_logged_line_holds_a_legacy_workflow_command(capsys):
+    _log("Failed: ##[add-mask]secret")
+    assert "##[" not in capsys.readouterr().err
+
+
 def test_run_reads_output_that_isnt_utf8():
     assert _run(sys.executable, "-c", "import sys; sys.stdout.buffer.write(b'a\\xffb')") == "a\udcffb"
 

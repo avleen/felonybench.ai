@@ -34,8 +34,27 @@ def test_a_real_emoji_is_fine(make_incident, rubric):
     assert _errors(incident, rubric) == []
 
 
-def test_the_unstorable_text_error_can_itself_be_printed():
-    assert _unstorable_text_errors({"\ud800": "x"})[0].encode()
+@pytest.mark.parametrize("key", ["\ud800", "a\0b", "x\n::error::forged\n\n## Validation"])
+def test_the_unstorable_text_error_is_one_printable_line(key):
+    error = _unstorable_text_errors({key: "\0"})[0]
+    assert error.encode() and "\0" not in error and len(error.splitlines()) == 1
+
+
+def test_unstorable_text_is_reported_alongside_schema_errors(make_incident, rubric):
+    incident = make_incident(org="a\0b")
+    incident["summary"] = "x"
+    errors = _errors(incident, rubric)
+    assert any(e.startswith("summary: ") for e in errors) and any(e.startswith("org: ") for e in errors)
+
+
+def test_a_family_error_can_be_printed_when_the_family_cant_be_stored(make_incident, rubric, tmp_path):
+    for org in ("Aorg", "Borg"):
+        incident = make_incident(id=f"2026-06-01-{org.lower()}-x", org=org)
+        incident["models"][0]["family"] = "\ud800"
+        (tmp_path / f"{incident['id']}.yaml").write_text(yaml.safe_dump(incident))
+    errors = [e for found in validate_dir(tmp_path, rubric, load_validator()).values() for e in found]
+    assert any("more than one lab" in e for e in errors)
+    assert all(e.encode() for e in errors)
 
 
 def test_requires_news_source(make_incident, rubric):
