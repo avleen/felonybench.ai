@@ -7,10 +7,9 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-import yaml
 from jsonschema import Draft202012Validator
 
-from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric
+from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric, load_incident_yaml
 from scripts.scoring import model_lab, model_slug, slugify, to_date
 
 SCHEMA = ROOT / "schema" / "incident.schema.json"
@@ -188,19 +187,12 @@ def validate_incident(incident: dict, stem: str, rubric: dict, validator) -> lis
     return errors
 
 
-def _load_yaml(text: str):
-    # No incident needs an alias, and a small file of them expands to gigabytes.
-    if any(isinstance(event, yaml.AliasEvent) for event in yaml.parse(text, Loader=yaml.SafeLoader)):
-        raise ValueError("aliases aren't allowed in incident files")
-    return yaml.safe_load(text)
-
-
 def validate_dir(directory: Path, rubric: dict, validator) -> dict[str, list[str]]:
     results, seen, families = {}, {}, {}
     org_names, model_names = {}, {}  # slug -> spelling -> files
     for path in sorted(Path(directory).glob("*.yaml")):
         try:
-            incident = _load_yaml(path.read_text())
+            incident = load_incident_yaml(path.read_text())
         except Exception as e:  # PyYAML lets out all sorts: !!bool foo is a KeyError, 1:1:...:1.0 an OverflowError
             results[path.name] = [f"YAML: {e}"]
             continue

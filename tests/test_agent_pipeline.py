@@ -1,5 +1,6 @@
 import html
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -7,7 +8,8 @@ import yaml
 
 from scripts.apply_agent_output import apply_output
 from scripts.closed_prs import closing_reason, rejected, render, snapshot_name
-from scripts.open_prs import labels_for, pr_body
+from scripts.open_prs import labels_for, pr_body, pr_title
+from scripts.rubric import load_incident_yaml
 from scripts import run_report
 from scripts.run_report import agent_result, describe, failed, failure_body, neutralize
 from scripts.validate import NEWS_REQUIRED
@@ -259,3 +261,57 @@ def test_neutralize_leaves_no_bare_mention(text):
 @pytest.mark.parametrize("text", ["&#640;", "&#x401;", "&amp;#64;", "AT&T"])
 def test_neutralize_leaves_other_entities_alone(text):
     assert neutralize(text) == text
+
+
+def test_a_pr_title_cant_mention_anyone():
+    assert "@owner" not in pr_title({"org": "@owner", "victims": [{"name": "@other"}]}, is_new=True)
+    assert "@other" not in pr_title({"org": "@owner", "victims": [{"name": "@other"}]}, is_new=True)
+    assert "@owner" not in pr_title({"id": "@owner"}, is_new=False)
+
+
+def test_incident_loading_refuses_aliases_but_reads_plain_yaml():
+    assert load_incident_yaml("a: 1\n") == {"a": 1}
+    with pytest.raises(yaml.YAMLError):
+        load_incident_yaml("a: &a 1\nb: *a\n")
+    with pytest.raises(yaml.YAMLError, match="line 2"):
+        load_incident_yaml("a: &a 1\nb: *a\n")
+
+
+def _real_gh_stub(tmp_path, monkeypatch):
+    """A real subprocess, so an argument the OS would refuse fails here too."""
+    log = tmp_path / "gh.log"
+    gh = tmp_path / "bin" / "gh"
+    gh.parent.mkdir()
+    gh.write_text(f'#!/bin/sh\necho "$1 $2" >> "{log}"\necho "[]"\n')
+    gh.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{gh.parent}:{os.environ['PATH']}")
+    return log
+
+
+@pytest.mark.parametrize("content", [b"caf\xff\n", b"caf\x00e\n", b"caf" + b"\xff" * 64000, "café".encode() * 40000])
+def test_a_bad_sweep_report_is_still_posted_and_summarized(tmp_path, monkeypatch, content):
+    log = _real_gh_stub(tmp_path, monkeypatch)
+    report = tmp_path / "sweep.md"
+    report.write_bytes(content)
+    summary = tmp_path / "summary"
+    for key, value in {"GITHUB_SERVER_URL": "s", "GITHUB_REPOSITORY": "r", "GITHUB_RUN_ID": "1", "GITHUB_WORKFLOW": "w", "GITHUB_STEP_SUMMARY": str(summary)}.items():
+        monkeypatch.setenv(key, value)
+
+    assert run_report.main(["--agent", "success", "--publish", "success", "--sweep-report", str(report)]) == 0
+
+    assert "issue create" in log.read_text()
+    assert "caf" in summary.read_text()
+
+
+@pytest.mark.parametrize("text", ["\xff" * 64000, "\ufffd" * 64000, "😀" * 59000, "a" * 200000])
+def test_postable_fits_in_one_argument_and_says_it_was_cut(text):
+    out = run_report.postable(text)
+    assert len(out.encode()) <= run_report.MAX_ARG_BYTES and len(out) <= run_report.COMMENT_LIMIT
+    if len(text) > run_report.COMMENT_LIMIT or len(text.encode()) > run_report.MAX_ARG_BYTES:
+        assert out.endswith("_…truncated._")
+
+
+def test_postable_cuts_on_a_character_boundary_and_leaves_short_text_alone():
+    assert "\ufffd" not in run_report.postable("😀" * 59000)
+    assert run_report.postable("short") == "short"
+    assert run_report.postable("a\0b @x") == "ab @\u200bx"

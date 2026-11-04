@@ -5,16 +5,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import yaml
-
-from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric
+from scripts.rubric import DEFAULT_RUBRIC, ROOT, load_rubric, load_incident_yaml
 from scripts.scoring import build_scores
 
 
 def load_incidents(directory: Path) -> list[dict]:
     if not directory.is_dir():
         return []
-    return [yaml.safe_load(p.read_text()) for p in sorted(directory.glob("*.yaml"))]
+    return [load_incident_yaml(p.read_text()) for p in sorted(directory.glob("*.yaml"))]
 
 
 def main(argv: list[str] | None = None) -> int:
