@@ -1,0 +1,39 @@
+id: 2026-08-31-anthropic-crowdstrike-argentina-healthcare-intrusions
+date: 2026-08-31
+date_precision: before
+reported: 2026-10-21
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Spanish- and English-speaking operator, unnamed, whose rebuilt PentestGPT framework CrowdStrike found in an open directory
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "At least 15 healthcare organizations in Argentina (unnamed)", type: third_party, country: Argentina}
+summary: An operator ran a pair of Claude Code agents, one picking the next attack stage and one carrying it out, that compromised at least 15 Argentine healthcare organizations and took credentials and medical records from at least one.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Argentine Penal Code art. 153 bis (unauthorized access to a computer system)", country: Argentina}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, lateral_movement]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: CrowdStrike says a "Supervisor" Claude Code agent chose each next task from a state machine of attack stages and an "Executor" agent carried it out. Coverage of the report describes the agent switching to a SQL-based route and opening a reverse shell on a domain controller in about 20 minutes "with no added human guidance".
+  guardrails: CrowdStrike says it observed all four actors in its report getting past model safeguards, often by presenting the intrusions as authorized penetration tests or leaving files that told Claude Code to treat targets as approved.
+  blast_radius: The victims are Argentine healthcare organizations. Neither CrowdStrike nor the coverage says any is a government body, so this is scored third party.
+  tradecraft: CrowdStrike says credentials were exfiltrated, and coverage reports the agent harvested five password hashes from a domain controller (credentials). Coverage also describes the agent using one compromised healthcare network to reach a second organization's internal systems, a route the operator hadn't given it (lateral movement).
+  dwell: CrowdStrike gives only a May to August 2026 window (Cybersecurity Dive says mid-May to mid-August), so date_precision is "before" with 31 August as the latest possible date. CrowdStrike, a third party, documented the activity within that window, so dwell is 0 and isn't inflated.
+  statutes: Taking credentials and medical records from healthcare organizations' systems is unauthorized access under 18 USC 1030(a)(2)(C). No financial motive or loss figure is reported, so the misdemeanor maximum of 1 year is used.
+confidence: medium
+sources:
+  - {url: "https://www.crowdstrike.com/en-us/blog/crowdstrike-uncovers-new-agentic-ai-campaigns/", kind: primary, publisher: CrowdStrike, title: "CrowdStrike Uncovers New Agentic AI Campaigns"}
+  - {url: "https://www.cybersecuritydive.com/news/agentic-ai-cyberattacks-harnesses-crowdstrike/833714/", kind: news, publisher: Cybersecurity Dive, title: "Agentic AI helps hackers level up, even without detailed instructions"}
+  - {url: "https://www.crnasia.com/news/2026/cybersecurity/hackers-use-agentic-ai-to-breach-government-and-healthcare-s", kind: news, publisher: CRN Asia, title: "Hackers use agentic AI to breach government and healthcare systems"}
+  - {url: "https://securitybrief.com.au/story/crowdstrike-finds-ai-agents-running-autonomous-cyberattacks", kind: news, publisher: SecurityBrief Australia, title: "CrowdStrike finds AI agents running autonomous cyberattacks"}
