@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import IncidentList from "../../components/IncidentList.astro";
-import { fmt, rubric, incidentsFor, allModels, isLow, LEAGUES, CONFIDENCE_VIEWS } from "../../lib/data";
+import { fmt, rubric, incidentsFor, allModels, defaultStanding, isLow, modelTitle, LEAGUES, CONFIDENCE_VIEWS } from "../../lib/data";
 
 export function getStaticPaths() {
   return allModels().map((model: any) => ({ params: { slug: model.slug }, props: { model } }));
@@ -17,11 +17,17 @@ const views = CONFIDENCE_VIEWS.map(({ key, data }) => {
   return { key, standings, badges: [...new Set(standings.flatMap((s) => s.row.badges))] as string[] };
 });
 const onlyLow = incidents.every(isLow);
+const hiddenCount = incidents.filter(isLow).length;
+const standing = defaultStanding(model.slug);
+const description = standing
+  ? `${modelTitle(model)}: #${standing.row.rank} in the ${standing.league} with ${fmt(standing.row.score)} FBS.`
+  : `${modelTitle(model)}: low-confidence reports only, so it isn't ranked by default.`;
 ---
-<Layout title={`${model.name} rap sheet`} ogImage={`/og/${model.slug}.png`}>
+<Layout title={modelTitle(model)} description={description} ogImage={`/og/${model.slug}.png`} revealWithoutJs={onlyLow} noindex={onlyLow}>
   {onlyLow && (
     <div class="panel low-notice" data-conf="confident">
-      <p class="eyebrow">Low-confidence reports only</p>
+      <p class="eyebrow">Low-confidence reports only · {model.org}</p>
+      <h1>{model.name}</h1>
       <p>Every report about {model.name} is low confidence, so it's hidden while you're viewing high- and medium-confidence reports.</p>
       <button type="button" class="show-low-button" data-show-low>Show low-confidence reports</button>
     </div>
@@ -37,16 +43,19 @@ const onlyLow = incidents.every(isLow);
   </section>
 
   {views.map((v) => (
-    <div class="table-wrap" data-conf={v.key}>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="League standings" data-conf={v.key}>
       <table>
-        <thead><tr><th>League</th><th class="num">Rank</th><th class="num">FBS</th><th class="num">Sentence-Years</th><th class="num">Incidents</th></tr></thead>
+        <thead><tr><th scope="col">League</th><th scope="col" class="num">Rank</th><th scope="col" class="num">FBS</th><th scope="col" class="num">Sentence-Years</th><th scope="col" class="num">Incidents</th></tr></thead>
         <tbody>{v.standings.map((s) => <tr><td>{s.label}</td><td class="num">#{s.row.rank}</td><td class="num score">{fmt(s.row.score)}</td><td class="num">{fmt(s.row.sentence_years)}</td><td class="num">{s.row.incidents.length}</td></tr>)}</tbody>
       </table>
     </div>
   ))}
   <p class="muted">Standings include alleged incidents.</p>
 
-  <h2>Record</h2>
+  <h2 id="record">Record</h2>
+  {!onlyLow && hiddenCount > 0 && (
+    <p class="muted hidden-count" data-conf="confident">{hiddenCount} low-confidence {hiddenCount === 1 ? "report" : "reports"} hidden. <button type="button" class="show-low-button" data-show-low data-focus="#record">Show low-confidence reports</button></p>
+  )}
   <IncidentList incidents={incidents} />
   </div>
 </Layout>
@@ -54,6 +63,7 @@ const onlyLow = incidents.every(isLow);
 <style>
   .low-notice { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
   .low-notice p { margin: 0; }
+  .low-notice h1 { font-size: clamp(24px, 3vw, 34px); line-height: 1.15; }
   .mugshot {
     margin: 16px 0 24px;
     background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rule) 31px 32px);

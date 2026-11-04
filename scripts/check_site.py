@@ -21,6 +21,34 @@ def broken_values(dist: Path) -> list[str]:
     return errors
 
 
+def structure_errors(dist: Path) -> list[str]:
+    """An unclosed <noscript> or <script> swallows the rest of the page, and everything above still passes."""
+    errors = []
+    for page in sorted(dist.rglob("*.html")):
+        html = page.read_text()
+        name = page.relative_to(dist)
+        for tag in ("noscript", "script"):
+            if len(re.findall(rf"<{tag}\b", html)) != html.count(f"</{tag}>"):
+                errors.append(f"{name}: unclosed <{tag}>")
+        visible = re.sub(r"<noscript\b.*?</noscript>", "", html, flags=re.S)
+        if not re.search(r"<main\b.*<h1\b.*</main>", visible, re.S):
+            errors.append(f"{name}: no <h1> inside <main>")
+    return errors
+
+
+def sitemap_errors(dist: Path) -> list[str]:
+    """A page can't both ask search engines to skip it and be advertised to them."""
+    errors = []
+    for path in sorted(dist.glob("sitemap-[0-9]*.xml")):
+        for url in re.findall(r"<loc>https?://[^/]+(/[^<]*)</loc>", path.read_text()):
+            page = dist / url.strip("/") / "index.html"
+            if not page.is_file():
+                errors.append(f"{path.name}: {url} has no page")
+            elif re.search(r'<meta name="?robots"? content="?noindex', page.read_text()):
+                errors.append(f"{path.name}: {url} is marked noindex")
+    return errors
+
+
 def _target_exists(dist: Path, target: str) -> bool:
     path = dist / target.lstrip("/")
     return path.is_file() or (path / "index.html").is_file()
@@ -63,7 +91,7 @@ def main(argv: list[str] | None = None) -> int:
     if not (args.dist / "index.html").is_file():
         print(f"No built site at {args.dist}", file=sys.stderr)
         return 1
-    errors = broken_values(args.dist) + redirect_errors(args.dist)
+    errors = broken_values(args.dist) + structure_errors(args.dist) + sitemap_errors(args.dist) + redirect_errors(args.dist)
     for error in errors:
         print(error, file=sys.stderr)
     print(f"Built site: {len(errors)} problems.")

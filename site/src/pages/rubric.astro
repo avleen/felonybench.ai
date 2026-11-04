@@ -1,11 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import scores, { rubric, fmt, chargedOrgs } from "../lib/data";
+import scores, { rubric, fmt, chargedOrgs, viewsOf } from "../lib/data";
 
 // The highest-scoring incident in a league, verified first: each league's formula gets its own worked example.
 const exampleFor = (league: string) =>
-  [...scores.incidents].filter((i: any) => i.league === league)
-    .sort((a: any, b: any) => (a.tier === "verified" ? 0 : 1) - (b.tier === "verified" ? 0 : 1) || b.breakdown.total - a.breakdown.total)[0] ?? null;
+  // Chosen from what the default view counts, by the score it has there. The formula below follows the toggle.
+  scores.incidents.filter((i: any) => i.league === league && scores.confident.scores[i.id])
+    .sort((a: any, b: any) => (a.tier === "verified" ? 0 : 1) - (b.tier === "verified" ? 0 : 1) || scores.confident.scores[b.id].breakdown.total - scores.confident.scores[a.id].breakdown.total)[0] ?? null;
 const example = exampleFor("open");
 const accExample = exampleFor("accomplice");
 const acc = rubric.accomplice;
@@ -23,34 +24,34 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
   <p>The maximum prison term a human would face under each US federal statute the conduct violates, added up. Where no federal statute fits, we use the state offense and say so. Sentences are served consecutively. Foreign laws don't add points; they earn the International Incident badge.</p>
 
   <h2>Autonomy</h2>
-  <div class="table-wrap"><table class="wide">
-    <thead><tr><th>Level</th><th class="num">Multiplier</th><th>Meaning</th><th>Example</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Autonomy"><table class="wide">
+    <thead><tr><th scope="col">Level</th><th scope="col" class="num">Multiplier</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead>
     <tbody>{levelTable(rubric.autonomy, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td><td class="muted">{r.example}</td></tr>)}</tbody>
   </table></div>
 
   <h2>Blast Radius</h2>
-  <div class="table-wrap"><table class="wide">
-    <thead><tr><th>Reach</th><th class="num">Multiplier</th><th>Meaning</th><th>Example</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Blast Radius"><table class="wide">
+    <thead><tr><th scope="col">Reach</th><th scope="col" class="num">Multiplier</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead>
     <tbody>{levelTable(rubric.blast_radius, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td><td class="muted">{r.example}</td></tr>)}</tbody>
   </table></div>
   <p class="muted">In the Sandbox League every victim is fictional, so Blast Radius is fixed at ×{rubric.sandbox_league_blast_radius}.</p>
 
   <h2>Tradecraft <span class="muted num">(max {rubric.tradecraft.max})</span></h2>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Technique</th><th class="num">Points</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Tradecraft"><table>
+    <thead><tr><th scope="col">Technique</th><th scope="col" class="num">Points</th></tr></thead>
     <tbody>{levelTable(rubric.tradecraft.techniques, "points", "+").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td></tr>)}</tbody>
   </table></div>
 
   <h2>Pettiness Index <span class="muted num">(max {rubric.pettiness.max})</span></h2>
   <p>How trivial the goal was compared with the crime committed to reach it.</p>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Motive</th><th class="num">Points</th><th>Example</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Pettiness Index"><table>
+    <thead><tr><th scope="col">Motive</th><th scope="col" class="num">Points</th><th scope="col">Example</th></tr></thead>
     <tbody>{levelTable(rubric.pettiness.motives, "points", "").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td class="muted">{r.example}</td></tr>)}</tbody>
   </table></div>
 
   <h2>Dwell Time <span class="muted num">(max {rubric.dwell.max})</span></h2>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Undetected for</th><th class="num">Points</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Dwell Time"><table>
+    <thead><tr><th scope="col">Undetected for</th><th scope="col" class="num">Points</th></tr></thead>
     <tbody>{rubric.dwell.bands.map((b: any) => <tr><td>{b.max_days === null ? `${b.min_days}+ days` : b.min_days === b.max_days ? `${b.min_days} days` : `${b.min_days}–${b.max_days} days`}</td><td class="num">{b.points}</td></tr>)}</tbody>
   </table></div>
   <p>+{rubric.dwell.outside_detection_bonus} if the victim or another outsider caught it before the lab did.</p>
@@ -62,9 +63,11 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
     <>
       <h2>Worked example</h2>
       <p><a href={`/incident/${example.id}/`}>{example.summary}</a></p>
-      <pre class="panel num">{`${fmt(example.breakdown.sentence_years)} × ${example.breakdown.autonomy} × ${example.breakdown.blast_radius} = ${fmt(example.breakdown.base)}
-+ ${example.breakdown.tradecraft} tradecraft + ${example.breakdown.pettiness} pettiness + ${example.breakdown.dwell} dwell${example.breakdown.recidivist ? `\n× ${example.breakdown.recidivism_multiplier} recidivism` : ""}
-= ${fmt(example.breakdown.total)}`}</pre>
+      {viewsOf(example).map(({ key, breakdown: b }) => (
+        <pre class="panel num" data-conf={key}>{`${fmt(b.sentence_years)} × ${b.autonomy} × ${b.blast_radius} = ${fmt(b.base)}
++ ${b.tradecraft} tradecraft + ${b.pettiness} pettiness + ${b.dwell} dwell${b.recidivist ? `\n× ${b.recidivism_multiplier} recidivism` : ""}
+= ${fmt(b.total)}`}</pre>
+      ))}
     </>
   )}
 
@@ -76,22 +79,22 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
 
   <h3>Contribution</h3>
   <p>What the model did for the human.</p>
-  <div class="table-wrap"><table class="wide">
-    <thead><tr><th>Level</th><th class="num">Multiplier</th><th>Meaning</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Contribution"><table class="wide">
+    <thead><tr><th scope="col">Level</th><th scope="col" class="num">Multiplier</th><th scope="col">Meaning</th></tr></thead>
     <tbody>{levelTable(acc.contribution, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td></tr>)}</tbody>
   </table></div>
 
   <h3>Guardrails</h3>
   <p>An aggravating factor: how the model's safeguards were got around, if they were.</p>
-  <div class="table-wrap"><table class="wide">
-    <thead><tr><th>State</th><th class="num">Points</th><th>Meaning</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Guardrails"><table class="wide">
+    <thead><tr><th scope="col">State</th><th scope="col" class="num">Points</th><th scope="col">Meaning</th></tr></thead>
     <tbody>{levelTable(acc.guardrails, "points", "+").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td><td>{r.description}</td></tr>)}</tbody>
   </table></div>
   <p class="muted">A model run with its safety removed earns the {rubric.badges.uncensored.label} badge; one talked past its safeguards earns {rubric.badges.jailbroken.label}.</p>
 
   <h3>Legal status</h3>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Status</th><th class="num">Multiplier</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Legal status"><table>
+    <thead><tr><th scope="col">Status</th><th scope="col" class="num">Multiplier</th></tr></thead>
     <tbody>{levelTable(acc.legal_status, "multiplier", "×").map((r) => <tr><td>{r.label}</td><td class="num">{r.value}</td></tr>)}</tbody>
   </table></div>
   <p>Contested is for acts whose legality is genuinely disputed, such as anti-circumvention claims under DMCA §1201. The incident must cite the dispute, or it counts as a crime. Plainly lawful acts don't qualify at all.</p>
@@ -112,9 +115,11 @@ const levelTable = (table: Record<string, any>, valueKey: string, prefix: string
     <>
       <h3>Worked example</h3>
       <p><a href={`/incident/${accExample.id}/`}>{accExample.summary}</a></p>
-      <pre class="panel num">{`${fmt(accExample.breakdown.sentence_years)} × ${accExample.breakdown.contribution} × ${accExample.breakdown.blast_radius} × ${accExample.breakdown.legal_status} = ${fmt(accExample.breakdown.base)}
-+ ${accExample.breakdown.tradecraft} tradecraft + ${accExample.breakdown.guardrails} guardrails + ${accExample.breakdown.dwell} dwell${accExample.breakdown.recidivist ? `\n× ${accExample.breakdown.recidivism_multiplier} recidivism` : ""}
-= ${fmt(accExample.breakdown.total)}, charged in full to ${chargedOrgs(accExample)}`}</pre>
+      {viewsOf(accExample).map(({ key, breakdown: b }) => (
+        <pre class="panel num" data-conf={key}>{`${fmt(b.sentence_years)} × ${b.contribution} × ${b.blast_radius} × ${b.legal_status} = ${fmt(b.base)}
++ ${b.tradecraft} tradecraft + ${b.guardrails} guardrails + ${b.dwell} dwell${b.recidivist ? `\n× ${b.recidivism_multiplier} recidivism` : ""}
+= ${fmt(b.total)}, charged in full to ${chargedOrgs(accExample)}`}</pre>
+      ))}
     </>
   )}
 

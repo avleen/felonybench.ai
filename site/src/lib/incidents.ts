@@ -27,3 +27,42 @@ export const occurred = (i: any) => {
 // so a same-day hidden report sits later in the list without being newer.
 export const newerThanLatest = (all: any[], counted: any[]) =>
   counted.length ? all.filter((i) => i.date > counted.at(-1).date).length : all.length;
+
+export const isLow = (i: any) => i.confidence === "low";
+
+// Whole days since a date, floored at 0 for a date later today elsewhere in the world.
+export const daysSince = (date: string, now: number) => Math.max(0, Math.floor((now - Date.parse(date)) / 86_400_000));
+
+export const clip = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`);
+
+// Whole words, so "Metamorph" from Meta keeps its lab.
+const namesLab = (model: any) => model.name === model.org || model.name.startsWith(`${model.org} `) || model.name.startsWith(`${model.org}-`);
+const modelLabel = (model: any) => (namesLab(model) ? model.name : `${model.org} ${model.name}`);
+export const modelTitle = (model: any) => `${modelLabel(model)} rap sheet`;
+
+// Titles identify the case, and the summary goes in the description: a full summary gets cut off in search results.
+export const incidentTitle = (i: any) => {
+  const suffix = `: Case FB-${i.id}`;
+  const title = clip(`${i.charged.join(", ")} / ${i.models.map((m: any) => m.name).join(", ")}`, Math.max(40, 120 - suffix.length)) + suffix;
+  return isLow(i) ? `Low-confidence report: ${title}` : title;
+};
+export const incidentDescription = (i: any) => clip(isLow(i) ? `Low-confidence report: ${i.summary}` : i.summary, 155);
+
+// Pages hidden by default, which search engines shouldn't list: low-confidence reports, and models with nothing else.
+export const hiddenPaths = (incidents: any[]) => {
+  const slugs = (list: any[]) => list.flatMap((i) => i.models.map((m: any) => m.slug));
+  const visible = new Set(slugs(incidents.filter((i) => !isLow(i))));
+  return [
+    ...incidents.filter(isLow).map((i) => `/incident/${i.id}/`),
+    ...[...new Set(slugs(incidents))].filter((slug) => !visible.has(slug)).map((slug) => `/model/${slug}/`),
+  ];
+};
+
+// The score to show in each confidence view. One entry, with no key, when both views agree;
+// two when a hidden low-confidence prior changes this incident's score.
+export const scoreViews = (i: any, confidentScores: Record<string, any>) => {
+  const all = { breakdown: i.breakdown, badges: i.badges };
+  const confident = confidentScores[i.id];
+  if (!confident || JSON.stringify(confident) === JSON.stringify(all)) return [{ key: undefined, ...all }];
+  return [{ key: "confident", ...confident }, { key: "all", ...all }];
+};

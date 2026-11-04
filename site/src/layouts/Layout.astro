@@ -1,14 +1,26 @@
 ---
 import "../styles/global.css";
 import Mark from "../components/Mark.astro";
-import { CORRECTIONS_EMAIL, rubric } from "../lib/data";
+import scores, { CORRECTIONS_EMAIL, isLow, rubric } from "../lib/data";
+const latestIn = (incidents: any[]) => incidents.map((i) => i.reported).sort().at(-1);
+const latestReports = [
+  { key: "confident", date: latestIn(scores.incidents.filter((i: any) => !isLow(i))) },
+  { key: "all", date: latestIn(scores.incidents) },
+];
 
-interface Props { title?: string; description?: string; ogImage?: string }
+interface Props { title?: string; description?: string; ogImage?: string; revealWithoutJs?: boolean; noindex?: boolean }
 const {
   title,
   description = "The leading benchmark for crimes committed by frontier AI models. Higher is better.",
   ogImage = "/og/default.png",
+  revealWithoutJs = false,
+  noindex = false,
 } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// Without JS the controls can't work, and a page that's all low-confidence reports could never be revealed.
+const noJsStyles = `.confidence-bar, .controls, .show-low-button { display: none !important; }${revealWithoutJs ? `
+  html:not(.show-low) main [data-conf="all"], html:not(.show-low) main [data-low] { display: revert !important; }
+  html:not(.show-low) main [data-conf="confident"] { display: none !important; }` : ""}`;
 const fullTitle = title ? `${title} · FelonyBench` : "FelonyBench";
 const nav = [["/", "Leaderboard"], ["/trends/", "Trends"], ["/rubric/", "Rubric"], ["/how-it-works/", "How it works"], ["/about/", "About"]];
 const here = Astro.url.pathname.replace(/\/?$/, "/");
@@ -20,6 +32,10 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta property="og:site_name" content="FelonyBench" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(ogImage, Astro.site).href} />
@@ -29,6 +45,7 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
       // Before first paint, so a reader who chose to see low-confidence reports doesn't get a flash of the default view.
       try { if (localStorage.getItem("fb-confidence") === "all") document.documentElement.classList.add("show-low"); } catch {}
     </script>
+    <noscript><Fragment set:html={`<style>${noJsStyles}</style>`} /></noscript>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -45,7 +62,7 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
         <nav>{nav.map(([href, label]) => <a href={href} aria-current={here === href ? "page" : undefined}>{label}</a>)}</nav>
       </div>
     </header>
-    <div class="confidence-bar">
+    <aside class="confidence-bar" aria-label="Which reports to count">
       <div class="wrap">
         <form id="confidence-control" class="controls">
           <fieldset>
@@ -56,11 +73,11 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
         </form>
         <a class="muted" href="/how-it-works/#confidence">What's this?</a>
       </div>
-    </div>
+    </aside>
     <main id="main"><slot /></main>
     <footer class="site-footer">
       <div class="wrap">
-        <p class="disclaimer"><Mark size={32} inverse /> <span>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet). Rubric v{rubric.version}.</span></p>
+        <p class="disclaimer"><Mark size={32} inverse /> <span>Scores reflect what the conduct would constitute if performed by a human. No charges have been filed. Models cannot be indicted (yet). Rubric v{rubric.version}. {latestReports.map(({ key, date }) => date && <span data-conf={key}>Latest report {date}.</span>)}</span></p>
         <p class="contact"><span>Corrections and takedowns</span><a href={`mailto:${CORRECTIONS_EMAIL}`}>{CORRECTIONS_EMAIL}</a></p>
       </div>
     </footer>
@@ -77,6 +94,12 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
       document.querySelectorAll("[data-show-low]").forEach((button) => button.addEventListener("click", () => {
         input("all").checked = true;
         form.dispatchEvent(new Event("change"));
+        // The button just hid itself, so put keyboard users on what it revealed: the page's
+        // heading, or the section's when only part of the page changed.
+        const headings = button.getAttribute("data-focus") ?? "main h1";
+        const heading = [...document.querySelectorAll<HTMLElement>(headings)].find((h) => h.offsetParent);
+        heading?.setAttribute("tabindex", "-1");
+        heading?.focus();
       }));
     </script>
   </body>
@@ -88,4 +111,5 @@ const here = Astro.url.pathname.replace(/\/?$/, "/");
     padding: 8px 16px; z-index: 10;
   }
   .skip-link:focus { left: 16px; top: 16px; }
+  @media (prefers-color-scheme: dark) { .skip-link { color: #151412; } }
 </style>

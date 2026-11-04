@@ -1,4 +1,4 @@
-from scripts.scoring import breakdown, dwell_points
+from scripts.scoring import breakdown, build_scores, dwell_points
 
 
 def test_worked_example_scores_87(make_incident, rubric):
@@ -36,3 +36,16 @@ def test_dwell_bands(rubric):
     assert dwell_points({"dwell_days": 6, "detected_by": "lab"}, rubric) == 4
     assert dwell_points({"dwell_days": 7, "detected_by": "lab"}, rubric) == 8
     assert dwell_points({"dwell_days": 45, "detected_by": "victim"}, rubric) == 15
+
+
+def test_a_hidden_prior_does_not_count_in_the_default_view_score(make_incident, rubric):
+    prior = make_incident(id="2026-01-01-openai-a", confidence="low")
+    later = make_incident(id="2026-01-10-openai-b", confidence="medium")
+    scores = build_scores([prior, later], rubric, "t")
+    everything = next(i for i in scores["incidents"] if i["id"] == later["id"])
+    confident = scores["confident"]["scores"][later["id"]]
+    assert everything["breakdown"]["recidivist"] is True
+    assert confident["breakdown"]["recidivist"] is False
+    assert confident["breakdown"]["total"] < everything["breakdown"]["total"]
+    assert "repeat_offender" not in confident["badges"]
+    assert prior["id"] not in scores["confident"]["scores"]

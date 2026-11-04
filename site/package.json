@@ -13,6 +13,7 @@
     "test": "node --test src/lib/*.test.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
     "@resvg/resvg-js": "^2.6.2",
     "astro": "^7.4.5",
     "satori": "^0.33.5"
