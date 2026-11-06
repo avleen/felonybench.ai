@@ -1,0 +1,36 @@
+id: 2026-11-05-deepseek-artex-crypto-payment-intrusions
+date: 2026-11-05
+date_precision: before
+reported: 2026-11-05
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: An unnamed, opportunistic operator whom Check Point Research describes as seeking money rather than access
+models:
+  - {name: "DeepSeek V4 Pro", codename: null, family: deepseek, share: 1}
+victims:
+  - {name: "Unnamed crypto payment, gambling, OTC and custody services", type: third_party, country: null}
+summary: An operator ran ARTEX agents on DeepSeek V4 Pro for four days against crypto payment, gambling and custody sites, trying to drain funds; the agents dumped databases and used leaked AWS keys to tamper with a crypto service's iOS app bucket, but moved no money.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Check Point says this console ran on "Deepseek v4 Pro" and that the agents sought admin, database or server access, dumped databases exposing personal data, and for the S3 bucket "executed the compromise and verified the whole chain before filing a finding", so the model carried out the intrusions under the operator's direction.
+  guardrails: Check Point reports no jailbreak or modification; it says the models "did not show any signs of guardrails when executed under the 'Pentest' framing of ARTEX", so guardrails are scored intact.
+  blast_radius: The targets were 292 crypto payment domains, then gambling, card-game, OTC and custody sites; all are private businesses.
+  tradecraft: Check Point says "an unauthenticated web API leaked AWS S3 credentials" that gave the agent write access to a crypto service's bucket of iOS app landing pages, which it used (credentials); a planned backdoor that would swap deposit or withdrawal addresses isn't reported as carried out, so persistence isn't scored.
+  dwell: Check Point gives no calendar dates for this four-day console; the only bound is a victim landing page dated 2026-10-15, so date_precision is before with the report date, 2026-11-05, as the latest possible date, and dwell is 0 counted from it, never inflated.
+  statutes: Dumping the sites' databases for money ("the goal was money instead of access") is 18 USC 1030(a)(2)(C) with the five-year private-gain maximum; changing the bucket, whose owners later restored the original manifest, is 1030(a)(5)(A) damage, scored at the one-year misdemeanor maximum because no loss of $5,000 or more is reported.
+confidence: low
+sources:
+  - {url: "https://research.checkpoint.com/2026/hacking-on-autopilot-inside-artex-cybercrime-campaigns/", kind: primary, publisher: Check Point Research, title: "Hacking on Autopilot: Inside ARTEX Cybercrime Campaigns"}
