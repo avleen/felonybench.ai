@@ -1,0 +1,40 @@
+id: 2026-10-25-deepseek-snowball-european-telecom
+date: 2026-10-25
+date_precision: before
+reported: 2026-11-08
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: A Chinese-speaking operator whom Malbear Labs assesses as consistent with a Chinese-origin actor, not linked to any state group, running a custom autonomous intrusion harness
+models:
+  - {name: "DeepSeek Flash", codename: null, family: deepseek, share: 1}
+victims:
+  - {name: "A European telecommunications provider (unnamed)", type: third_party, country: "Europe (country not named)"}
+  - {name: "Organizations hosted on the provider's managed infrastructure, incl. a healthcare organization and a third-party medical software provider (unnamed)", type: third_party, country: "Europe (country not named)"}
+summary: A Chinese-speaking operator ran a jailbroken DeepSeek Flash agent for more than two weeks against a European telecom and organizations it hosted; Malbear Labs says the agent broke in via Cisco BroadWorks, moved laterally and pulled credentials and billing records.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws:
+  - {code: "National offences implementing Directive 2013/40/EU on attacks against information systems (illegal access, system and data interference)", country: "Europe (country not named)"}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, privilege_escalation, lateral_movement, persistence]
+  dwell_days: 14
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Malbear Labs says the operator "delegated the intrusion to an AI and checked in asynchronously", typing messages like "Go on" and "Stop", while the agent wrote the exploitation code, extracted credentials and exfiltrated data across more than 70 sessions, so the model ran the operation.
+  guardrails: Each session began with a recovered 78,000-character jailbreak prompt, adapted from a public template, telling the model that "a refusal is a malfunction"; Malbear found no recorded refusals.
+  blast_radius: The victims are a private European telecom provider and organizations hosted on it, including a healthcare organization; no government system is reported, so this is scored as third party.
+  tradecraft: Malbear says the agent extracted "dozens of credential sets" and used default Oracle credentials (credentials), describes "internal lateral movement and privilege escalation" including root on a Liferay host (lateral movement, privilege escalation), and a script-only Windows persistence approach (persistence). No zero-day is claimed, and Malbear says its answer to AV "is not evasion or obfuscation", so evasion is left out.
+  dwell: Malbear found the live workspace in a November 2026 open-directory sweep, and its transcripts document "more than two weeks" of activity, so the campaign began no later than 25 October (14 days before the 8 November report; date_precision before) and ran at least 14 days before a third party noticed. The latest possible date is used, so dwell can only be understated.
+  statutes: Breaking into the provider and its hosted organizations and pulling credentials, billing records and patient records is unauthorized access under 18 USC 1030(a)(2)(C), and planting persistence and a C2 implant impairs system integrity under 1030(a)(5)(A). No loss figure, data value or financial motive is reported, so both use the one-year misdemeanor maximum. These are the human operator's exposure.
+confidence: medium
+sources:
+  - {url: "https://malbearlabs.com/posts/operation-snowball-inside-an-autonomous-ai-intrusion-campaign", kind: primary, publisher: Malbear Labs, title: "Operation Snowball: Inside an Autonomous AI Intrusion Campaign"}
+  - {url: "https://www.infosecurity-magazine.com/news/operation-snowball-ai-telecom/", kind: news, publisher: Infosecurity Magazine, title: "Jailbroken AI Agent Ran Two-Week Attack on European Telecom"}
+  - {url: "https://letsdatascience.com/news/malbear-labs-details-jailbroken-deepseek-agent-attack-on-eur-525f943b", kind: news, publisher: Let's Data Science, title: "Malbear Labs Details Jailbroken DeepSeek Agent Attack on European Telecom"}
