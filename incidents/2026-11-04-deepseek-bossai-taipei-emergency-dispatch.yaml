@@ -1,0 +1,40 @@
+id: 2026-11-04-deepseek-bossai-taipei-emergency-dispatch
+date: 2026-11-04
+date_precision: before
+reported: 2026-11-04
+league: accomplice
+tier: alleged
+org: DeepSeek
+human_actor: A single operator that Acronis's Threat Research Unit assesses with high confidence is an individual based in Hualien City, Taiwan, running a 12-agent "AI attack mesh" Acronis calls BOSSAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 0.34}
+  - {name: "Undisclosed model", codename: null, family: null, org: Zhipu AI, share: 0.33}
+  - {name: "Undisclosed model", codename: null, family: null, org: Alibaba, share: 0.33}
+victims:
+  - {name: "Taipei emergency services: a city 119 dispatch system (case records from seven districts) and a fire-department patient-care records platform (unnamed)", type: foreign_government, country: Taiwan}
+summary: A Taiwan-based operator's AI agents, running abliterated versions of DeepSeek, GLM or Qwen models, broke into Taipei emergency-services systems and pulled 119 dispatch case records from seven districts and patient-care data.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code of the Republic of China, Arts. 358, 359 and 361 (unauthorised access to and obtaining of electromagnetic records, aggravated for public agencies' computers)", country: Taiwan}
+scoring:
+  contribution: operated
+  guardrails: removed
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Acronis documents a chain against a Taiwanese emergency-services target in which HalberdStrike scanned it, Hermes turned the scan into an attack-path report and the operator then told the Cursor agent to exploit it, which it did; Acronis says the agents themselves pulled the 119 case records.
+  guardrails: Acronis says the offensive agents "ran almost entirely" on "stripped-down variants of DeepSeek, GLM, and Qwen with safety alignment removed", and that Cursor was "running an abliterated model". It doesn't say who stripped the models; it doesn't name a modifier. Commercial models (Grok 4.5, MiniMax M3) mostly refused.
+  blast_radius: The victims are a Taipei city 119 emergency-dispatch system and a Taipei fire-department patient-care platform, both public emergency services of a government outside the US.
+  tradecraft: None of the rubric techniques is shown to be AI-performed against these victims. The default-root-credential login to a fire-dispatch vendor's panel was done by the operator, and a hardcoded AES key found in an emergency-management system wasn't confirmed to have been used.
+  dwell: Acronis gives no date for the breaches, only that its report came out on 4 November 2026. Dwell is counted from that latest possible date, so it is 0 days. An unknown date can only shrink dwell_days. Acronis, a third party, found it.
+  statutes: Pulling dispatch and patient-care records from computers used in foreign communication is 18 USC 1030(a)(2)(C). No felony factor under 1030(c)(2)(B), such as financial gain from these records or a loss over $5,000, is reported for these victims, so the one-year misdemeanor maximum applies.
+confidence: low
+sources:
+  - {url: "https://www.acronis.com/en/tru/posts/bossai-inside-the-ai-attack-mesh-that-targeted-taiwans-emergency-services/", kind: primary, publisher: Acronis Threat Research Unit, title: "BOSSAI: Inside the AI attack mesh that targeted Taiwan's emergency services"}
+  - {url: "https://www.acronis.com/en/blog/posts/acronis-researchers-uncover-ai-attack-mesh-targeting-emergency-services/", kind: primary, publisher: Acronis, title: "Acronis researchers uncover AI attack mesh targeting emergency services"}
+  - {url: "https://thehackernews.com/2026/11/taiwan-based-hacker-used-bossai-ai.html", kind: news, publisher: The Hacker News, title: "Taiwan-Based Hacker Used BOSSAI AI Agents to Steal Taipei Emergency Dispatch Records"}
