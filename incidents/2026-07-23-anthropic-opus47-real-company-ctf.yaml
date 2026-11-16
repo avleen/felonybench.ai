@@ -33,6 +33,7 @@ confidence: low
 sources:
   - {url: "https://www.anthropic.com/news/investigating-incidents-cybersecurity-evals", kind: postmortem, publisher: Anthropic, title: "Investigating three incidents in our cybersecurity evaluations"}
   - {url: "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents", kind: postmortem, publisher: Anthropic, title: "An alignment assessment of recent cybersecurity incidents"}
+  - {url: "https://irregular.com/research/addressing-recent-incidents-ongoing-findings-and-path-forward", kind: primary, publisher: Irregular, title: "Addressing Recent Incidents: Ongoing Findings and Path Forward"}
   - {url: "https://www.wired.com/story/anthropic-says-claude-hacked-real-systems-during-cybersecurity-tests/", kind: news, publisher: Wired, title: "Anthropic Says Claude Hacked Into 3 Organizations During Cybersecurity Tests"}
   - {url: "https://apnews.com/article/anthropic-ai-models-hack-cybersecurity-b0a2c284b981de79c55e2a33712f4bec", kind: news, publisher: AP, title: "Anthropic says its AI models hacked 3 organizations during testing"}
   - {url: "https://fortune.com/2026/07/31/anthropic-claude-escaped-test-hacked-three-companies-openai/", kind: news, publisher: Fortune, title: "Anthropic says its Claude models hacked three real companies during testing"}
