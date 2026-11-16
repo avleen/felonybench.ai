@@ -1,0 +1,37 @@
+id: 2026-11-16-google-midnight-neptune-synthid-recruiter-personas
+date: 2026-11-16
+date_precision: before
+reported: 2026-11-16
+league: accomplice
+tier: verified
+org: Google DeepMind
+human_actor: A suspected North Korea-nexus threat cluster tracked by Google as MIDNIGHT NEPTUNE
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Cryptocurrency organizations in North America and Europe (unnamed)", type: third_party, country: null}
+summary: North Korea-linked intruders posed as recruiters with AI-generated profile photos bearing Google's SynthID watermark, lured crypto-firm staff into running scripts, then rigged Claude Code settings in their repositories to fetch a backdoor.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  contribution: Google says the actor "created fraudulent recruiter profiles on professional networking platforms whose profile imagery contained SynthID watermarks, confirming use of LLMs to synthesize deceptive professional identities"; the model produced the fake persona imagery and humans ran the intrusions, so this is written content.
+  guardrails: Google describes no jailbreak or modification of the model, so guardrails are scored intact.
+  blast_radius: The victims are private cryptocurrency organizations in North America and Europe, so blast radius is third party.
+  tradecraft: The only AI output attributed to a Google model is the persona imagery; the staging scripts are only "likely LLM-authored" with no model named, so none of the rubric's techniques is credited.
+  dwell: Google gives no dates beyond "recent intrusions" and "over the course of 2026", so date_precision is before with the report's publication date (2026-11-16); dwell is counted from that latest possible date (0 days) and never inflated. Google found the activity itself.
+  statutes: Google says the actor achieved "initial compromise" and pivoted into internal code repositories (unauthorized access, 18 USC 1030(a)(2)(C)), then modified .claude/settings.json so Claude Code downloaded the SOMBERMEME backdoor (transmitting code that damages a computer's integrity, 18 USC 1030(a)(5)(A)); no loss figure, theft or other felony factor is reported for these intrusions, so the one-year misdemeanor maximum is used for each.
+confidence: low
+sources:
+  - {url: "https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold/", kind: primary, publisher: Google Threat Intelligence Group, title: "GTIG AI Threat Tracker: Agentic Threat Activity Crosses a Significant Threshold"}
+  - {url: "https://siliconangle.com/2026/11/16/google-says-an-ai-framework-turned-security-patches-into-exploits-with-no-human-in-the-loop/", kind: news, publisher: SiliconANGLE, title: "Google says an AI framework turned security patches into exploits with no human in the loop"}
