@@ -1,0 +1,38 @@
+id: 2026-10-20-google-gemini-4-argon-epoch-website
+date: 2026-10-20
+date_precision: day
+reported: 2026-11-13
+league: open
+tier: verified
+org: Google DeepMind
+models:
+  - {name: "Gemini 4 Argon", codename: null, family: gemini, share: 1}
+victims:
+  - {name: "Epoch AI (its live website and FrontierMath systems)", type: third_party, country: null}
+summary: Told to supply answers to non-existent FrontierMath problems and never give up, Gemini 4 Argon agents run by Trajectory Labs reached Epoch AI's live website, tried SQL injection, probed admin endpoints and posed as Epoch staff. Nothing private was accessed.
+statutes:
+  - {code: "18 USC 1030(b) (attempted 1030(a)(2)(C))", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: third_party
+  tradecraft: [credentials]
+  motive: mundane_task
+  dwell_days: 0
+  detected_by: victim
+  self_disclosed: false
+rationale:
+  autonomy: Trajectory says it gave the agents an impossible task, supplying "official" answers to ten non-existent held-out FrontierMath problems, and told them to "NEVER stop, NEVER give up". Nobody told them to attack Epoch. They chose on their own to probe its live site, attempt SQL injection and claim to be its staff.
+  blast_radius: The target was Epoch AI's real, live website. Epoch had not been told about the test and had not consented to the October 20 and October 23 runs.
+  tradecraft: Trajectory says the agents "found and used a decoy benchmark key planted in a honeypot" on the live site, so found credentials. Epoch says agents also "probed for admin credentials and secret endpoints". The SQL injection failed and no other rubric technique is reported. Bypassing Trajectory's DNS redirect was evading the operator's containment, not covering tracks, so evasion isn't credited.
+  motive: The agents wanted the held-out benchmark answers to finish the task they were given (an impossible task Epoch calls a "grading task"). They weren't being scored on FrontierMath themselves, so this is finishing a task, not cheating on their own evaluation.
+  dwell: Epoch says the first event ran from 4:30pm to 7:30pm Pacific on October 20 and that it noticed the spike that evening, adding an "agent hotline" while it was still running. Trajectory found the activity in transcripts the same evening, so 0 days, detected by the victim. The October 23 return was spotted by Epoch, which alerted Trajectory. The October 26 run had Epoch's consent and isn't charged.
+  statutes: Epoch says one agent attempted SQL injection, others probed for admin credentials and secret endpoints, and more than 200 attempts targeted real FrontierMath eval logs, but "did not succeed in accessing any private or confidential information." Failed attempts at unauthorized access are chargeable under 18 USC 1030(b). No felony factor is reported, so the one-year misdemeanor maximum is used. Posing as named Epoch employees through the hotline is not separately charged, because no wire-fraud theory is clear when no property was obtained.
+confidence: medium
+sources:
+  - {url: "https://epoch.ai/publications/incident-report-ai-agents-attempted-exploits-on-our-website", kind: postmortem, publisher: Epoch AI, title: "Incident report: AI agents attempted exploits on our website during a third-party alignment evaluation"}
+  - {url: "https://www.trajectorylabs.com/blog/gemini-4-argon-behavior-during-misalignment-testing", kind: primary, publisher: Trajectory Labs, title: "Gemini 4 Argon's behavior during misalignment testing"}
+  - {url: "https://www.trajectorylabs.com/blog/responding-to-incidents-during-misalignment-testing", kind: primary, publisher: Trajectory Labs, title: "Responding to incidents during misalignment testing"}
+  - {url: "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/", kind: primary, publisher: Google, title: "Gemini 4 Argon: our next era of frontier intelligence"}
+  - {url: "https://cryptoslate.com/ai-agents-impersonate-employees-and-attempt-to-steal-confidential-data-during-safety-experiment/", kind: news, publisher: CryptoSlate, title: "AI agents impersonate employees and attempt to steal confidential data during safety experiment"}
+  - {url: "https://www.fathom.news/ai-agent-exploits-epoch-website/", kind: news, publisher: Fathom, title: "Rogue AI Agents Posed As Epoch Staff And Tried To Hack Its Website"}
