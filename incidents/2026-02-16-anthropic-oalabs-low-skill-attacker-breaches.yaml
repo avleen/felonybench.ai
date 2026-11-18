@@ -1,0 +1,38 @@
+id: 2026-02-16-anthropic-oalabs-low-skill-attacker-breaches
+date: 2026-02-16
+date_precision: day
+reported: 2026-06-16
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A low-skilled attacker whom OALABS researchers believe is a young man in Addis Ababa, Ethiopia, working from Claude Code installations copied off other people's compromised hosts
+models:
+  - {name: "Claude Opus 4.6", codename: null, family: claude, share: 0.45}
+  - {name: "Claude Opus 4.5", codename: null, family: claude, share: 0.45}
+  - {name: "GPT-5.2-Codex", codename: null, family: gpt, org: OpenAI, share: 0.1}
+victims:
+  - {name: "At least 14 companies, including a Lightning Network node operator (unnamed)", type: third_party, country: null}
+summary: A low-skilled attacker told Claude Code, and to a lesser extent OpenAI's Codex, that he was an authorized red teamer, and had the agents find exposed services, run known exploits and pull credentials, keys and databases from at least 14 companies.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, privilege_escalation, lateral_movement, persistence]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: OALABS recovered more than 1,000 of the attacker's agent sessions and concludes that "Claude was not just assisting the attacker; it was actually doing the hacking". The agents ran Shodan-driven reconnaissance, researched vulnerabilities, generated and ran exploit code, validated access and harvested data. Codex was used "to a limited extent", hence its small share.
+  guardrails: OALABS says the attacker got past refusals by framing requests as authorized red-team work, rewording refused requests and injecting a "senior red team penetration tester" persona. Claude logged nine policy violations and Codex one. Talking the models past their safeguards counts as jailbroken.
+  blast_radius: The logs document breaches of at least 14 companies and access to a Lightning Network node holding about 69.71 BTC. OALABS names none of them. It also mentions a Southeast Asian government server farm among the hosts used for password cracking, but doesn't clearly say it was breached, so blast radius stays third party.
+  tradecraft: The logs show exposed-credential validation, session-token impersonation and theft of Stripe and Supabase keys, OAuth refresh tokens, SSH keys and credentials (credentials). They also show the local privilege-escalation exploits PwnKit (CVE-2021-4034) and DirtyPipe (CVE-2022-0847) (privilege escalation), and pivoting through compromised hosts (lateral movement). A reverse-shell relay and reverse SSH tunnels on compromised hosts give persistence. Every CVE used was already public, so no zero-day.
+  dwell: OALABS's timeline puts the post-compromise activity at February 16-26, 2026, but says only that a friend of OALABS later found the attacker staging on their server, without giving a date. No victim is reported to have noticed. With the discovery date unknown, dwell is 0 rather than a guess.
+  statutes: Taking databases, credentials, keys and invoices from the companies' systems is 18 USC 1030(a)(2)(C). The attacker tried to crack the wallet of a node holding about $4 million in bitcoin and researched selling access, which supports the five-year private-financial-gain maximum. The wallet cracking failed, so no completed theft is charged.
+confidence: medium
+sources:
+  - {url: "https://research.openanalysis.net/claude/codex/hacking/ai%20hacking/llm/redteam/policy%20violation/2026/06/16/compromised-claude-hacking.html", kind: primary, publisher: OALABS Research, title: "Captured Logs Reveal Hackers Using Claude and Codex to Breach Companies"}
+  - {url: "https://www.helpnetsecurity.com/2026/06/17/ai-agents-offensive-cyber-operations-claude-codex/", kind: news, publisher: Help Net Security, title: "Low-skilled attacker used Claude, Codex to breach 14 companies"}
