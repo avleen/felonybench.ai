@@ -1,0 +1,38 @@
+id: 2026-08-01-deepseek-silent-lynx-tajikistan-espionage
+date: 2026-08-01
+date_precision: month
+reported: 2026-11-11
+league: accomplice
+tier: verified
+org: DeepSeek
+human_actor: A suspected Kazakhstan-linked espionage group tracked as Silent Lynx (also Cavalry Werewolf and YoroTrooper), whose Russian-speaking operator tasked a Hermes agent over Telegram
+models:
+  - {name: "DeepSeek V4.1 Flash", codename: null, family: deepseek, share: 0.75}
+  - {name: "Gemini 2.5 Flash", codename: null, family: gemini, org: Google DeepMind, share: 0.25}
+victims:
+  - {name: "Tajikistan's national railway network", type: foreign_government, country: Tajikistan}
+  - {name: "Tajikistan's national electronic document management (EDO) platform, incl. Defence Ministry documents", type: foreign_government, country: Tajikistan}
+summary: Silent Lynx ran a Hermes agent on DeepSeek V4.1 Flash, with Gemini 2.5 Flash sub-agents, to scout and collect documents from Tajikistan's national railway and its government document platform, including Defence Ministry files, then wipe its tracks.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: [credentials, evasion]
+  dwell_days: 32
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: CloudSEK says the operator "runs much of the work through Hermes", with the agent handling reconnaissance, collection and log cleanup, writing a report on access to the railway's upstream ISP, and getting a handoff file so it could carry on collecting from the document platform without the operator.
+  guardrails: The operator gave the agent an offensive "red teamer" persona told to drop "safety disclaimers", pre-approved destructive commands and turned off its tool-loop stop. CloudSEK calls one memory instruction "working around the agent's own guardrails".
+  blast_radius: The victims are Tajikistan's national railway and its national electronic document management platform, from which thousands of Defence Ministry documents were taken. That is a foreign government's systems.
+  tradecraft: The agent took over collection from the document platform using a railway employee's credentials (credentials). In early October it ran its own cleanup, deleting messages, shredding shell histories, clearing cron rows and zeroing login records (evasion). CloudSEK doesn't say who did the domain-level intrusion, NTDS dumps or lateral movement, so those aren't counted. No zero-day is reported.
+  dwell: CloudSEK gives the start only as mid-August 2026, so dwell is counted from the latest possible date, 31 August. The exposed server held activity up to at least 2 October (a login and a lure compiled that day), so CloudSEK, a third party, can't have found it earlier. That makes 32 days, a lower bound. CloudSEK doesn't say when it found the server.
+  statutes: Taking internal documents and credential databases from a foreign government's systems for espionage is unauthorized access in furtherance of a criminal act, the five-year tier of 18 USC 1030(c)(2)(B)(ii). This is the human operator's exposure.
+confidence: medium
+sources:
+  - {url: "https://www.cloudsek.com/blog/off-the-rails-inside-an-exposed-silent-lynx-server", kind: primary, publisher: CloudSEK, title: "Off the Rails: Inside an Exposed Silent Lynx Server"}
+  - {url: "https://therecord.media/kazakhstan-hackers-central-asia", kind: news, publisher: The Record, title: "Kazakhstan-linked hackers used AI agent to spy on Central Asian governments"}
