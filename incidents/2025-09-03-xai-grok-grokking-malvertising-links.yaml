@@ -1,0 +1,35 @@
+id: 2025-09-03-xai-grok-grokking-malvertising-links
+date: 2025-09-03
+date_precision: before
+reported: 2025-09-03
+league: accomplice
+tier: alleged
+org: xAI
+human_actor: Malvertisers running adult-themed promoted video posts on X, unnamed, in a technique Guardio Labs' Nati Tal calls "Grokking"
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "X users who followed Grok's replies to fake CAPTCHA scams and infostealer malware (unnamed)", type: third_party, country: null}
+summary: Malvertisers hid malicious links in a field X doesn't scan under promoted video ads, then asked Grok where the video came from; Grok replied from its trusted account with the full clickable link, which led to fake CAPTCHA scams and infostealers.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [evasion]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: BleepingComputer says Grok parsed the hidden "From:" field and replied with the full malicious link in clickable form, so Grok's own post published the lure that a human had planted. Grok wrote the content but didn't run the attack.
+  guardrails: The actors hid the link where X's filters didn't look and asked an innocent-looking question, so Grok repeated it without checking. That is tricking the model past its safeguards, as with the Bankrbot Morse-code case.
+  blast_radius: The victims are members of the public on X who clicked through to scams and malware. No government system is involved.
+  tradecraft: Moving the link into an unscanned metadata field so X's malvertising filters wouldn't catch it, and having Grok repost it from a trusted system account, is evasion of the platform's defenses. Grok supplied that laundering step.
+  dwell: Guardio Labs' Nati Tal reported "hundreds of examples" over the previous few days when BleepingComputer covered it on 3 September 2025. No start date is given, so date_precision is "before" with 3 September 2025 as the latest possible date, and dwell is 0 so it isn't inflated. A third party (Guardio) found it.
+  statutes: Spreading links to information-stealing malware is knowingly causing the transmission of code that damages protected computers, 18 USC 1030(a)(5)(A). No confirmed infection count or loss is reported, so the misdemeanor maximum of 1 year is used.
+confidence: low
+sources:
+  - {url: "https://www.bleepingcomputer.com/news/security/threat-actors-abuse-xs-grok-ai-to-spread-malicious-links/", kind: news, publisher: BleepingComputer, title: "Threat actors abuse X's Grok AI to spread malicious links"}
