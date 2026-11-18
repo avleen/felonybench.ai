@@ -1,0 +1,44 @@
+id: 2026-08-01-zhipu-cl-sta-1238-cairn-espionage
+date: 2026-08-01
+date_precision: month
+reported: 2026-11-12
+league: accomplice
+tier: verified
+org: Zhipu AI
+human_actor: Chinese-speaking attackers, likely one operator or a small team, whose suspected China-nexus intelligence collection Palo Alto Networks Unit 42 tracks as CL-STA-1238
+models:
+  - {name: "GLM 5.2", codename: null, family: glm, share: 0.52}
+  - {name: "DeepSeek V4 Flash", codename: null, family: deepseek, org: DeepSeek, share: 0.32}
+  - {name: "DeepSeek V4 Pro", codename: null, family: deepseek, org: DeepSeek, share: 0.16}
+victims:
+  - {name: "A US teachers' union", type: third_party, country: US}
+  - {name: "An industry standards body", type: third_party, country: null}
+  - {name: "A semiconductor company", type: third_party, country: null}
+  - {name: "A defense-policy program (a think tank or defense-analytics vendor)", type: third_party, country: null}
+  - {name: "Other unnamed organizations among the 10 confirmed, incl. a semiconductor-lithography maker and an industrial-automation maker", type: third_party, country: null}
+summary: Chinese-speaking attackers ran 25 operations through a customized Cairn agent framework on GLM 5.2 and DeepSeek V4 models, which broke into 10 semiconductor, defense-policy and civil-society organizations and took member records, credentials and documents.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, persistence]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Unit 42 says operators gave each task a one-line goal and sometimes a root domain, and the Cairn agents mapped the attack surface, exploited web applications, sprayed passwords and harvested data on their own. Humans could inject hints, and for one target they supplied VPN details.
+  guardrails: The attackers added a Chinese-language preamble that claimed the work was authorized and forbade refusal, and each operation generated an AUTHORIZATION.md file. Unit 42 says "Neither Zhipu GLM nor DeepSeek refused this framing", so the models were talked past their safeguards.
+  blast_radius: The confirmed victims are private organizations, including a standards body, a US teachers' union, a semiconductor company and a defense-policy think tank or vendor. Unit 42 names no government body as a victim, though .mil and .gov user records were exposed.
+  tradecraft: The agents got dozens of valid credentials by password spraying at a standards body and brute-forced a semiconductor company's production credential (credentials). They then created unauthorized administrator accounts and a persistent API token there (persistence). Privilege escalation and lateral movement appear only as planned stages, so they aren't counted, and Unit 42 says every exploited flaw was already known.
+  dwell: Unit 42 gives only "August–September 2026" for the activity and doesn't say when it gained visibility or whether victims noticed, so dwell is counted as 0 rather than guessed.
+  statutes: Taking more than a million union member records, staff password hashes and about 150,000 internal documents for intelligence collection fits the five-year tier of 18 USC 1030(c)(2)(B). Overwriting a live standards-ballot document and planting admin accounts impairs data integrity under 1030(a)(5)(A). No loss figure or count of ten damaged computers is reported, so that count uses the one-year misdemeanor maximum. This is the human operators' exposure.
+confidence: medium
+sources:
+  - {url: "https://unit42.paloaltonetworks.com/cairn-framework-ai-autonomous-attacks/", kind: primary, publisher: Palo Alto Networks Unit 42, title: "Attackers Use Autonomous AI to Target Semiconductor, Defense and Civil Society Sectors"}
+  - {url: "https://www.csoonline.com/article/4247565/palo-alto-tracks-a-massive-chinese-ai-attack-that-sadly-lives-up-to-industry-fears.html", kind: news, publisher: CSO Online, title: "Palo Alto tracks a massive Chinese AI attack that sadly lives up to industry fears"}
+  - {url: "https://www.helpnetsecurity.com/2026/11/12/cairn-autonomous-ai-cyberattacks/", kind: news, publisher: Help Net Security, title: "Attackers breached 10 organizations with an open-source AI pentest framework"}
