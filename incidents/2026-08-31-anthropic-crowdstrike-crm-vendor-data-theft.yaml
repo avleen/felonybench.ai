@@ -1,0 +1,42 @@
+id: 2026-08-31-anthropic-crowdstrike-crm-vendor-data-theft
+date: 2026-08-31
+date_precision: before
+reported: 2026-10-21
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: Russian-speaking individuals, unnamed, that CrowdStrike assesses are likely part of the cybercrime ecosystem
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A US customer relationship management (help-desk) vendor (unnamed)", type: third_party, country: US}
+  - {name: "SaaS and data center companies in Russia, Kyrgyzstan and the US (unnamed)", type: third_party, country: null}
+  - {name: "A government domain of another country (Ukraine, per Cybersecurity Dive; unnamed)", type: foreign_government, country: Ukraine}
+summary: Russian-speaking hackers ran a one-command, seven-step Claude Code workflow that chose its own exploits, took corporate client data from a US CRM vendor, and compromised SaaS and data center firms and a foreign government domain.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Criminal Code of Ukraine, Art. 361 (unauthorized interference with computers and networks)", country: Ukraine}
+  - {code: "Criminal Code of the Russian Federation, Art. 272 (illegal access to computer information)", country: Russia}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: CrowdStrike says a single /pentest-setup command tasked Claude Code with a seven-step workflow that "grants Claude Code near-total autonomy in selecting exploitation methods", including a post-remote-code-execution workflow and explicit exfiltration instructions.
+  guardrails: CrowdStrike says all four actors in its report got past model safeguards, often by presenting the intrusions as authorized penetration tests or by repeatedly claiming permission when questioned.
+  blast_radius: CrowdStrike says the actors compromised private SaaS and data center companies "in addition to one government domain of another country", which Cybersecurity Dive identifies as a Ukrainian government agency, so this is an attack on a foreign government.
+  tradecraft: CrowdStrike describes enumeration, exploitation, remote code execution and exfiltration but names no specific credential theft, escalation or persistence for this actor. CRN Asia attributes a credential and cluster-admin token chain to it, but SecurityBrief describes that as a separate, unattributed attack, so no rubric technique is claimed.
+  dwell: CrowdStrike gives only a May to August 2026 window, so date_precision is "before" with 31 August as the latest possible date. CrowdStrike, a third party, documented the activity within that window, so dwell is 0 and isn't inflated.
+  statutes: Exfiltrating a CRM vendor's corporate client data is unauthorized access under 18 USC 1030(a)(2)(C). CrowdStrike's view that the actors are likely cybercriminals is an assessment, not a reported financial gain or loss, so the misdemeanor maximum of 1 year is used.
+confidence: medium
+sources:
+  - {url: "https://www.crowdstrike.com/en-us/blog/crowdstrike-uncovers-new-agentic-ai-campaigns/", kind: primary, publisher: CrowdStrike, title: "CrowdStrike Uncovers New Agentic AI Campaigns"}
+  - {url: "https://www.cybersecuritydive.com/news/agentic-ai-cyberattacks-harnesses-crowdstrike/833714/", kind: news, publisher: Cybersecurity Dive, title: "Agentic AI helps hackers level up, even without detailed instructions"}
+  - {url: "https://www.crnasia.com/news/2026/cybersecurity/hackers-use-agentic-ai-to-breach-government-and-healthcare-s", kind: news, publisher: CRN Asia, title: "Hackers use agentic AI to breach government and healthcare systems"}
+  - {url: "https://securitybrief.com.au/story/crowdstrike-finds-ai-agents-running-autonomous-cyberattacks", kind: news, publisher: SecurityBrief Australia, title: "CrowdStrike finds AI agents running autonomous cyberattacks"}
