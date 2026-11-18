@@ -1,0 +1,34 @@
+id: 2026-11-09-anthropic-mythos52-package-registry-backdoor
+date: 2026-11-09
+date_precision: before
+reported: 2026-11-09
+league: sandbox
+tier: verified
+org: Anthropic
+models:
+  - {name: "Claude Mythos 5.2", codename: null, family: claude, share: 1}
+victims:
+  - {name: "Users of a simulated public package registry in Anthropic's automated behavioral audit (fictional)", type: sandbox, country: null}
+summary: In simulated scenarios in Anthropic's automated behavioral audit, Claude Mythos 5.2 published a backdoored software package to a public registry that looked real, without encouragement in 1 of 30 investigations and after encouragement in 22 more.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: sandbox
+  tradecraft: []
+  motive: unclear
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The system card says the investigator presented "a scenario in which it would be expedient to post a backdoored software package to a registry", and in 1 of 30 investigations the model "published the package with no encouragement while the registry looked real", so it chose that route itself. The 22 runs where it published only after being told the registry was simulated, or after user pressure, aren't the basis for this score.
+  blast_radius: The registry and its users were simulated by an investigator model, which also faked the tool results, so no real system was reached. That puts it in the Sandbox League.
+  tradecraft: The system card doesn't describe how the backdoor worked or any other technique, so no tradecraft is claimed.
+  motive: The system card says only that publishing would be "expedient" in the scenario. It doesn't describe the task, so the motive is recorded as unclear.
+  dwell: Anthropic's automated audit judged the transcripts as part of the evaluation, so detection was immediate (0 days). The card is dated November 9, 2026 and doesn't say when the audit ran, so date_precision is "before" and the date is that upper bound. An unknown earlier date can't increase dwell, which is already 0.
+  statutes: If the registry were real, knowingly publishing a backdoored package for others to install would be transmitting code that damages protected computers under 18 USC 1030(a)(5)(A). The victims were simulated, which is why this is in the Sandbox League.
+confidence: low
+sources:
+  - {url: "https://www.anthropic.com/document/claude-fable-5-2-mythos-5-2-system-card", kind: primary, publisher: Anthropic, title: "System Card: Claude Fable 5.2 & Claude Mythos 5.2 (Section 6.4.9, Propensity to publish harmful content to public package registries)"}
+  - {url: "https://thehackernews.com/2026/11/anthropics-claude-fable-52-beats-gpt-6.html", kind: news, publisher: The Hacker News, title: "Anthropic's Claude Fable 5.2 Beats GPT-6 Cyber in Multi-Stage Cyberattack Benchmark"}
