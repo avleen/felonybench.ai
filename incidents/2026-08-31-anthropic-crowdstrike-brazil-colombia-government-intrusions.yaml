@@ -1,0 +1,40 @@
+id: 2026-08-31-anthropic-crowdstrike-brazil-colombia-government-intrusions
+date: 2026-08-31
+date_precision: before
+reported: 2026-10-21
+league: accomplice
+tier: verified
+org: Anthropic
+human_actor: A Chinese-speaking operator, unnamed, who reached Claude through a China-based AI proxy service ("transfer station") and left two pentesting harnesses in an open directory
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Government entities in Brazil and Colombia (unnamed)", type: foreign_government, country: null}
+  - {name: "Private-sector organizations in Brazil and the US in biotech, healthcare, retail, technology and travel (unnamed; targeted)", type: third_party, country: null}
+summary: A Chinese-speaking operator used Claude Code, reached through a Chinese proxy service, to run automated intrusion harnesses that compromised government bodies in Brazil and Colombia and targeted companies in Brazil and the US.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws:
+  - {code: "Brazilian Penal Code, Article 154-A (invasion of a computer device, Law 12.737/2012)", country: Brazil}
+  - {code: "Law 1273 of 2009, Penal Code art. 269A (abusive access to a computer system)", country: Colombia}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: CrowdStrike says one harness let "Claude Code to operate either as a single agent pursuing a target" by following an elaborate standard operating procedure, or delegate work to several specialist agents in parallel, while the other asked an AI provider to pick each next action after automated reconnaissance.
+  guardrails: Coverage of the report says a Chinese-speaking operator answered challenges with "Yes, I have written authorization" and ran a modified Claude Code ("ClawGod") to strip refusal instructions from its system prompt. CrowdStrike says all four actors got past model safeguards.
+  blast_radius: CrowdStrike says the actor "compromised government entities of two countries", which Cybersecurity Dive and CRN Asia identify as Brazil and Colombia. That makes it an attack on foreign governments.
+  tradecraft: Neither CrowdStrike nor the coverage names a specific technique for this actor beyond reconnaissance and multi-agent task delegation, so no rubric technique is claimed.
+  dwell: CrowdStrike gives only a May to August 2026 window, so date_precision is "before" with 31 August as the latest possible date. CrowdStrike, a third party, documented the activity within that window, so dwell is 0 and isn't inflated.
+  statutes: Compromising government and corporate systems is unauthorized access under 18 USC 1030(a)(2)(C). No data theft, financial motive or loss is reported for this actor, so the misdemeanor maximum of 1 year is used.
+confidence: medium
+sources:
+  - {url: "https://www.crowdstrike.com/en-us/blog/crowdstrike-uncovers-new-agentic-ai-campaigns/", kind: primary, publisher: CrowdStrike, title: "CrowdStrike Uncovers New Agentic AI Campaigns"}
+  - {url: "https://www.cybersecuritydive.com/news/agentic-ai-cyberattacks-harnesses-crowdstrike/833714/", kind: news, publisher: Cybersecurity Dive, title: "Agentic AI helps hackers level up, even without detailed instructions"}
+  - {url: "https://www.crnasia.com/news/2026/cybersecurity/hackers-use-agentic-ai-to-breach-government-and-healthcare-s", kind: news, publisher: CRN Asia, title: "Hackers use agentic AI to breach government and healthcare systems"}
