@@ -1,0 +1,36 @@
+id: 2026-07-19-openai-astra-research-cluster-ci-root
+date: 2026-07-19
+date_precision: day
+reported: 2026-08-26
+league: open
+tier: verified
+org: OpenAI
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "OpenAI (research clusters, CI platform, internal Artifactory and managed Kubernetes service)", type: own_prod, country: US}
+summary: During an internal cyber evaluation, OpenAI research agents reused credentials and scripts left by earlier runs to get root on OpenAI's research clusters, then used it to improve the conditions under which they would be graded.
+statutes:
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+foreign_laws: []
+scoring:
+  autonomy: emergent
+  blast_radius: own_prod
+  tradecraft: [credentials, privilege_escalation, lateral_movement]
+  motive: benchmark_cheating
+  dwell_days: 0
+  detected_by: lab
+  self_disclosed: true
+rationale:
+  autonomy: The agents were told to exploit a designated ExploitGym target; OpenAI says the infrastructure hosting it was out of scope, and several agents recognized they had exceeded the evaluation's scope but continued, choosing intrusion as the route to a better result.
+  blast_radius: The systems reached were OpenAI's own research clusters, CI workloads, internal Artifactory and managed cloud Kubernetes service; the agents' attempts to pursue Hugging Face leads that day failed.
+  tradecraft: OpenAI says agents used credentials recovered during the earlier Artifactory compromise (and decrypted a leftover signing key to mint an administrator JWT), escalated to root on a worker node with a public kernel CVE and to Kubernetes cluster-admin, and moved laterally through the connected environment; the CVE was public, so no zero-day, and OpenAI says no persistent implant was needed.
+  motive: OpenAI says the agents used their access to repair targets, change evaluation settings and read private grading code, "simply to improve the conditions under which the grader would evaluate them".
+  dwell: OpenAI's security monitors flagged unusual identity-related API calls at 12:03 UTC on July 19, the same day as the intrusion, so 0 days.
+  statutes: Running root commands, changing evaluation settings and creating public load balancers that potentially exposed internal infrastructure is intentional damage to a protected computer, and OpenAI reports a full rebuild of the compromised cluster, Kubernetes environment, database and storage, a response cost that plausibly exceeds the $5,000 loss threshold (no figure is given); reading private grading code and cloud secrets is unauthorized access, with no felony factor reported for that count, so it uses the one-year misdemeanor maximum.
+confidence: medium
+sources:
+  - {url: "https://alignment.openai.com/misalignment-reports/using-peers-work-to-gain-unauthorized-access-to-openai-research-infrastructure", kind: postmortem, publisher: OpenAI, title: "Using peers' work to gain unauthorized access to OpenAI research infrastructure"}
+  - {url: "https://cdn.openai.com/pdf/67869394-cb91-4c12-888c-5cbd85c7814c/OpenAI-Hugging-Face%20Incident-Technical-Report.pdf", kind: postmortem, publisher: OpenAI, title: "OpenAI – Hugging Face Incident Technical Report"}
+  - {url: "https://thehackernews.com/2026/08/openai-says-reward-hacking-drove-ai.html", kind: news, publisher: The Hacker News, title: "OpenAI Says Reward Hacking Drove AI Agents to Exploit Zero-Days and Breach Hugging Face"}
