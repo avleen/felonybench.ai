@@ -1,0 +1,37 @@
+id: 2026-07-31-openai-poipet-scam-centre
+date: 2026-07-31
+date_precision: before
+reported: 2026-07-31
+league: accomplice
+tier: verified
+org: OpenAI
+human_actor: A scam operation very likely based in or around Poipet, Cambodia, which OpenAI links to East Asian organized crime groups
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Hundreds of people targeted with investment, romance, gambling and fake-police scams over WhatsApp and Telegram (unnamed)", type: third_party, country: null}
+summary: A scam centre in Poipet, Cambodia used ChatGPT to create fake personas, write and translate messages to targets, and produce forged passports, legal notices and trading receipts for investment, romance, gambling and fake-police scams.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: true
+rationale:
+  contribution: The Record and The Hacker News, summarizing OpenAI's report, say the network used ChatGPT to create fake personas, "generate and translate messages" to targets, make promotional content, and produce images of forged passports, legal notices, stock-purchase confirmations and gambling sites. Humans ran the chats, so this is written content, not operation.
+  guardrails: Neither OpenAI's report as covered nor the press describes a jailbreak or a modified model.
+  blast_radius: The targets were members of the public reached on WhatsApp and Telegram. No company or government system was attacked.
+  tradecraft: None of the rubric's intrusion techniques apply to a messaging scam.
+  dwell: OpenAI doesn't say when the operation began, so date_precision is "before" with the 31 July 2026 report date and dwell is 0, never inflated. OpenAI acted on a tip from WhatsApp, so a third party detected it.
+  statutes: Deceiving targets over messaging apps into sending deposits, fees and fake fines is wire fraud (18 USC 1343). OpenAI says conversations referenced victims losing thousands of dollars.
+confidence: medium
+sources:
+  - {url: "https://openai.com/index/disrupting-malicious-uses-of-ai-criminal-scam-operation/", kind: primary, publisher: OpenAI, title: "Disrupting malicious uses of AI: a criminal scam operation"}
+  - {url: "https://therecord.media/openai-chatgpt-cambodia-scam-centers-disruption", kind: news, publisher: The Record, title: "OpenAI: Cambodian scam centers used ChatGPT to lure Indian nationals, conduct investment fraud"}
+  - {url: "https://thehackernews.com/2026/08/openai-disrupts-poipet-scam-network.html", kind: news, publisher: The Hacker News, title: "OpenAI Disrupts Poipet Scam Network Using ChatGPT Across Multiple Fraud Schemes"}
