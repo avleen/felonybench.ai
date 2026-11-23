@@ -1,0 +1,37 @@
+id: 2026-05-16-google-lyft-driver-fake-damage-photo
+date: 2026-05-16
+date_precision: day
+reported: 2026-05-18
+league: accomplice
+tier: alleged
+org: Google DeepMind
+human_actor: A Lyft driver in the Boca Raton, Florida area (not named in coverage)
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A Boca Raton father whose account paid for his teenage daughter's ride", type: third_party, country: US}
+summary: A Boca Raton-area Lyft driver backed a $75 damage fee against two teenage riders with a photo of food and drink spilled across his back seat that carried a Gemini logo. Lyft agreed the image was fake, offered a refund and removed the driver.
+statutes:
+  - {code: "18 USC 1343", max_years: 20}
+foreign_laws: []
+scoring:
+  contribution: wrote_content
+  guardrails: intact
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: victim
+  self_disclosed: false
+rationale:
+  contribution: The model generated the fabricated evidence, a photo of spilled food and drink in the car, which the driver submitted to support the fee. WPBF reports "you could see the Gemini logo on the bottom right-hand side of one of the photos". Producing content a human then used is wrote_content.
+  guardrails: No jailbreak or modification is reported. Generating a picture of a messy car seat needs no bypass, so guardrails are scored intact.
+  blast_radius: The victim is a private family charged through a ride-hailing app. No government system or public-at-large harm is involved.
+  tradecraft: Fabricating a photo isn't a rubric technique, and no computer intrusion is involved.
+  dwell: ABC News says the ride was on Saturday 16 May 2026 and the father learned of the $75 fee after the girls got home (WPBF says through a bank fraud alert). His daughter spotted the AI logo when Lyft sent the photo as proof, so the victim noticed the same day. Dwell is 0 days.
+  statutes: Submitting a fabricated photo through Lyft's app to collect a $75 fee the driver wasn't owed is a scheme to obtain money by false pretenses using interstate wires, so 18 USC 1343 wire fraud (20-year maximum) fits, as for the other scam incidents here. Wire fraud doesn't require the money to be kept, and the fee was charged before it was disputed. This is the human driver's exposure. A Florida petit-theft charge would be the much smaller state alternative.
+confidence: medium
+sources:
+  - {url: "https://www.wpbf.com/article/lyft-driver-ai-falsely-accuse-damaging-car/71341981", kind: news, publisher: WPBF 25 News, title: "Lyft driver uses AI to falsely accuse Boca Raton man's daughters of damaging car"}
+  - {url: "https://abcnews.com/GMA/News/father-daughter-speak-after-lyft-driver-accused-ai/story?id=133144373", kind: news, publisher: ABC News, title: "Father, daughter speak after Lyft driver is accused of using AI-generated image for damage claim"}
+  - {url: "https://bocanewsnow.com/2026/05/18/lyft-driver-scam-boca-raton-area-driver-uses-ai-to-accuse-rider/", kind: news, publisher: Boca News Now, title: "LYFT DRIVER SCAM: Boca Raton Area Driver Uses AI To Accuse Rider"}
