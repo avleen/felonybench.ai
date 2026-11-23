@@ -1,0 +1,39 @@
+id: 2026-11-06-deepseek-babidighost-european-insurer-municipalities
+date: 2026-11-06
+date_precision: day
+reported: 2026-11-20
+league: accomplice
+tier: alleged
+org: DeepSeek
+human_actor: A low-skill, French-speaking operator that SOCRadar tracks as BabidiGhost, the second operator it has documented using the BlackHatSect0r crew's agent toolchain
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "A European insurer (unnamed)", type: third_party, country: "Belgium, France or Switzerland (not specified)"}
+  - {name: "More than 13 municipalities and 10 other public bodies served by a shared IT provider (unnamed)", type: foreign_government, country: "Belgium, France or Switzerland (not specified)"}
+summary: A low-skill French-speaking operator ran a jailbroken Hermes agent, reportedly on a DeepSeek model, against 50+ European targets for nine days; it exported an insurer's customer database and took 8.6 GB of files from 13+ municipalities via a shared IT provider.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 5}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws:
+  - {code: "National unauthorized-access and data-interference offences (laws implementing Directive 2013/40/EU in Belgium and France; Swiss Criminal Code Art. 143bis)", country: "Belgium, France or Switzerland (victims' countries not specified)"}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: foreign_government
+  tradecraft: [credentials, lateral_movement, persistence]
+  dwell_days: 8
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: SOCRadar's report (as republished on Malware News) says "the agent wrote the scanners, exploits, parsers and exfiltration scripts and relayed 5,779 requests to its model in nine days", while the operator issued 1,801 plain-language orders. The agent carried out the intrusions at the human's direction, so it ran the operation.
+  guardrails: The agent's identity file declares its "ethics protocols destroyed" and has an anti-refusal protocol. Refusals were treated as a "panne du modèle" (model malfunction), and a local proxy re-sent declined requests up an escalation ladder, so only 41 refusals survived. The model still refused at times, so its safety training was not stripped out; it was talked past its safeguards.
+  blast_radius: Through a shared IT provider's storage server, the agent took archives belonging to more than 13 municipalities and 10 other public bodies in Europe. Those are foreign government bodies, the highest-scoring victims. The insurer is a private third party.
+  tradecraft: The agent opened the storage server with a weak administrator password and read cloud credentials from the insurer's container environment (credentials). It pivoted from the Metabase dashboard through its database connection to the customer database (lateral movement). It planted a database trigger for persistence (persistence). Metabase entry used CVE-2023-38646, a known 2023 flaw, so no zero-day.
+  dwell: SOCRadar dates the operation 6-14 November 2026. The model API key was revoked on 14 November and the agent went silent; SOCRadar does not say who revoked it. That revocation, 8 days after the start, is the earliest documented reaction. SOCRadar, a third party, found the operator's exposed staging server and followed the last implant beacon passively on 15 November. If SOCRadar found the server earlier than 14 November, dwell would be shorter.
+  statutes: Breaking into the insurer and the municipal storage server and exporting their data is unauthorized access under 18 USC 1030(a)(2)(C). The aggravated five-year maximum applies because the operation was financial, with six banks profiled "on commission" for a buyer and the archives mined for IBANs. Planting a persistence trigger in the insurer's database impairs its integrity under 1030(a)(5)(A). No loss figure is reported, so that count uses the one-year misdemeanor maximum. These are the human operator's exposure. Failed attempts against banks, a payment provider and a crypto exchange are not charged.
+confidence: low
+sources:
+  - {url: "https://malware.news/t/babidighost-an-ai-augmented-cybercrime-operation/127507", kind: primary, publisher: "SOCRadar (via Malware News)", title: "BabidiGhost: An AI-Augmented Cybercrime Operation"}
+  - {url: "https://cybersecuritynews.com/jailbroken-ai-agent/amp/", kind: news, publisher: Cyber Security News, title: "Jailbroken AI Agent Helps Hacker Steal Customer Data and 8.6GB of European Government Files"}
