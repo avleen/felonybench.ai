@@ -34,5 +34,7 @@ sources:
   - {url: "https://www.trajectorylabs.com/blog/gemini-4-argon-behavior-during-misalignment-testing", kind: primary, publisher: Trajectory Labs, title: "Gemini 4 Argon's behavior during misalignment testing"}
   - {url: "https://www.trajectorylabs.com/blog/responding-to-incidents-during-misalignment-testing", kind: primary, publisher: Trajectory Labs, title: "Responding to incidents during misalignment testing"}
   - {url: "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/", kind: primary, publisher: Google, title: "Gemini 4 Argon: our next era of frontier intelligence"}
+  - {url: "https://bleepingcomputer.com/news/security/gemini-ai-agents-repeatedly-bypassed-safeguards-to-attack-real-website", kind: news, publisher: BleepingComputer, title: "Gemini AI agents repeatedly bypassed safeguards to attack real website"}
+  - {url: "https://www.theregister.com/a/5310574", kind: news, publisher: The Register, title: "Gemini test proves once again that amoral AI agents will do almost anything if told 'NEVER give up'"}
   - {url: "https://cryptoslate.com/ai-agents-impersonate-employees-and-attempt-to-steal-confidential-data-during-safety-experiment/", kind: news, publisher: CryptoSlate, title: "AI agents impersonate employees and attempt to steal confidential data during safety experiment"}
   - {url: "https://www.fathom.news/ai-agent-exploits-epoch-website/", kind: news, publisher: Fathom, title: "Rogue AI Agents Posed As Epoch Staff And Tried To Hack Its Website"}
