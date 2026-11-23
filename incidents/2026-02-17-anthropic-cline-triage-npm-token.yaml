@@ -1,0 +1,39 @@
+id: 2026-02-17-anthropic-cline-triage-npm-token
+date: 2026-02-17
+date_precision: before
+reported: 2026-02-17
+league: accomplice
+tier: alleged
+org: Anthropic
+human_actor: An unidentified actor who, according to researcher Adnan Khan, found his public proof of concept and used it against Cline's real repository
+models:
+  - {name: "Claude Opus 4.5", codename: null, family: claude, share: 1}
+victims:
+  - {name: "Cline Bot Inc. (GitHub Actions and npm publishing credentials)", type: third_party, country: US}
+  - {name: "Developers who installed the unauthorized cline@2.3.0 (about 4,000 downloads)", type: third_party, country: null}
+summary: An unknown attacker used a prompt-injection flaw in Cline's GitHub issue-triage bot, which ran Claude Opus 4.5 with shell access, to obtain Cline's npm credentials, then published a cline@2.3.0 that silently installed OpenClaw on about 4,000 developers' machines.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 1}
+foreign_laws: []
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: []
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: Cline's post-mortem says its triage workflow let anyone open an issue and have Claude analyse it "with the ability to execute shell commands", so crafted issue text could trick Claude into running arbitrary code on the runner. Khan says the workflow ran claude-code-action with Claude Opus 4.5, and that "a different actor found my PoC on my test repository and used it to directly attack Cline and obtain the publication credentials". The model carried out the code-execution step itself at the attacker's direction.
+  guardrails: The attacker didn't modify the model. Instructions hidden in a GitHub issue title talked the deployed bot into running the attacker's commands, which is scored jailbroken, as with the Meta AI support takeovers.
+  blast_radius: The victims are a private software company and the developers who installed the unauthorized release. No government system is involved.
+  tradecraft: The cache poisoning and token theft that followed the injected command are not shown to have been done by the model, and the token used was one Cline had failed to revoke. No rubric technique is attributed to the AI.
+  dwell: Khan says the attacker used his proof of concept, which became public on 9 February, so the credential theft happened between 9 and 17 February. The latest possible date, 17 February, is used (date_precision before). StepSecurity's monitoring flagged the release at 11:40 UTC that day, about eight hours after the 3:26 AM PT publish, so dwell is 0 days, detected by a third party. The earlier theft date can only make dwell understated.
+  statutes: Running code on Cline's GitHub Actions runner and taking its npm publishing credentials is unauthorized access under 18 USC 1030(a)(2)(C). Publishing a release whose postinstall script globally installed unwanted software on users' machines is knowingly transmitting code that impairs their integrity under 1030(a)(5)(A). Cline says OpenClaw is not malicious and no user data was exposed, and no loss figure is reported, so both use the one-year misdemeanor maximum. These are the human attacker's exposure.
+confidence: low
+sources:
+  - {url: "https://cline.bot/blog/post-mortem-unauthorized-cline-cli-npm", kind: postmortem, publisher: Cline, title: "Post-mortem: Unauthorized Cline CLI npm publish on February 17, 2026"}
+  - {url: "https://adnanthekhan.com/posts/clinejection/", kind: primary, publisher: Adnan Khan, title: "Clinejection — Compromising Cline's Production Releases just by Prompting an Issue Triager"}
+  - {url: "https://www.theregister.com/2026/02/20/openclaw_snuck_into_cline_package", kind: news, publisher: The Register, title: "AI coding assistant Cline compromised to create more OpenClaw chaos"}
