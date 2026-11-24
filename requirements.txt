@@ -1,5 +1,5 @@
 # Exact versions, so a new release can't change a run without a PR. Dependabot proposes updates.
-pyyaml==6.0.3
+pyyaml==6.0.4
 jsonschema==4.26.0
 feedparser==6.0.14
 pytest==9.2.0
