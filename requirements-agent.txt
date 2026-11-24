@@ -2,4 +2,4 @@
 # (playwright) and scripts.pdf_text (pypdf). Kept out of requirements.txt so
 # Cloudflare builds don't install them.
 playwright==1.65.2
-pypdf==7.1.0
+pypdf==7.1.1
