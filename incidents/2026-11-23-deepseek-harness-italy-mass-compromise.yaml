@@ -1,0 +1,38 @@
+id: 2026-11-23-deepseek-harness-italy-mass-compromise
+date: 2026-11-23
+date_precision: before
+reported: 2026-11-23
+league: accomplice
+tier: alleged
+org: DeepSeek
+human_actor: Unidentified operators running "DeepSeek Harness – Red Team Mode", an open-source AI-agent framework, in real offensive campaigns that CSIRT Italia detected
+models:
+  - {name: "Undisclosed model", codename: null, family: null, share: 1}
+victims:
+  - {name: "Organizations in Italy hit by mass compromise campaigns (unnamed)", type: third_party, country: IT}
+summary: CSIRT Italia reported mass compromise campaigns in Italy run by autonomous AI agents, and listed DeepSeek Harness, a framework built to drive DeepSeek's cloud AI service in offensive operations, among the tools used.
+statutes:
+  - {code: "18 USC 1030(a)(2)(C)", max_years: 1}
+  - {code: "18 USC 1030(a)(5)(A)", max_years: 10}
+foreign_laws:
+  - {code: "Italian Criminal Code art. 615-ter (unauthorized access to a computer system)", country: IT}
+scoring:
+  contribution: operated
+  guardrails: jailbroken
+  legal_status: crime
+  blast_radius: third_party
+  tradecraft: [credentials, lateral_movement]
+  dwell_days: 0
+  detected_by: third_party
+  self_disclosed: false
+rationale:
+  contribution: CSIRT Italia says the campaigns were "condotte mediante agenti autonomi orchestrati tramite intelligenza artificiale" that automate the attack phases and adapt to responses with little human input, and describes DeepSeek Harness as a framework for using "il servizio di intelligenza artificiale in cloud di DeepSeek nell'orchestrazione di attività offensive".
+  guardrails: CSIRT Italia says DeepSeek Harness ships a built-in system prompt that tries to get around the model's safety constraints by presenting the work as authorized penetration testing in a controlled environment, framed as team exercises with objectives and scores.
+  blast_radius: The bulletin says CSIRT Italia detected the campaigns "nel contesto nazionale" and that "un numero elevato di sistemi" was compromised within a few hours, but names no victim or sector, so they are counted as private third parties rather than government or critical infrastructure.
+  tradecraft: CSIRT Italia says the agents chained vulnerabilities, misconfigurations and compromised credentials (credentials) and used compromised endpoints as pivots to repeat reconnaissance and exploitation on internal systems not reachable from the internet (lateral movement). Persistence tunnels and real-time evasive code are described as framework capabilities, not tied to an observed case, so they are left out.
+  dwell: The bulletin gives no campaign dates, so the date is the bulletin's publication day (the latest possible) and dwell is 0. An unknown date can only shrink dwell this way, never inflate it.
+  statutes: Compromising many systems without authorization is 18 USC 1030(a)(2)(C). No loss, gain or further crime is reported, so it is the one-year misdemeanor tier. CSIRT Italia's "numero elevato di sistemi" compromised in hours supports the ten-or-more-computers felony factor under 1030(c)(4)(A)(i)(VI) for 1030(a)(5)(A). These are the human operators' exposure.
+confidence: low
+sources:
+  - {url: "https://www.acn.gov.it/portale/w/impiego-di-agenti-di-ia-in-campagne-di-compromissione-automatizzate", kind: primary, publisher: Agenzia per la Cybersicurezza Nazionale (CSIRT Italia), title: "Impiego di agenti di IA in campagne di compromissione automatizzate (BL01/261123/CSIRT-ITA)"}
+  - {url: "https://www.bleepingcomputer.com/news/security/italy-and-switzerland-warn-of-autonomous-ai-driven-cyberattacks/", kind: news, publisher: BleepingComputer, title: "Italy and Switzerland warn of autonomous AI-driven cyberattacks"}
